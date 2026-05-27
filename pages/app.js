@@ -26,7 +26,8 @@ export default function App() {
           body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0f0; }
           .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; background: linear-gradient(180deg, #0A0E27 0%, #141B33 100%); }
           .login-box { width: 350px; background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%); padding: 40px; border-radius: 20px; border: 1px solid #2D3A52; text-align: center; }
-          .logo { font-size: 60px; margin-bottom: 20px; }
+          .logo-img { width: 80px; height: 80px; margin: 0 auto 20px; border-radius: 15px; border: 2px solid rgba(255, 255, 255, 0.3); overflow: hidden; }
+          .logo-img img { width: 100%; height: 100%; object-fit: cover; }
           h1 { color: #fff; margin-bottom: 10px; font-size: 28px; }
           .slogan { color: #FF8C00; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 30px; }
           .form-group { margin-bottom: 20px; text-align: left; }
@@ -39,7 +40,9 @@ export default function App() {
         
         <div className="login-container">
           <div className="login-box">
-            <div className="logo">🔨</div>
+            <div className="logo-img">
+              <img src="https://i.postimg.cc/XpQvP00b/image.png" alt="CarpinteriAPP" />
+            </div>
             <h1>CarpinteriAPP</h1>
             <p className="slogan">El Futuro de la Carpintería</p>
             
@@ -197,6 +200,7 @@ export default function App() {
             color: #FFFFFF;
             font-weight: 700;
             margin-bottom: 0.2rem;
+            word-break: break-all;
         }
 
         .user-email {
@@ -445,8 +449,8 @@ export default function App() {
 
             <div className="user-section">
               <div className="user-info">
-                <div className="user-name">Alan Coimieres</div>
-                <div className="user-email">{email}</div>
+                <div className="user-name">{email}</div>
+                <div className="user-email">Usuario activo</div>
                 <div className="plan-badge">Plan Básico</div>
               </div>
               <button className="logout-btn" onClick={() => {setIsLoggedIn(false); setEmail(''); setPassword('');}}>
