@@ -1,25 +1,23 @@
 import crypto from 'crypto';
 
-// Cache en memoria para esta sesión (en producción usarías Redis/DB)
+// Cache en memoria para esta sesión
 const analysisCache = {};
+const userFailureCount = {}; // Contador de fallos por usuario/IP
 
 function getImageHash(imageBase64) {
   return crypto.createHash('sha256').update(imageBase64).digest('hex');
 }
 
-function isImageResolutionValid(imageBase64) {
-  // Estimación básica: si base64 es muy corto, imagen muy pequeña
-  // <20KB típicamente = imagen pequeña
-  const sizeInBytes = Buffer.byteLength(imageBase64, 'base64');
-  return sizeInBytes > 20000; // Mínimo ~480x480
+function getClientIP(req) {
+  return req.headers['x-forwarded-for']?.split(',')[0] || 
+         req.headers['x-real-ip'] || 
+         req.socket.remoteAddress || 
+         'unknown';
 }
 
-function isImageTooBlackOrWhite(imageBase64) {
-  // Verificación simple: si el base64 tiene muchos bytes repetidos (blanco/negro)
-  // Esta es una heurística - en producción usarías análisis de píxeles real
-  const uniqueChars = new Set(imageBase64).size;
-  const diversity = uniqueChars / imageBase64.length;
-  return diversity < 0.3; // Muy poco variado = probablemente blanco/negro
+function isImageResolutionValid(imageBase64) {
+  const sizeInBytes = Buffer.byteLength(imageBase64, 'base64');
+  return sizeInBytes > 20000; // Mínimo ~480x480
 }
 
 async function analyzeWithModel(imageBase64, model) {
@@ -130,6 +128,7 @@ export default async function handler(req, res) {
 
   try {
     const { imageBase64 } = req.body;
+    const clientIP = getClientIP(req);
 
     if (!imageBase64) {
       return res.status(400).json({ error: 'Imagen requerida' });
@@ -148,15 +147,7 @@ export default async function handler(req, res) {
       });
     }
 
-    // 2. VALIDACIÓN DE BLANCO/NEGRO
-    if (isImageTooBlackOrWhite(imageBase64)) {
-      return res.status(400).json({
-        error: '⚫⚪ Imagen casi en blanco/negro',
-        message: 'La imagen no tiene suficiente color o variedad. Por favor, toma una foto real y clara del mueble.',
-      });
-    }
-
-    // 3. CACHE DE IMÁGENES
+    // 2. CACHE DE IMÁGENES
     const imageHash = getImageHash(imageBase64);
     if (analysisCache[imageHash]) {
       console.log('📦 Análisis desde caché:', imageHash);
@@ -164,20 +155,39 @@ export default async function handler(req, res) {
         success: true,
         analysis: analysisCache[imageHash].analysis,
         cached: true,
+        model: analysisCache[imageHash].model,
       });
     }
 
-    // 4. INTENTAR CON HAIKU PRIMERO
-    console.log('🐦 Intentando con Haiku...');
-    let result = await analyzeWithModel(imageBase64, 'claude-haiku-4-5-20241022');
+    // 3. DETERMINAR MODELO A USAR (Haiku o Sonnet)
+    let failureCount = userFailureCount[clientIP] || 0;
+    let model = failureCount >= 2 ? 'claude-3-5-sonnet-20241022' : 'claude-haiku-4-5-20241022';
+    let isUsingFallback = false;
 
-    // 5. VALIDACIÓN DE RESPUESTA
-    if (!result.analysis || result.analysis.length < 500) {
+    console.log(`📊 Cliente ${clientIP}: ${failureCount} fallos previos → usando ${model === 'claude-3-5-sonnet-20241022' ? 'Sonnet' : 'Haiku'}`);
+
+    // 4. INTENTAR ANÁLISIS
+    let result = await analyzeWithModel(imageBase64, model);
+
+    // 5. VALIDACIÓN DE RESPUESTA - Si es corta, intenta fallback a Sonnet
+    if (model === 'claude-haiku-4-5-20241022' && result.analysis.length < 500) {
       console.log('⚠️ Haiku respondió muy corto, escalando a Sonnet...');
       result = await analyzeWithModel(imageBase64, 'claude-3-5-sonnet-20241022');
+      isUsingFallback = true;
+      
+      // Incrementar contador de fallos para este usuario
+      userFailureCount[clientIP] = (userFailureCount[clientIP] || 0) + 1;
     }
 
-    // 6. VALIDACIÓN FINAL
+    // 6. SI HAIKU FUNCIONÓ BIEN, REDUCIR CONTADOR
+    if (model === 'claude-haiku-4-5-20241022' && result.analysis.length >= 500 && !isUsingFallback) {
+      if (userFailureCount[clientIP] > 0) {
+        userFailureCount[clientIP]--;
+        console.log('✅ Haiku funcionó bien, reduciendo contador de fallos');
+      }
+    }
+
+    // 7. VALIDACIÓN FINAL
     if (!result.analysis || result.analysis.trim().length === 0) {
       return res.status(400).json({
         error: '❌ No se pudo analizar',
@@ -185,9 +195,10 @@ export default async function handler(req, res) {
       });
     }
 
-    // 7. GUARDAR EN CACHÉ
+    // 8. GUARDAR EN CACHÉ
     analysisCache[imageHash] = {
       analysis: result.analysis,
+      model: isUsingFallback ? 'sonnet' : (model === 'claude-3-5-sonnet-20241022' ? 'sonnet' : 'haiku'),
       timestamp: Date.now(),
     };
 
@@ -202,6 +213,8 @@ export default async function handler(req, res) {
       success: true,
       analysis: result.analysis,
       cached: false,
+      model: analysisCache[imageHash].model,
+      failureCount: userFailureCount[clientIP] || 0,
     });
   } catch (error) {
     console.error('Error en Claude Vision API:', error);
