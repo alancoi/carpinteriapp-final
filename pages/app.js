@@ -10,6 +10,7 @@ export default function App() {
   const [preview, setPreview] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState(null);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -27,6 +28,7 @@ export default function App() {
       setPreview(event.target.result);
       setLoading(true);
       setAnalysis(null);
+      setFeedback(null);
 
       const base64Image = event.target.result.split(',')[1];
 
@@ -40,17 +42,25 @@ export default function App() {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.details || data.error || 'Error desconocido');
+          throw new Error(data.message || data.details || data.error || 'Error desconocido');
         }
 
         setAnalysis(data.analysis);
       } catch (error) {
-        setAnalysis(`❌ Error: ${error.message}`);
+        setAnalysis(`❌ ${error.message}`);
       } finally {
         setLoading(false);
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  const handleFeedback = (isUseful) => {
+    setFeedback(isUseful ? 'positive' : 'negative');
+    // Aquí guardarías el feedback en BD para mejorar
+    setTimeout(() => {
+      setFeedback(null);
+    }, 2000);
   };
 
   if (!isLoggedIn) {
@@ -175,6 +185,14 @@ export default function App() {
         .loading-text { font-size: 0.9rem; font-weight: 600; color: #A0AEC0; }
         .analysis-result { background: #0A0E27; border: 1px solid #0D47A1; border-left: 4px solid #FF8C00; color: #A0AEC0; padding: 1.5rem; border-radius: 8px; font-size: 0.75rem; max-height: 400px; overflow-y: auto; white-space: pre-wrap; font-family: 'Courier New', monospace; margin-top: 1rem; line-height: 1.8; letter-spacing: 0.3px; }
         .analysis-result strong { color: #FF8C00; font-weight: 700; }
+        .feedback-section { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid #2D3A52; }
+        .feedback-label { font-size: 0.85rem; color: #A0AEC0; margin-bottom: 0.8rem; display: block; }
+        .feedback-buttons { display: flex; gap: 0.8rem; }
+        .feedback-btn { flex: 1; padding: 0.7rem; background: #1F2A47; border: 1px solid #2D3A52; color: #A0AEC0; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.8rem; transition: all 0.3s; }
+        .feedback-btn:hover { border-color: #FF8C00; }
+        .feedback-btn.positive { background: rgba(76, 175, 80, 0.2); border-color: #4CAF50; color: #4CAF50; }
+        .feedback-btn.negative { background: rgba(244, 67, 54, 0.2); border-color: #F44336; color: #F44336; }
+        .feedback-message { text-align: center; color: #4CAF50; font-size: 0.8rem; margin-top: 0.8rem; }
       `}</style>
 
       <div className="phone-frame">
@@ -286,7 +304,7 @@ export default function App() {
         <div className="modal-content">
           <div className="modal-header">
             <h2>📸 Subir Foto de Mueble</h2>
-            <button className="close-btn" onClick={() => {setUploadModalOpen(false); setPreview(null); setAnalysis(null);}}>×</button>
+            <button className="close-btn" onClick={() => {setUploadModalOpen(false); setPreview(null); setAnalysis(null); setFeedback(null);}}>×</button>
           </div>
 
           <div className="file-input-wrapper">
@@ -312,12 +330,39 @@ export default function App() {
           )}
 
           {analysis && !loading && (
-            <div className="analysis-result">
-              {analysis}
-            </div>
+            <>
+              <div className="analysis-result">
+                {analysis}
+              </div>
+              
+              {!analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐') && (
+                <div className="feedback-section">
+                  <label className="feedback-label">¿Fue útil este análisis?</label>
+                  <div className="feedback-buttons">
+                    <button 
+                      className={`feedback-btn ${feedback === 'positive' ? 'positive' : ''}`}
+                      onClick={() => handleFeedback(true)}
+                    >
+                      👍 Sí, muy útil
+                    </button>
+                    <button 
+                      className={`feedback-btn ${feedback === 'negative' ? 'negative' : ''}`}
+                      onClick={() => handleFeedback(false)}
+                    >
+                      👎 Necesita mejora
+                    </button>
+                  </div>
+                  {feedback && (
+                    <div className="feedback-message">
+                      ✓ Gracias por tu feedback, nos ayuda a mejorar
+                    </div>
+                  )}
+                </div>
+              )}
+            </>
           )}
 
-          <button className="btn-primary" onClick={() => {setUploadModalOpen(false); setPreview(null); setAnalysis(null);}}>
+          <button className="btn-primary" onClick={() => {setUploadModalOpen(false); setPreview(null); setAnalysis(null); setFeedback(null);}}>
             Cerrar
           </button>
         </div>

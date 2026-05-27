@@ -1,21 +1,34 @@
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
-  }
+import crypto from 'crypto';
+
+// Cache en memoria para esta sesión (en producción usarías Redis/DB)
+const analysisCache = {};
+
+function getImageHash(imageBase64) {
+  return crypto.createHash('sha256').update(imageBase64).digest('hex');
+}
+
+function isImageResolutionValid(imageBase64) {
+  // Estimación básica: si base64 es muy corto, imagen muy pequeña
+  // <20KB típicamente = imagen pequeña
+  const sizeInBytes = Buffer.byteLength(imageBase64, 'base64');
+  return sizeInBytes > 20000; // Mínimo ~480x480
+}
+
+function isImageTooBlackOrWhite(imageBase64) {
+  // Verificación simple: si el base64 tiene muchos bytes repetidos (blanco/negro)
+  // Esta es una heurística - en producción usarías análisis de píxeles real
+  const uniqueChars = new Set(imageBase64).size;
+  const diversity = uniqueChars / imageBase64.length;
+  return diversity < 0.3; // Muy poco variado = probablemente blanco/negro
+}
+
+async function analyzeWithModel(imageBase64, model) {
+  const apiKey = process.env.CLAUDE_API_KEY;
+
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000); // 30 segundos
 
   try {
-    const { imageBase64 } = req.body;
-
-    if (!imageBase64) {
-      return res.status(400).json({ error: 'Imagen requerida' });
-    }
-
-    const apiKey = process.env.CLAUDE_API_KEY;
-
-    if (!apiKey) {
-      return res.status(500).json({ error: 'API key no configurada en variables de entorno' });
-    }
-
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -24,7 +37,7 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20241022',
+        model: model,
         max_tokens: 2000,
         messages: [
           {
@@ -45,6 +58,8 @@ export default async function handler(req, res) {
 SI NO es un mueble: Responde SOLO: "❌ ERROR: Esta no es una imagen de un mueble o carpintería. Por favor, sube una foto clara de un mueble de madera."
 
 SI la imagen es BORROSA, oscura o de mala calidad: Responde SOLO: "⚠️ CALIDAD BAJA: La imagen no tiene suficiente claridad. Por favor, busca una foto con mejor iluminación y resolución para obtener un análisis exacto."
+
+SI la imagen está muy inclinada o de lado: Responde SOLO: "📐 PERSPECTIVA: Por favor, toma la foto de frente y lo más perpendicular posible al mueble para obtener medidas exactas."
 
 SI es un mueble de BUENA CALIDAD: Analiza y proporciona EXACTAMENTE esto (EN ESTE ORDEN):
 
@@ -82,15 +97,15 @@ SÉ ESPECÍFICO Y EXACTO.`,
           },
         ],
       }),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeout);
 
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(response.status).json({
-        error: 'Error en Claude API',
-        details: data.error?.message || 'Error desconocido',
-      });
+      throw new Error(data.error?.message || 'Error en API');
     }
 
     const analysis =
@@ -98,14 +113,108 @@ SÉ ESPECÍFICO Y EXACTO.`,
         ? data.content[0].text
         : '';
 
+    return { success: true, analysis };
+  } catch (error) {
+    clearTimeout(timeout);
+    if (error.name === 'AbortError') {
+      throw new Error('TIMEOUT: El análisis tardó demasiado. Intenta con una imagen más clara.');
+    }
+    throw error;
+  }
+}
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método no permitido' });
+  }
+
+  try {
+    const { imageBase64 } = req.body;
+
+    if (!imageBase64) {
+      return res.status(400).json({ error: 'Imagen requerida' });
+    }
+
+    const apiKey = process.env.CLAUDE_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ error: 'API key no configurada' });
+    }
+
+    // 1. VALIDACIÓN DE RESOLUCIÓN
+    if (!isImageResolutionValid(imageBase64)) {
+      return res.status(400).json({
+        error: '📷 Imagen muy pequeña',
+        message: 'La imagen tiene muy baja resolución. Por favor, usa una foto de al menos 480x480 píxeles.',
+      });
+    }
+
+    // 2. VALIDACIÓN DE BLANCO/NEGRO
+    if (isImageTooBlackOrWhite(imageBase64)) {
+      return res.status(400).json({
+        error: '⚫⚪ Imagen casi en blanco/negro',
+        message: 'La imagen no tiene suficiente color o variedad. Por favor, toma una foto real y clara del mueble.',
+      });
+    }
+
+    // 3. CACHE DE IMÁGENES
+    const imageHash = getImageHash(imageBase64);
+    if (analysisCache[imageHash]) {
+      console.log('📦 Análisis desde caché:', imageHash);
+      return res.status(200).json({
+        success: true,
+        analysis: analysisCache[imageHash].analysis,
+        cached: true,
+      });
+    }
+
+    // 4. INTENTAR CON HAIKU PRIMERO
+    console.log('🐦 Intentando con Haiku...');
+    let result = await analyzeWithModel(imageBase64, 'claude-haiku-4-5-20241022');
+
+    // 5. VALIDACIÓN DE RESPUESTA
+    if (!result.analysis || result.analysis.length < 500) {
+      console.log('⚠️ Haiku respondió muy corto, escalando a Sonnet...');
+      result = await analyzeWithModel(imageBase64, 'claude-3-5-sonnet-20241022');
+    }
+
+    // 6. VALIDACIÓN FINAL
+    if (!result.analysis || result.analysis.trim().length === 0) {
+      return res.status(400).json({
+        error: '❌ No se pudo analizar',
+        message: 'No se pudo procesar la imagen. Por favor, intenta con una foto más clara del mueble.',
+      });
+    }
+
+    // 7. GUARDAR EN CACHÉ
+    analysisCache[imageHash] = {
+      analysis: result.analysis,
+      timestamp: Date.now(),
+    };
+
+    // Limpiar caché antiguo (más de 1 hora)
+    Object.keys(analysisCache).forEach((key) => {
+      if (Date.now() - analysisCache[key].timestamp > 3600000) {
+        delete analysisCache[key];
+      }
+    });
+
     return res.status(200).json({
       success: true,
-      analysis: analysis,
+      analysis: result.analysis,
+      cached: false,
     });
   } catch (error) {
     console.error('Error en Claude Vision API:', error);
+
+    let errorMessage = 'Error procesando imagen';
+    if (error.message.includes('TIMEOUT')) {
+      errorMessage = '⏱️ ' + error.message;
+    } else if (error.message.includes('invalid x-api-key')) {
+      errorMessage = '🔐 Error de autenticación de API';
+    }
+
     return res.status(500).json({
-      error: 'Error procesando imagen',
+      error: errorMessage,
       details: error.message,
     });
   }
