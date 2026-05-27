@@ -143,7 +143,6 @@ export default function App() {
         .menu-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.5rem; }
         .menu-card { background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%); border: 2px solid #2D3A52; border-radius: 12px; padding: 1.2rem; cursor: pointer; transition: all 0.3s; text-align: center; }
         .menu-card:hover { border-color: #FF8C00; box-shadow: 0 10px 30px rgba(255, 140, 0, 0.2); transform: translateY(-3px); }
-        .menu-card:active { transform: scale(0.98); }
         .menu-icon { font-size: 2.2rem; margin-bottom: 0.6rem; display: block; }
         .menu-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; color: #FFFFFF; }
         .menu-desc { color: #A0AEC0; font-size: 0.75rem; line-height: 1.3; }
@@ -166,12 +165,16 @@ export default function App() {
         .feature-item span { color: #A0AEC0; font-size: 0.85rem; }
         .btn-primary { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #0D47A1, #FF8C00); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: all 0.3s; }
         .btn-primary:active { transform: scale(0.98); }
+        .file-input-wrapper { margin: 1rem 0; }
+        .file-input-wrapper input { width: 100%; cursor: pointer; color: #A0AEC0; padding: 12px; background: #1F2A47; border: 2px dashed #2D3A52; border-radius: 8px; text-align: center; }
         .upload-preview { margin: 1rem 0; text-align: center; }
         .upload-preview img { max-width: 100%; border-radius: 8px; max-height: 300px; }
-        .file-input-wrapper { margin: 1rem 0; }
-        .file-input-wrapper input { width: 100%; cursor: pointer; }
-        .loading { color: #FF8C00; text-align: center; padding: 1rem; font-weight: 600; }
-        .analysis-result { background: rgba(13, 71, 161, 0.1); border: 1px solid #0D47A1; color: #A0AEC0; padding: 1rem; border-radius: 8px; font-size: 0.85rem; max-height: 400px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; margin-top: 1rem; }
+        .loading { display: flex; flex-direction: column; align-items: center; justify-content: center; color: #FF8C00; padding: 2rem 1rem; text-align: center; }
+        .spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(255, 140, 0, 0.2); border-top-color: #FF8C00; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .loading-text { font-size: 0.9rem; font-weight: 600; color: #A0AEC0; }
+        .analysis-result { background: #0A0E27; border: 1px solid #0D47A1; border-left: 4px solid #FF8C00; color: #A0AEC0; padding: 1.5rem; border-radius: 8px; font-size: 0.75rem; max-height: 400px; overflow-y: auto; white-space: pre-wrap; font-family: 'Courier New', monospace; margin-top: 1rem; line-height: 1.8; letter-spacing: 0.3px; }
+        .analysis-result strong { color: #FF8C00; font-weight: 700; }
       `}</style>
 
       <div className="phone-frame">
@@ -287,7 +290,12 @@ export default function App() {
           </div>
 
           <div className="file-input-wrapper">
-            <input type="file" accept="image/*" onChange={handleFileUpload} />
+            <input 
+              type="file" 
+              accept="image/*" 
+              onChange={handleFileUpload}
+              placeholder="Seleccionar archivo"
+            />
           </div>
 
           {preview && (
@@ -298,7 +306,8 @@ export default function App() {
 
           {loading && (
             <div className="loading">
-              ⏳ Analizando imagen con Claude Vision...
+              <div className="spinner"></div>
+              <div className="loading-text">Analizando imagen, dame un momento...</div>
             </div>
           )}
 
