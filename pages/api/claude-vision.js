@@ -10,7 +10,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Imagen requerida' });
     }
 
-    const apiKey = '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';
+    const apiKey = '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';
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
