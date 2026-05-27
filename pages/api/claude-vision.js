@@ -24,7 +24,7 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: 'claude-opus-4-1',
+        model: 'claude-haiku-4-5-20241022',
         max_tokens: 2000,
         messages: [
           {
@@ -40,9 +40,13 @@ export default async function handler(req, res) {
               },
               {
                 type: 'text',
-                text: `ANALIZA ESTA IMAGEN DE MUEBLE/CARPINTERÍA CON MÁXIMO DETALLE.
+                text: `VERIFICA PRIMERO si esta imagen es un mueble de madera/carpintería de BUENA CALIDAD.
 
-DEBES PROPORCIONAR EXACTAMENTE ESTO (EN ESTE ORDEN):
+SI NO es un mueble: Responde SOLO: "❌ ERROR: Esta no es una imagen de un mueble o carpintería. Por favor, sube una foto clara de un mueble de madera."
+
+SI la imagen es BORROSA, oscura o de mala calidad: Responde SOLO: "⚠️ CALIDAD BAJA: La imagen no tiene suficiente claridad. Por favor, busca una foto con mejor iluminación y resolución para obtener un análisis exacto."
+
+SI es un mueble de BUENA CALIDAD: Analiza y proporciona EXACTAMENTE esto (EN ESTE ORDEN):
 
 1. DIMENSIONES EXACTAS DEL MUEBLE:
    - Ancho total (cm), Alto total (cm), Profundidad (cm)
@@ -59,7 +63,6 @@ DEBES PROPORCIONAR EXACTAMENTE ESTO (EN ESTE ORDEN):
    - Medidas exactas de cada pieza
    - Cantidad de piezas
    - DESPERDICIO: en % + en cm² + en m²
-   Ejemplo: "Desperdicio 15% = 7.550 cm² = 0.75 m²"
 
 4. LISTA DETALLADA DE MATERIALES:
    TABLEROS: tipo, espesor, m² o piezas
@@ -67,13 +70,13 @@ DEBES PROPORCIONAR EXACTAMENTE ESTO (EN ESTE ORDEN):
    TORNILLOS EXACTOS: 3.5x50mm X unidades, 3.5x35mm X, etc
    OTROS: cola, lijas, sellador
 
-5. PASOS DE ARMADO (7-10 pasos):
-   Cada paso: nombre, piezas con medidas, cantidad de tornillos exacta, procedimiento
+5. PASOS DE ARMADO (5-7 pasos):
+   Cada paso: nombre, piezas con medidas, procedimiento
 
 6. TIEMPO ESTIMADO:
    Preparación (h), ensamble (h), acabado (h), TOTAL
 
-SÉ ESPECÍFICO Y EXACTO. NO DEJES NADA AL AZAR.`,
+SÉ ESPECÍFICO Y EXACTO.`,
               },
             ],
           },
@@ -107,4 +110,3 @@ SÉ ESPECÍFICO Y EXACTO. NO DEJES NADA AL AZAR.`,
     });
   }
 }
-// Trigger rebuild with env vars - Wed May 27 15:50:07 UTC 2026
