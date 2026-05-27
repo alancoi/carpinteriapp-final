@@ -12,6 +12,9 @@ export default async function handler(req, res) {
 
     const apiKey = process.env.CLAUDE_API_KEY;
 
+    console.log('API Key disponible:', !!apiKey);
+    console.log('API Key primeros 20 chars:', apiKey?.substring(0, 20));
+
     if (!apiKey) {
       return res.status(500).json({ error: 'API key no configurada' });
     }
