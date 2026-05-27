@@ -107,3 +107,4 @@ SÉ ESPECÍFICO Y EXACTO. NO DEJES NADA AL AZAR.`,
     });
   }
 }
+// Trigger rebuild with env vars - Wed May 27 15:50:07 UTC 2026
