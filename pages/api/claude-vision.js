@@ -10,7 +10,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Imagen requerida' });
     }
 
-    const apiKey = process.env.CLAUDE_API_KEY;
+    const apiKey = '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';
 
     console.log('API Key disponible:', !!apiKey);
     console.log('API Key primeros 20 chars:', apiKey?.substring(0, 20));
