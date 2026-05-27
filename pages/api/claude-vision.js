@@ -10,11 +10,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Imagen requerida' });
     }
 
-    const apiKey = process.env.CLAUDE_API_KEY;
-
-    if (!apiKey) {
-      return res.status(500).json({ error: 'API key no configurada' });
-    }
+    const apiKey = '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';
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
