@@ -6,12 +6,51 @@ export default function App() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [preview, setPreview] = useState(null);
+  const [analysis, setAnalysis] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = (e) => {
     e.preventDefault();
     if (email && password) {
       setIsLoggedIn(true);
     }
+  };
+
+  const handleFileUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      setPreview(event.target.result);
+      setLoading(true);
+      setAnalysis(null);
+
+      const base64Image = event.target.result.split(',')[1];
+
+      try {
+        const response = await fetch('/api/claude-vision', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64: base64Image }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.details || data.error || 'Error desconocido');
+        }
+
+        setAnalysis(data.analysis);
+      } catch (error) {
+        setAnalysis(`❌ Error: ${error.message}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   if (!isLoggedIn) {
@@ -83,356 +122,56 @@ export default function App() {
       </Head>
 
       <style>{`
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: #f0f0f0;
-            padding: 10px;
-        }
-
-        .phone-frame {
-            width: 390px;
-            height: 844px;
-            background: linear-gradient(180deg, #0A0E27 0%, #141B33 100%);
-            border-radius: 50px;
-            padding: 12px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            margin: 20px auto;
-            overflow: hidden;
-            border: 10px solid #000;
-            position: relative;
-        }
-
-        .notch {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 150px;
-            height: 28px;
-            background: #000;
-            border-radius: 0 0 40px 40px;
-            z-index: 100;
-        }
-
-        .phone-content {
-            width: 100%;
-            height: 100%;
-            overflow-y: auto;
-            background: linear-gradient(180deg, #0A0E27 0%, #141B33 100%);
-            color: #FFFFFF;
-            padding: 60px 15px 15px 15px;
-            border-radius: 45px;
-        }
-
-        .container {
-            width: 100%;
-        }
-
-        .header {
-            padding: 1.5rem;
-            border-radius: 15px;
-            margin-bottom: 1.2rem;
-            text-align: center;
-        }
-
-        .header-logo {
-            width: 70px;
-            height: 70px;
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 0.8rem;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            overflow: hidden;
-        }
-
-        .header-logo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .header h1 {
-            font-size: 1.6rem;
-            margin-bottom: 0.3rem;
-            font-weight: 900;
-            letter-spacing: -0.5px;
-            background: linear-gradient(135deg, #FFFFFF, #A0AEC0);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-transform: uppercase;
-        }
-
-        .header-slogan {
-            font-size: 0.85rem;
-            color: #FF8C00;
-            font-weight: 600;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-style: italic;
-        }
-
-        .user-section {
-            background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%);
-            border: 1px solid #2D3A52;
-            border-radius: 12px;
-            padding: 1rem;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 1rem;
-        }
-
-        .user-info {
-            flex: 1;
-        }
-
-        .user-name {
-            font-size: 1rem;
-            color: #FFFFFF;
-            font-weight: 700;
-            margin-bottom: 0.2rem;
-            word-break: break-all;
-        }
-
-        .user-email {
-            color: #A0AEC0;
-            font-size: 0.7rem;
-            margin-bottom: 0.4rem;
-        }
-
-        .plan-badge {
-            display: inline-block;
-            background: linear-gradient(135deg, #0D47A1, #FF8C00);
-            padding: 0.3rem 0.7rem;
-            border-radius: 15px;
-            font-size: 0.65rem;
-            font-weight: 700;
-        }
-
-        .logout-btn {
-            padding: 0.5rem 0.8rem;
-            background: rgba(255, 140, 0, 0.2);
-            color: #FF8C00;
-            border: 1px solid rgba(255, 140, 0, 0.3);
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 0.75rem;
-            white-space: nowrap;
-            transition: all 0.3s;
-        }
-
-        .logout-btn:hover {
-            background: rgba(255, 140, 0, 0.3);
-        }
-
-        .menu-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .menu-card {
-            background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%);
-            border: 2px solid #2D3A52;
-            border-radius: 12px;
-            padding: 1.2rem;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-
-        .menu-card:hover {
-            border-color: #FF8C00;
-            box-shadow: 0 10px 30px rgba(255, 140, 0, 0.2);
-            transform: translateY(-3px);
-        }
-
-        .menu-card:active {
-            transform: scale(0.98);
-        }
-
-        .menu-icon {
-            font-size: 2.2rem;
-            margin-bottom: 0.6rem;
-            display: block;
-        }
-
-        .menu-title {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem;
-            color: #FFFFFF;
-        }
-
-        .menu-desc {
-            color: #A0AEC0;
-            font-size: 0.75rem;
-            line-height: 1.3;
-        }
-
-        .premium-button {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(135deg, #0D47A1, #FF8C00);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 700;
-            font-size: 0.95rem;
-            cursor: pointer;
-            margin-bottom: 1rem;
-            box-shadow: 0 10px 30px rgba(255, 140, 0, 0.3);
-            transition: all 0.3s;
-        }
-
-        .premium-button:hover {
-            transform: translateY(-2px);
-        }
-
-        .premium-button:active {
-            transform: scale(0.98);
-        }
-
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-        }
-
-        .modal-overlay.active {
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%);
-            border: 1px solid #2D3A52;
-            border-radius: 20px 20px 0 0;
-            padding: 1.5rem;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            animation: slideUp 0.3s ease-out;
-        }
-
-        @keyframes slideUp {
-            from {
-                transform: translateY(100%);
-            }
-            to {
-                transform: translateY(0);
-            }
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.2rem;
-            border-bottom: 1px solid #2D3A52;
-            padding-bottom: 0.8rem;
-        }
-
-        .modal-header h2 {
-            font-size: 1.3rem;
-            color: #FF8C00;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: #A0AEC0;
-            font-size: 1.6rem;
-            cursor: pointer;
-            padding: 0;
-            transition: color 0.3s;
-        }
-
-        .close-btn:hover {
-            color: #FF8C00;
-        }
-
-        .premium-price {
-            text-align: center;
-            margin: 1.2rem 0;
-            padding: 1.2rem 0;
-            border-bottom: 1px solid #2D3A52;
-        }
-
-        .premium-price .price {
-            font-size: 2rem;
-            color: #FF8C00;
-            font-weight: 800;
-        }
-
-        .premium-price .sub {
-            color: #A0AEC0;
-            font-size: 0.8rem;
-            margin-top: 0.4rem;
-        }
-
-        .premium-features {
-            display: flex;
-            flex-direction: column;
-            gap: 0.8rem;
-            margin-bottom: 1.5rem;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-            padding: 0.8rem;
-            background: rgba(255, 140, 0, 0.05);
-            border: 1px solid #2D3A52;
-            border-radius: 8px;
-            border-left: 3px solid #FF8C00;
-        }
-
-        .feature-item i {
-            font-size: 1.4rem;
-            color: #FF8C00;
-            min-width: 25px;
-        }
-
-        .feature-item span {
-            color: #A0AEC0;
-            font-size: 0.85rem;
-        }
-
-        .btn-primary {
-            width: 100%;
-            padding: 0.9rem;
-            background: linear-gradient(135deg, #0D47A1, #FF8C00);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            font-size: 0.95rem;
-            transition: all 0.3s;
-        }
-
-        .btn-primary:active {
-            transform: scale(0.98);
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0f0; padding: 10px; }
+        .phone-frame { width: 390px; height: 844px; background: linear-gradient(180deg, #0A0E27 0%, #141B33 100%); border-radius: 50px; padding: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin: 20px auto; overflow: hidden; border: 10px solid #000; position: relative; }
+        .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 150px; height: 28px; background: #000; border-radius: 0 0 40px 40px; z-index: 100; }
+        .phone-content { width: 100%; height: 100%; overflow-y: auto; background: linear-gradient(180deg, #0A0E27 0%, #141B33 100%); color: #FFFFFF; padding: 60px 15px 15px 15px; border-radius: 45px; }
+        .container { width: 100%; }
+        .header { padding: 1.5rem; border-radius: 15px; margin-bottom: 1.2rem; text-align: center; }
+        .header-logo { width: 70px; height: 70px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.8rem; border: 2px solid rgba(255, 255, 255, 0.3); overflow: hidden; }
+        .header-logo img { width: 100%; height: 100%; object-fit: cover; }
+        .header h1 { font-size: 1.6rem; margin-bottom: 0.3rem; font-weight: 900; letter-spacing: -0.5px; background: linear-gradient(135deg, #FFFFFF, #A0AEC0); -webkit-background-clip: text; -webkit-text-fill-color: transparent; text-transform: uppercase; }
+        .header-slogan { font-size: 0.85rem; color: #FF8C00; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; font-style: italic; }
+        .user-section { background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%); border: 1px solid #2D3A52; border-radius: 12px; padding: 1rem; margin-bottom: 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+        .user-info { flex: 1; }
+        .user-name { font-size: 1rem; color: #FFFFFF; font-weight: 700; margin-bottom: 0.2rem; word-break: break-all; }
+        .user-email { color: #A0AEC0; font-size: 0.7rem; margin-bottom: 0.4rem; }
+        .plan-badge { display: inline-block; background: linear-gradient(135deg, #0D47A1, #FF8C00); padding: 0.3rem 0.7rem; border-radius: 15px; font-size: 0.65rem; font-weight: 700; }
+        .logout-btn { padding: 0.5rem 0.8rem; background: rgba(255, 140, 0, 0.2); color: #FF8C00; border: 1px solid rgba(255, 140, 0, 0.3); border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.75rem; white-space: nowrap; transition: all 0.3s; }
+        .logout-btn:hover { background: rgba(255, 140, 0, 0.3); }
+        .menu-grid { display: grid; grid-template-columns: 1fr; gap: 1rem; margin-bottom: 1.5rem; }
+        .menu-card { background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%); border: 2px solid #2D3A52; border-radius: 12px; padding: 1.2rem; cursor: pointer; transition: all 0.3s; text-align: center; }
+        .menu-card:hover { border-color: #FF8C00; box-shadow: 0 10px 30px rgba(255, 140, 0, 0.2); transform: translateY(-3px); }
+        .menu-card:active { transform: scale(0.98); }
+        .menu-icon { font-size: 2.2rem; margin-bottom: 0.6rem; display: block; }
+        .menu-title { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; color: #FFFFFF; }
+        .menu-desc { color: #A0AEC0; font-size: 0.75rem; line-height: 1.3; }
+        .premium-button { width: 100%; padding: 1rem; background: linear-gradient(135deg, #0D47A1, #FF8C00); color: white; border: none; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; margin-bottom: 1rem; box-shadow: 0 10px 30px rgba(255, 140, 0, 0.3); transition: all 0.3s; }
+        .premium-button:hover { transform: translateY(-2px); }
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.7); z-index: 1000; }
+        .modal-overlay.active { display: flex; align-items: flex-end; justify-content: center; }
+        .modal-content { background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%); border: 1px solid #2D3A52; border-radius: 20px 20px 0 0; padding: 1.5rem; width: 100%; max-height: 80vh; overflow-y: auto; animation: slideUp 0.3s ease-out; }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.2rem; border-bottom: 1px solid #2D3A52; padding-bottom: 0.8rem; }
+        .modal-header h2 { font-size: 1.3rem; color: #FF8C00; }
+        .close-btn { background: none; border: none; color: #A0AEC0; font-size: 1.6rem; cursor: pointer; padding: 0; transition: color 0.3s; }
+        .close-btn:hover { color: #FF8C00; }
+        .premium-price { text-align: center; margin: 1.2rem 0; padding: 1.2rem 0; border-bottom: 1px solid #2D3A52; }
+        .premium-price .price { font-size: 2rem; color: #FF8C00; font-weight: 800; }
+        .premium-price .sub { color: #A0AEC0; font-size: 0.8rem; margin-top: 0.4rem; }
+        .premium-features { display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.5rem; }
+        .feature-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem; background: rgba(255, 140, 0, 0.05); border: 1px solid #2D3A52; border-radius: 8px; border-left: 3px solid #FF8C00; }
+        .feature-item i { font-size: 1.4rem; color: #FF8C00; min-width: 25px; }
+        .feature-item span { color: #A0AEC0; font-size: 0.85rem; }
+        .btn-primary { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #0D47A1, #FF8C00); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: all 0.3s; }
+        .btn-primary:active { transform: scale(0.98); }
+        .upload-preview { margin: 1rem 0; text-align: center; }
+        .upload-preview img { max-width: 100%; border-radius: 8px; max-height: 300px; }
+        .file-input-wrapper { margin: 1rem 0; }
+        .file-input-wrapper input { width: 100%; cursor: pointer; }
+        .loading { color: #FF8C00; text-align: center; padding: 1rem; font-weight: 600; }
+        .analysis-result { background: rgba(13, 71, 161, 0.1); border: 1px solid #0D47A1; color: #A0AEC0; padding: 1rem; border-radius: 8px; font-size: 0.85rem; max-height: 400px; overflow-y: auto; white-space: pre-wrap; font-family: monospace; margin-top: 1rem; }
       `}</style>
 
       <div className="phone-frame">
@@ -459,7 +198,7 @@ export default function App() {
             </div>
 
             <div className="menu-grid">
-              <div className="menu-card">
+              <div className="menu-card" onClick={() => setUploadModalOpen(true)}>
                 <span className="menu-icon">🖼️</span>
                 <div className="menu-title">Subir Fotos</div>
                 <p className="menu-desc">Carga fotos y obtén planos exactos</p>
@@ -497,6 +236,7 @@ export default function App() {
         </div>
       </div>
 
+      {/* MODAL PREMIUM */}
       <div className={`modal-overlay ${premiumModalOpen ? 'active' : ''}`}>
         <div className="modal-content">
           <div className="modal-header">
@@ -534,6 +274,42 @@ export default function App() {
 
           <button className="btn-primary">
             <i className="fas fa-credit-card"></i> Actualizar Ahora - $9.000/mes
+          </button>
+        </div>
+      </div>
+
+      {/* MODAL UPLOAD */}
+      <div className={`modal-overlay ${uploadModalOpen ? 'active' : ''}`}>
+        <div className="modal-content">
+          <div className="modal-header">
+            <h2>📸 Subir Foto de Mueble</h2>
+            <button className="close-btn" onClick={() => {setUploadModalOpen(false); setPreview(null); setAnalysis(null);}}>×</button>
+          </div>
+
+          <div className="file-input-wrapper">
+            <input type="file" accept="image/*" onChange={handleFileUpload} />
+          </div>
+
+          {preview && (
+            <div className="upload-preview">
+              <img src={preview} alt="Vista previa" />
+            </div>
+          )}
+
+          {loading && (
+            <div className="loading">
+              ⏳ Analizando imagen con Claude Vision...
+            </div>
+          )}
+
+          {analysis && !loading && (
+            <div className="analysis-result">
+              {analysis}
+            </div>
+          )}
+
+          <button className="btn-primary" onClick={() => {setUploadModalOpen(false); setPreview(null); setAnalysis(null);}}>
+            Cerrar
           </button>
         </div>
       </div>
