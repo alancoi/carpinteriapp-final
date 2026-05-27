@@ -2,7 +2,75 @@ import { useState } from 'react';
 import Head from 'next/head';
 
 export default function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
+
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (email && password) {
+      setIsLoggedIn(true);
+    }
+  };
+
+  if (!isLoggedIn) {
+    return (
+      <>
+        <Head>
+          <title>CarpinteriAPP - Login</title>
+          <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+        </Head>
+        <style>{`
+          * { margin: 0; padding: 0; box-sizing: border-box; }
+          body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0f0; }
+          .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; background: linear-gradient(180deg, #0A0E27 0%, #141B33 100%); }
+          .login-box { width: 350px; background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%); padding: 40px; border-radius: 20px; border: 1px solid #2D3A52; text-align: center; }
+          .logo { font-size: 60px; margin-bottom: 20px; }
+          h1 { color: #fff; margin-bottom: 10px; font-size: 28px; }
+          .slogan { color: #FF8C00; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 30px; }
+          .form-group { margin-bottom: 20px; text-align: left; }
+          .label { color: #A0AEC0; font-size: 12px; margin-bottom: 8px; display: block; }
+          input { width: 100%; background: #1F2A47; border: 1px solid #2D3A52; color: #fff; padding: 12px; border-radius: 8px; font-size: 14px; }
+          input:focus { outline: none; border-color: #FF8C00; }
+          .btn-login { width: 100%; background: linear-gradient(135deg, #0D47A1, #FF8C00); color: white; border: none; padding: 14px; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+          .btn-login:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255, 140, 0, 0.3); }
+        `}</style>
+        
+        <div className="login-container">
+          <div className="login-box">
+            <div className="logo">🔨</div>
+            <h1>CarpinteriAPP</h1>
+            <p className="slogan">El Futuro de la Carpintería</p>
+            
+            <form onSubmit={handleLogin}>
+              <div className="form-group">
+                <label className="label">Email (Usuario)</label>
+                <input 
+                  type="email" 
+                  placeholder="tu@email.com" 
+                  value={email} 
+                  onChange={(e) => setEmail(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div className="form-group">
+                <label className="label">Contraseña</label>
+                <input 
+                  type="password" 
+                  placeholder="••••••••" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  required 
+                />
+              </div>
+              <button type="submit" className="btn-login">Iniciar Sesión</button>
+            </form>
+          </div>
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -378,10 +446,10 @@ export default function App() {
             <div className="user-section">
               <div className="user-info">
                 <div className="user-name">Alan Coimieres</div>
-                <div className="user-email">alancoimieres@gmail.com</div>
+                <div className="user-email">{email}</div>
                 <div className="plan-badge">Plan Básico</div>
               </div>
-              <button className="logout-btn">
+              <button className="logout-btn" onClick={() => {setIsLoggedIn(false); setEmail(''); setPassword('');}}>
                 <i className="fas fa-sign-out-alt"></i> Salir
               </button>
             </div>
