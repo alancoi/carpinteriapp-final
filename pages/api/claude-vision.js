@@ -161,10 +161,10 @@ export default async function handler(req, res) {
 
     // 3. DETERMINAR MODELO A USAR (Haiku o Sonnet)
     let failureCount = userFailureCount[clientIP] || 0;
-    let model = failureCount >= 2 ? 'claude-3-5-sonnet-20241022' : 'claude-haiku-4-5-20251001';
+    let model = failureCount >= 2 ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001';
     let isUsingFallback = false;
 
-    console.log(`📊 Cliente ${clientIP}: ${failureCount} fallos previos → usando ${model === 'claude-3-5-sonnet-20241022' ? 'Sonnet' : 'Haiku'}`);
+    console.log(`📊 Cliente ${clientIP}: ${failureCount} fallos previos → usando ${model === 'claude-sonnet-4-6' ? 'Sonnet' : 'Haiku'}`);
 
     // 4. INTENTAR ANÁLISIS
     let result = await analyzeWithModel(imageBase64, model);
@@ -172,7 +172,7 @@ export default async function handler(req, res) {
     // 5. VALIDACIÓN DE RESPUESTA - Si es corta, intenta fallback a Sonnet
     if (model === 'claude-haiku-4-5-20251001' && result.analysis.length < 500) {
       console.log('⚠️ Haiku respondió muy corto, escalando a Sonnet...');
-      result = await analyzeWithModel(imageBase64, 'claude-3-5-sonnet-20241022');
+      result = await analyzeWithModel(imageBase64, 'claude-sonnet-4-6');
       isUsingFallback = true;
       
       // Incrementar contador de fallos para este usuario
@@ -198,7 +198,7 @@ export default async function handler(req, res) {
     // 8. GUARDAR EN CACHÉ
     analysisCache[imageHash] = {
       analysis: result.analysis,
-      model: isUsingFallback ? 'sonnet' : (model === 'claude-3-5-sonnet-20241022' ? 'sonnet' : 'haiku'),
+      model: isUsingFallback ? 'sonnet' : (model === 'claude-sonnet-4-6' ? 'sonnet' : 'haiku'),
       timestamp: Date.now(),
     };
 
