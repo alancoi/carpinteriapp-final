@@ -2,17 +2,9 @@ import crypto from 'crypto';
 
 // Cache en memoria para esta sesión
 const analysisCache = {};
-const userFailureCount = {}; // Contador de fallos por usuario/IP
 
 function getImageHash(imageBase64) {
   return crypto.createHash('sha256').update(imageBase64).digest('hex');
-}
-
-function getClientIP(req) {
-  return req.headers['x-forwarded-for']?.split(',')[0] || 
-         req.headers['x-real-ip'] || 
-         req.socket.remoteAddress || 
-         'unknown';
 }
 
 function isImageResolutionValid(imageBase64) {
@@ -20,7 +12,7 @@ function isImageResolutionValid(imageBase64) {
   return sizeInBytes > 20000; // Mínimo ~480x480
 }
 
-async function analyzeWithModel(imageBase64, model) {
+async function analyzeWithModel(imageBase64) {
   const apiKey = process.env.CLAUDE_API_KEY;
 
   const controller = new AbortController();
@@ -35,7 +27,7 @@ async function analyzeWithModel(imageBase64, model) {
         'anthropic-version': '2023-06-01',
       },
       body: JSON.stringify({
-        model: model,
+        model: 'claude-3-5-sonnet-20241022',
         max_tokens: 2000,
         messages: [
           {
@@ -128,7 +120,6 @@ export default async function handler(req, res) {
 
   try {
     const { imageBase64 } = req.body;
-    const clientIP = getClientIP(req);
 
     if (!imageBase64) {
       return res.status(400).json({ error: 'Imagen requerida' });
@@ -155,39 +146,14 @@ export default async function handler(req, res) {
         success: true,
         analysis: analysisCache[imageHash].analysis,
         cached: true,
-        model: analysisCache[imageHash].model,
       });
     }
 
-    // 3. DETERMINAR MODELO A USAR (Haiku o Sonnet)
-    let failureCount = userFailureCount[clientIP] || 0;
-    let model = failureCount >= 2 ? 'claude-sonnet-4-6' : 'claude-haiku-4-5-20251001';
-    let isUsingFallback = false;
+    // 3. ANÁLISIS CON SONNET
+    console.log('🔍 Analizando con Sonnet...');
+    const result = await analyzeWithModel(imageBase64);
 
-    console.log(`📊 Cliente ${clientIP}: ${failureCount} fallos previos → usando ${model === 'claude-sonnet-4-6' ? 'Sonnet' : 'Haiku'}`);
-
-    // 4. INTENTAR ANÁLISIS
-    let result = await analyzeWithModel(imageBase64, model);
-
-    // 5. VALIDACIÓN DE RESPUESTA - Si es corta, intenta fallback a Sonnet
-    if (model === 'claude-haiku-4-5-20251001' && result.analysis.length < 500) {
-      console.log('⚠️ Haiku respondió muy corto, escalando a Sonnet...');
-      result = await analyzeWithModel(imageBase64, 'claude-sonnet-4-6');
-      isUsingFallback = true;
-      
-      // Incrementar contador de fallos para este usuario
-      userFailureCount[clientIP] = (userFailureCount[clientIP] || 0) + 1;
-    }
-
-    // 6. SI HAIKU FUNCIONÓ BIEN, REDUCIR CONTADOR
-    if (model === 'claude-haiku-4-5-20251001' && result.analysis.length >= 500 && !isUsingFallback) {
-      if (userFailureCount[clientIP] > 0) {
-        userFailureCount[clientIP]--;
-        console.log('✅ Haiku funcionó bien, reduciendo contador de fallos');
-      }
-    }
-
-    // 7. VALIDACIÓN FINAL
+    // 4. VALIDACIÓN FINAL
     if (!result.analysis || result.analysis.trim().length === 0) {
       return res.status(400).json({
         error: '❌ No se pudo analizar',
@@ -195,10 +161,9 @@ export default async function handler(req, res) {
       });
     }
 
-    // 8. GUARDAR EN CACHÉ
+    // 5. GUARDAR EN CACHÉ
     analysisCache[imageHash] = {
       analysis: result.analysis,
-      model: isUsingFallback ? 'sonnet' : (model === 'claude-sonnet-4-6' ? 'sonnet' : 'haiku'),
       timestamp: Date.now(),
     };
 
@@ -213,8 +178,6 @@ export default async function handler(req, res) {
       success: true,
       analysis: result.analysis,
       cached: false,
-      model: analysisCache[imageHash].model,
-      failureCount: userFailureCount[clientIP] || 0,
     });
   } catch (error) {
     console.error('Error en Claude Vision API:', error);
