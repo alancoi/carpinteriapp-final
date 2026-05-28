@@ -28,7 +28,7 @@ async function analyzeWithModel(imageBase64) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 2500,
+        max_tokens: 3500,
         messages: [
           {
             role: 'user',
@@ -45,29 +45,34 @@ async function analyzeWithModel(imageBase64) {
                 type: 'text',
                 text: `Verifica si esta imagen es un mueble de BUENA CALIDAD.
 
-SI NO es mueble: "❌ No es un mueble. Por favor sube una foto clara de un mueble de madera."
+SI NO mueble: "❌ No es mueble. Sube foto clara."
+SI borroso/oscuro: "⚠️ Imagen borrosa. Mejor iluminación."
+SI inclinado: "📐 Foto inclinada. Tómala de frente."
 
-SI es borroso/oscuro: "⚠️ Imagen borrosa. Necesita mejor iluminación y resolución."
+SI BUENA CALIDAD, proporciona EN ESTE ORDEN:
 
-SI está inclinado: "📐 Foto inclinada. Tómala de frente para medidas exactas."
+## 1. DIMENSIONES (cm)
+Ancho | Alto | Profundidad | Espesor placa | Detalles componentes
 
-SI es BUENA CALIDAD, proporciona en este orden:
+## 2. PLANO ASCII FRONTAL
+Diagrama técnico simple con medidas
 
-1. DIMENSIONES: Ancho, Alto, Profundidad (cm)
+## 3. CORTES PLACA 275×183cm
+- Tabla con piezas: Nombre | Qty | Largo | Ancho
+- Cálculo: Área total | Área usada | Desperdicio (cm² y %)
 
-2. PLANO ASCII: Dibujo técnico frontal con medidas
+## 4. MATERIALES
+TABLEROS: tipo, cantidad, medidas
+HERRAJES: correderas, jaladores, cantidad
+TORNILLOS: tipo y medida exacta (ej: 7×50mm)
+CLAVOS: tipo y cantidad
+CANTOS: material y metraje lineal
+ADHESIVOS: tipo y cantidad
 
-3. CORTES PLACAS 275x183cm: 
-   - Piezas a cortar
-   - Medidas exactas
-   - Desperdicio (%, cm², m²)
+## 5. 5-7 PASOS ARMADO
+Cada paso: nombre | Tiempo | Instrucciones detalladas
 
-4. MATERIALES:
-   - Tableros, herrajes, tornillos exactos
-
-5. 5-7 PASOS ARMADO: Con medidas
-
-6. TIEMPO: Horas preparación, ensamble, acabado`,
+## 6. TIEMPO TOTAL: Horas preparación + ensamble + acabado`,
               },
             ],
           },
