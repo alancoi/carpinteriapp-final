@@ -1,6 +1,5 @@
 import crypto from 'crypto';
 
-// Cache en memoria para esta sesión
 const analysisCache = {};
 
 function getImageHash(imageBase64) {
@@ -16,7 +15,7 @@ async function analyzeWithModel(imageBase64) {
   const apiKey = process.env.CLAUDE_API_KEY;
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000); // 60 segundos
+  const timeout = setTimeout(() => controller.abort(), 60000);
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -28,7 +27,7 @@ async function analyzeWithModel(imageBase64) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 3500,
+        max_tokens: 5000,
         messages: [
           {
             role: 'user',
@@ -46,33 +45,51 @@ async function analyzeWithModel(imageBase64) {
                 text: `Verifica si esta imagen es un mueble de BUENA CALIDAD.
 
 SI NO mueble: "❌ No es mueble. Sube foto clara."
-SI borroso/oscuro: "⚠️ Imagen borrosa. Mejor iluminacion."
+SI borroso/oscuro: "⚠️ Imagen borrosa. Mejor iluminacion y resolucion."
 SI inclinado: "📐 Foto inclinada. Tomala de frente."
 
-SI BUENA CALIDAD, proporciona EN ESTE ORDEN:
+SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden:
 
 ## 1. DIMENSIONES (cm)
-Ancho | Alto | Profundidad | Espesor placa | Detalles componentes
+Tabla simple: Ancho | Alto | Profundidad | Espesor | Detalles
 
-## 2. PLANO ASCII FRONTAL
-Diagrama tecnico simple con medidas
+## 2. PLANO ASCII (compacto y claro)
+Diagrama frontal SIMPLE en 10-15 lineas max con medidas principales
 
 ## 3. CORTES PLACA 275x183cm
-- Tabla con piezas: Nombre | Cantidad | Largo | Ancho
-- Calculo: Area total | Area usada | Desperdicio (cm2 y %)
+Tabla: Pieza | Cantidad | Largo | Ancho | cm2
+Calculo: Area total | Area usada | Desperdicio (cm2 y %)
 
-## 4. MATERIALES
-TABLEROS: tipo, cantidad, medidas
-HERRAJES: correderas, jaladores, cantidad
-TORNILLOS: tipo y medida exacta (ej: 7x50mm)
-CLAVOS: tipo y cantidad
-CANTOS: material y metraje lineal
-ADHESIVOS: tipo y cantidad
+## 4. MATERIALES EXACTOS
+- Tableros: tipo, cantidad, medidas
+- Herrajes: tipo, cantidad (correderas, jaladores, etc)
+- Tornillos: tipo exacto con medida (ej: 7x50mm), cantidad
+- Clavos: tipo, cantidad
+- Cantos: material, cantidad ml
+- Adhesivos: tipo, cantidad
 
-## 5. 5-7 PASOS ARMADO
-Cada paso: nombre | Tiempo | Instrucciones detalladas
+## 5. HERRAMIENTAS NECESARIAS
+Lista simple: sierra, taladro, destornillador, nivel, metro, lija, etc
 
-## 6. TIEMPO TOTAL: Horas preparacion + ensamble + acabado`,
+## 6. PASOS DE ARMADO (5-7 pasos)
+Formato: PASO N - Nombre | Tiempo | Instrucciones claras
+
+## 7. ACABADO FINAL
+Recomendacion: Pintura/barniz/sellador, aplicacion, secado
+
+## 8. NIVEL DIFICULTAD
+Facil / Medio / Dificil + Justificacion (ej: "Medio: requiere taladro y medidas exactas")
+
+## 9. NOTAS IMPORTANTES
+3-5 puntos: cuidados, esperas, verificaciones criticas
+
+## 10. ALTERNATIVAS DE MATERIALES
+2-3 opciones: "Se puede reemplazar X por Y si..."
+
+## 11. TIEMPO TOTAL
+Suma: preparacion + armado + acabado = HORAS TOTALES
+
+Responde COMPLETO, NO abrevies. Se conciso pero detallado.`,
               },
             ],
           },
@@ -98,7 +115,7 @@ Cada paso: nombre | Tiempo | Instrucciones detalladas
   } catch (error) {
     clearTimeout(timeout);
     if (error.name === 'AbortError') {
-      throw new Error('El análisis tardó demasiado. Intenta con una imagen más clara o espera unos momentos.');
+      throw new Error('El analisis tardo demasiado. Intenta con una imagen mas clara o espera unos momentos.');
     }
     throw error;
   }
@@ -106,7 +123,7 @@ Cada paso: nombre | Tiempo | Instrucciones detalladas
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Método no permitido' });
+    return res.status(405).json({ error: 'Metodo no permitido' });
   }
 
   try {
@@ -121,15 +138,13 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'API key no configurada' });
     }
 
-    // VALIDACIÓN DE RESOLUCIÓN
     if (!isImageResolutionValid(imageBase64)) {
       return res.status(400).json({
         error: '📷 Imagen muy pequeña',
-        message: 'Usa una foto de al menos 480x480 píxeles.',
+        message: 'Usa una foto de al menos 480x480 pixeles.',
       });
     }
 
-    // CACHE DE IMÁGENES
     const imageHash = getImageHash(imageBase64);
     if (analysisCache[imageHash]) {
       return res.status(200).json({
@@ -139,23 +154,20 @@ export default async function handler(req, res) {
       });
     }
 
-    // ANÁLISIS
     const result = await analyzeWithModel(imageBase64);
 
     if (!result.analysis || result.analysis.trim().length === 0) {
       return res.status(400).json({
         error: '❌ No se pudo analizar',
-        message: 'Intenta con una foto más clara del mueble.',
+        message: 'Intenta con una foto mas clara del mueble.',
       });
     }
 
-    // GUARDAR EN CACHÉ
     analysisCache[imageHash] = {
       analysis: result.analysis,
       timestamp: Date.now(),
     };
 
-    // Limpiar caché antiguo
     Object.keys(analysisCache).forEach((key) => {
       if (Date.now() - analysisCache[key].timestamp > 3600000) {
         delete analysisCache[key];
