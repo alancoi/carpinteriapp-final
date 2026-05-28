@@ -15,7 +15,7 @@ async function analyzeWithModel(imageBase64) {
   const apiKey = process.env.CLAUDE_API_KEY;
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 60000);
+  const timeout = setTimeout(() => controller.abort(), 90000); // 90 segundos
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -27,7 +27,7 @@ async function analyzeWithModel(imageBase64) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 5000,
+        max_tokens: 4000,
         messages: [
           {
             role: 'user',
