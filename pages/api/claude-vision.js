@@ -46,8 +46,8 @@ async function analyzeWithModel(imageBase64) {
                 text: `Verifica si esta imagen es un mueble de BUENA CALIDAD.
 
 SI NO mueble: "❌ No es mueble. Sube foto clara."
-SI borroso/oscuro: "⚠️ Imagen borrosa. Mejor iluminación."
-SI inclinado: "📐 Foto inclinada. Tómala de frente."
+SI borroso/oscuro: "⚠️ Imagen borrosa. Mejor iluminacion."
+SI inclinado: "📐 Foto inclinada. Tomala de frente."
 
 SI BUENA CALIDAD, proporciona EN ESTE ORDEN:
 
@@ -55,16 +55,16 @@ SI BUENA CALIDAD, proporciona EN ESTE ORDEN:
 Ancho | Alto | Profundidad | Espesor placa | Detalles componentes
 
 ## 2. PLANO ASCII FRONTAL
-Diagrama técnico simple con medidas
+Diagrama tecnico simple con medidas
 
-## 3. CORTES PLACA 275×183cm
-- Tabla con piezas: Nombre | Qty | Largo | Ancho
-- Cálculo: Área total | Área usada | Desperdicio (cm² y %)
+## 3. CORTES PLACA 275x183cm
+- Tabla con piezas: Nombre | Cantidad | Largo | Ancho
+- Calculo: Area total | Area usada | Desperdicio (cm2 y %)
 
 ## 4. MATERIALES
 TABLEROS: tipo, cantidad, medidas
 HERRAJES: correderas, jaladores, cantidad
-TORNILLOS: tipo y medida exacta (ej: 7×50mm)
+TORNILLOS: tipo y medida exacta (ej: 7x50mm)
 CLAVOS: tipo y cantidad
 CANTOS: material y metraje lineal
 ADHESIVOS: tipo y cantidad
@@ -72,7 +72,7 @@ ADHESIVOS: tipo y cantidad
 ## 5. 5-7 PASOS ARMADO
 Cada paso: nombre | Tiempo | Instrucciones detalladas
 
-## 6. TIEMPO TOTAL: Horas preparación + ensamble + acabado`,
+## 6. TIEMPO TOTAL: Horas preparacion + ensamble + acabado`,
               },
             ],
           },
