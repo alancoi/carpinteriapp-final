@@ -161,7 +161,7 @@ export default async function handler(req, res) {
 
     // 3. DETERMINAR MODELO A USAR (Haiku o Sonnet)
     let failureCount = userFailureCount[clientIP] || 0;
-    let model = failureCount >= 2 ? 'claude-3-5-sonnet-20241022' : 'claude-haiku-4-5-20241022';
+    let model = failureCount >= 2 ? 'claude-3-5-sonnet-20241022' : 'claude-haiku-4-5-20251001';
     let isUsingFallback = false;
 
     console.log(`📊 Cliente ${clientIP}: ${failureCount} fallos previos → usando ${model === 'claude-3-5-sonnet-20241022' ? 'Sonnet' : 'Haiku'}`);
@@ -170,7 +170,7 @@ export default async function handler(req, res) {
     let result = await analyzeWithModel(imageBase64, model);
 
     // 5. VALIDACIÓN DE RESPUESTA - Si es corta, intenta fallback a Sonnet
-    if (model === 'claude-haiku-4-5-20241022' && result.analysis.length < 500) {
+    if (model === 'claude-haiku-4-5-20251001' && result.analysis.length < 500) {
       console.log('⚠️ Haiku respondió muy corto, escalando a Sonnet...');
       result = await analyzeWithModel(imageBase64, 'claude-3-5-sonnet-20241022');
       isUsingFallback = true;
@@ -180,7 +180,7 @@ export default async function handler(req, res) {
     }
 
     // 6. SI HAIKU FUNCIONÓ BIEN, REDUCIR CONTADOR
-    if (model === 'claude-haiku-4-5-20241022' && result.analysis.length >= 500 && !isUsingFallback) {
+    if (model === 'claude-haiku-4-5-20251001' && result.analysis.length >= 500 && !isUsingFallback) {
       if (userFailureCount[clientIP] > 0) {
         userFailureCount[clientIP]--;
         console.log('✅ Haiku funcionó bien, reduciendo contador de fallos');
