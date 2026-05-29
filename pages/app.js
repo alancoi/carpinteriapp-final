@@ -3,8 +3,11 @@ import Head from 'next/head';
 
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [registerMode, setRegisterMode] = useState(false);
+  const [authError, setAuthError] = useState('');
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [costModalOpen, setCostModalOpen] = useState(false);
@@ -37,10 +40,56 @@ export default function App() {
   const [costOperative, setCostOperative] = useState('');
   const [desiredMargin, setDesiredMargin] = useState(50);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (email && password) {
+    setAuthError('');
+    
+    if (!email || !password) {
+      setAuthError('Por favor completa todos los campos');
+      return;
+    }
+
+    try {
+      const endpoint = registerMode ? '/api/auth/register' : '/api/auth/login';
+      
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setAuthError(data.error || 'Error en autenticación');
+        return;
+      }
+
+      setUserId(data.user.id);
       setIsLoggedIn(true);
+      setAuthError('');
+      setRegisterMode(false);
+      
+      // Cargar proyectos del usuario
+      if (data.user.id) {
+        loadProjects(data.user.id);
+      }
+    } catch (error) {
+      setAuthError('Error conectando con el servidor');
+      console.error(error);
+    }
+  };
+
+  const loadProjects = async (uid) => {
+    try {
+      const response = await fetch(`/api/proyectos/get?userId=${uid}`);
+      const data = await response.json();
+      
+      if (data.success) {
+        setProjects(data.projects || []);
+      }
+    } catch (error) {
+      console.error('Error cargando proyectos:', error);
     }
   };
 
@@ -123,19 +172,38 @@ export default function App() {
     }
   };
 
-  const saveProject = () => {
-    if (!analysis) return;
+  const saveProject = async () => {
+    if (!analysis || !userId) {
+      alert('No hay análisis o usuario no identificado');
+      return;
+    }
     
-    const newProject = {
-      id: Date.now(),
-      name: `Proyecto ${new Date().toLocaleDateString('es-AR')}`,
-      date: new Date().toLocaleString('es-AR'),
-      analysis: analysis,
-      preview: preview,
-      description: analysis.substring(0, 100) + '...',
-    };
+    try {
+      const response = await fetch('/api/proyectos/save', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId,
+          name: `Proyecto ${new Date().toLocaleDateString('es-AR')}`,
+          date: new Date().toLocaleString('es-AR'),
+          analysis,
+          preview,
+          description: analysis.substring(0, 100) + '...',
+        }),
+      });
 
-    setProjects([newProject, ...projects]);
+      const data = await response.json();
+      
+      if (data.success) {
+        setProjects([data.project, ...projects]);
+        alert('✓ Proyecto guardado en la nube');
+      } else {
+        alert('Error guardando proyecto: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error guardando proyecto');
+    }
   };
 
   const handleChangePassword = () => {
@@ -162,36 +230,103 @@ export default function App() {
     }, 2000);
   };
 
-  const handleSendContact = () => {
+  const deleteProject = async (projectId) => {
+    try {
+      const response = await fetch('/api/proyectos/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ projectId }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setProjects(projects.filter(p => p._id !== projectId));
+        setSelectedProject(null);
+        alert('✓ Proyecto eliminado');
+      } else {
+        alert('Error eliminando proyecto: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error eliminando proyecto');
+    }
+  };
+
+  const handleSendContact = async () => {
     if (!contactError.trim()) {
       setContactMessage('Por favor describe el problema o error');
       return;
     }
     
-    setContactMessage('✓ Mensaje enviado. Gracias por reportar, nuestro equipo lo revisará pronto');
-    setContactError('');
-    
-    setTimeout(() => {
-      setContactMessage('');
-      setContactModalOpen(false);
-    }, 2000);
+    try {
+      const response = await fetch('/api/contacto/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userId || null,
+          email: email || null,
+          mensaje: contactError,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setContactMessage('✓ Mensaje enviado. Gracias por reportar, nuestro equipo lo revisará pronto');
+        setContactError('');
+        
+        setTimeout(() => {
+          setContactMessage('');
+          setContactModalOpen(false);
+        }, 2000);
+      } else {
+        setContactMessage('❌ Error enviando mensaje: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setContactMessage('❌ Error conectando con el servidor');
+    }
   };
 
-  const handleSubmitRating = () => {
+  const handleSubmitRating = async () => {
     if (stars === 0) {
       setRatingMessage('Por favor selecciona una calificación');
       return;
     }
     
-    setRatingMessage('✓ ¡Gracias por tu calificación! Tu feedback nos ayuda a mejorar');
-    setStars(0);
-    setRatingComment('');
-    setRatingImprovement('');
-    
-    setTimeout(() => {
-      setRatingMessage('');
-      setRatingModalOpen(false);
-    }, 2000);
+    try {
+      const response = await fetch('/api/calificacion/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          userId: userId || null,
+          email: email || null,
+          estrellas: stars,
+          opinion: ratingComment,
+          mejoras: ratingImprovement,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setRatingMessage('✓ ¡Gracias por tu calificación! Tu feedback nos ayuda a mejorar');
+        setStars(0);
+        setRatingComment('');
+        setRatingImprovement('');
+        
+        setTimeout(() => {
+          setRatingMessage('');
+          setRatingModalOpen(false);
+        }, 2000);
+      } else {
+        setRatingMessage('❌ Error enviando calificación: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setRatingMessage('❌ Error conectando con el servidor');
+    }
   };
 
   if (!isLoggedIn) {
@@ -227,6 +362,10 @@ export default function App() {
             <p className="slogan">El Futuro de la Carpintería</p>
             
             <form onSubmit={handleLogin}>
+              <h2 style={{fontSize: '1.3rem', marginBottom: '1.5rem', color: '#FF8C00'}}>
+                {registerMode ? '📝 Registro' : '🔐 Login'}
+              </h2>
+              
               <div className="form-group">
                 <label className="label">Email (Usuario)</label>
                 <input 
@@ -247,7 +386,24 @@ export default function App() {
                   required 
                 />
               </div>
-              <button type="submit" className="btn-login">Iniciar Sesión</button>
+
+              {authError && (
+                <div style={{background: 'rgba(244, 67, 54, 0.2)', border: '1px solid #F44336', color: '#F44336', padding: '0.8rem', borderRadius: '8px', marginBottom: '1rem', fontSize: '0.85rem', fontWeight: '600'}}>
+                  ❌ {authError}
+                </div>
+              )}
+
+              <button type="submit" className="btn-login">
+                {registerMode ? '📝 Registrarse' : '🔐 Iniciar Sesión'}
+              </button>
+
+              <button 
+                type="button" 
+                onClick={() => {setRegisterMode(!registerMode); setAuthError(''); setEmail(''); setPassword('');}}
+                style={{width: '100%', marginTop: '1rem', padding: '0.8rem', background: 'transparent', border: '1px solid #FF8C00', color: '#FF8C00', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', transition: 'all 0.3s'}}
+              >
+                {registerMode ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
+              </button>
             </form>
           </div>
         </div>
@@ -946,7 +1102,7 @@ export default function App() {
                 <div className="analysis-result">
                   {selectedProject.analysis}
                 </div>
-                <button className="btn-delete" onClick={() => {setProjects(projects.filter(p => p.id !== selectedProject.id)); setSelectedProject(null);}}>
+                <button className="btn-delete" onClick={() => deleteProject(selectedProject._id)}>
                   🗑️ Eliminar Proyecto
                 </button>
               </div>
@@ -1060,8 +1216,10 @@ export default function App() {
                   className="btn-danger"
                   onClick={() => {
                     setIsLoggedIn(false);
+                    setUserId(null);
                     setEmail('');
                     setPassword('');
+                    setProjects([]);
                     setSettingsModalOpen(false);
                   }}
                 >
