@@ -16,6 +16,8 @@ export default function App() {
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
   const [contactModalOpen, setContactModalOpen] = useState(false);
   const [ratingModalOpen, setRatingModalOpen] = useState(false);
+  const [purchaseModalOpen, setPurchaseModalOpen] = useState(false);
+  const [purchaseCredentials, setPurchaseCredentials] = useState(null);
   const [contactMessage, setContactMessage] = useState('');
   const [contactError, setContactError] = useState('');
   const [stars, setStars] = useState(0);
@@ -326,6 +328,39 @@ export default function App() {
     } catch (error) {
       console.error('Error:', error);
       setRatingMessage('❌ Error conectando con el servidor');
+    }
+  };
+
+  const simulatePremiumPurchase = async () => {
+    try {
+      // Simular compra en MercadoPago
+      // En producción, esto vendría desde MercadoPago webhook
+      
+      const response = await fetch('/api/auth/auto-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: `premium-${Date.now()}@carpinteria.com`, // Email temporal
+          plan: 'premium',
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setPurchaseCredentials({
+          email: data.user.email,
+          password: data.user.tempPassword,
+          plan: data.user.plan,
+        });
+        setPremiumModalOpen(false);
+        setPurchaseModalOpen(true);
+      } else {
+        alert('Error: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('Error procesando compra');
     }
   };
 
@@ -660,6 +695,17 @@ export default function App() {
         .message-box.success { background: rgba(76, 175, 80, 0.2); border: 1px solid #4CAF50; color: #4CAF50; }
         .message-box.error { background: rgba(244, 67, 54, 0.2); border: 1px solid #F44336; color: #F44336; }
         
+        /* PURCHASE SUCCESS STYLES */
+        .purchase-success { text-align: center; padding: 1rem; }
+        .success-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .purchase-success h3 { color: #4CAF50; font-size: 1.3rem; margin-bottom: 1.5rem; }
+        .credentials-box { background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(13, 71, 161, 0.1) 100%); border: 2px solid #4CAF50; border-radius: 12px; padding: 1.5rem; margin-bottom: 1rem; text-align: left; }
+        .cred-label { color: #A0AEC0; font-size: 0.85rem; font-weight: 600; margin-top: 1rem; margin-bottom: 0.5rem; }
+        .cred-label:first-child { margin-top: 0; }
+        .cred-value { background: #0A0E27; border: 1px solid #2D3A52; padding: 0.8rem; border-radius: 8px; color: #FF8C00; font-weight: 700; font-family: 'Courier New', monospace; font-size: 0.9rem; word-break: break-all; }
+        .cred-password { color: #4CAF50; }
+        .cred-hint { color: #F44336; font-size: 0.85rem; margin-top: 1rem; font-weight: 600; }
+        
         .modal-wide { max-width: 100%; }
       `}</style>
 
@@ -743,9 +789,9 @@ export default function App() {
           </div>
 
           <div className="coming-soon-container">
-            <div className="coming-soon-icon">🚀</div>
-            <h3>¡Próximamente!</h3>
-            <p>Estamos trabajando en opciones premium exclusivas para llevar tu experiencia al siguiente nivel.</p>
+            <div className="coming-soon-icon">💎</div>
+            <h3>Plan Premium - $9.000/mes</h3>
+            <p>Acceso ilimitado a todas las funciones premium</p>
             
             <div className="coming-soon-features">
               <div className="feature-item">
@@ -770,7 +816,13 @@ export default function App() {
               </div>
             </div>
 
-            <p className="coming-soon-text">Te notificaremos cuando esté disponible</p>
+            <button 
+              className="btn-primary" 
+              onClick={simulatePremiumPurchase}
+              style={{marginTop: '1.5rem', background: 'linear-gradient(135deg, #0D47A1, #FF8C00)'}}
+            >
+              💳 Comprar Premium - $9.000
+            </button>
           </div>
         </div>
       </div>
@@ -1326,12 +1378,54 @@ export default function App() {
           </button>
         </div>
       </div>
+
+      {/* MODAL COMPRA EXITOSA - CREDENCIALES */}
+      <div className={`modal-overlay ${purchaseModalOpen ? 'active' : ''}`}>
+        <div className="modal-content">
+          <div className="modal-header">
+            <h2>🎉 ¡Compra Exitosa!</h2>
+            <button className="close-btn" onClick={() => {setPurchaseModalOpen(false); setPurchaseCredentials(null);}}>×</button>
+          </div>
+
+          <div className="modal-body">
+            {purchaseCredentials && (
+              <div className="purchase-success">
+                <div className="success-icon">✅</div>
+                <h3>¡Bienvenido al Plan Premium!</h3>
+                
+                <div className="credentials-box">
+                  <p className="cred-label">📧 Email de acceso:</p>
+                  <div className="cred-value">{purchaseCredentials.email}</div>
+                  
+                  <p className="cred-label">🔐 Contraseña temporal:</p>
+                  <div className="cred-value cred-password">{purchaseCredentials.password}</div>
+                  
+                  <p className="cred-hint">
+                    ⚠️ Guarda estas credenciales. Puedes cambiar la contraseña en Configuración después de iniciar sesión.
+                  </p>
+                </div>
+
+                <button 
+                  className="btn-primary"
+                  onClick={() => {
+                    setPurchaseModalOpen(false);
+                    setPurchaseCredentials(null);
+                    // Mostrar login con el email pre-llenado
+                    setIsLoggedIn(false);
+                    setEmail(purchaseCredentials.email);
+                  }}
+                  style={{marginTop: '1rem'}}
+                >
+                  🔐 Iniciar Sesión Ahora
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
     </>
   );
 }
-
-
-export const styles = `
   .cost-calculator {
     display: flex;
     flex-direction: column;
