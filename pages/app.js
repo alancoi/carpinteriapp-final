@@ -10,6 +10,10 @@ export default function App() {
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [chatModalOpen, setChatModalOpen] = useState(false);
   const [projectsModalOpen, setProjectsModalOpen] = useState(false);
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [passwordMessage, setPasswordMessage] = useState('');
   const [projects, setProjects] = useState([]);
   const [selectedProject, setSelectedProject] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
@@ -124,6 +128,30 @@ export default function App() {
     };
 
     setProjects([newProject, ...projects]);
+  };
+
+  const handleChangePassword = () => {
+    if (!newPassword || !confirmPassword) {
+      setPasswordMessage('Por favor completa todos los campos');
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordMessage('Las contraseñas no coinciden');
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordMessage('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    
+    setPassword(newPassword);
+    setPasswordMessage('✓ Contraseña actualizada correctamente');
+    setNewPassword('');
+    setConfirmPassword('');
+    
+    setTimeout(() => {
+      setPasswordMessage('');
+    }, 2000);
   };
 
   if (!isLoggedIn) {
@@ -375,6 +403,35 @@ export default function App() {
         .btn-delete { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #F44336, #d32f2f); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 1rem; }
         .btn-delete:hover { transform: translateY(-2px); }
         
+        /* SETTINGS STYLES */
+        .settings-container { display: flex; flex-direction: column; gap: 1.5rem; }
+        .settings-section { background: linear-gradient(135deg, rgba(13, 71, 161, 0.1) 0%, rgba(13, 71, 161, 0.05) 100%); border: 1px solid #0D47A1; border-radius: 12px; padding: 1.5rem; border-left: 4px solid #FF8C00; }
+        .settings-section h3 { margin: 0 0 1.2rem 0; color: #FF8C00; font-size: 1.1rem; }
+        
+        .settings-item { margin-bottom: 1rem; }
+        .settings-item label { display: block; color: #A0AEC0; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .settings-value { color: #FFFFFF; font-size: 1rem; padding: 0.8rem; background: rgba(10, 14, 39, 0.5); border-radius: 8px; }
+        
+        .plan-badge { display: inline-block; background: linear-gradient(135deg, #0D47A1, #FF8C00); padding: 0.5rem 1rem; border-radius: 20px; font-weight: 700; }
+        
+        .settings-input-group { margin-bottom: 1rem; }
+        .settings-input-group label { display: block; color: #A0AEC0; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .settings-input { width: 100%; padding: 0.8rem; background: #1F2A47; border: 1px solid #2D3A52; color: #FFFFFF; border-radius: 8px; font-size: 0.9rem; transition: all 0.3s; }
+        .settings-input:focus { outline: none; border-color: #FF8C00; box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2); }
+        
+        .settings-message { padding: 0.8rem 1rem; border-radius: 8px; font-weight: 600; margin-bottom: 1rem; }
+        .settings-message.success { background: rgba(76, 175, 80, 0.2); border: 1px solid #4CAF50; color: #4CAF50; }
+        .settings-message.error { background: rgba(244, 67, 54, 0.2); border: 1px solid #F44336; color: #F44336; }
+        
+        .info-section { background: linear-gradient(135deg, rgba(255, 140, 0, 0.1) 0%, rgba(255, 140, 0, 0.05) 100%); border: 1px solid #FF8C00; }
+        .info-box { background: rgba(10, 14, 39, 0.5); padding: 1rem; border-radius: 8px; }
+        .info-box p { margin: 0.5rem 0; color: #A0AEC0; font-size: 0.9rem; }
+        .info-box strong { color: #FF8C00; }
+        
+        .danger-section { background: linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%); border: 1px solid #F44336; }
+        .btn-danger { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #F44336, #d32f2f); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
+        .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(244, 67, 54, 0.3); }
+        
         .modal-wide { max-width: 100%; }
       `}</style>
 
@@ -426,7 +483,7 @@ export default function App() {
                 <p className="menu-desc">Historial de trabajos</p>
               </div>
 
-              <div className="menu-card">
+              <div className="menu-card" onClick={() => setSettingsModalOpen(true)} style={{cursor: 'pointer'}}>
                 <span className="menu-icon">⚙️</span>
                 <div className="menu-title">Configuración</div>
                 <p className="menu-desc">Tu perfil y preferencias</p>
@@ -838,6 +895,103 @@ export default function App() {
           </div>
 
           <button className="btn-primary" onClick={() => {setProjectsModalOpen(false); setSelectedProject(null);}}>
+            Cerrar
+          </button>
+        </div>
+      </div>
+
+      {/* MODAL CONFIGURACIÓN */}
+      <div className={`modal-overlay ${settingsModalOpen ? 'active' : ''}`}>
+        <div className="modal-content modal-wide">
+          <div className="modal-header">
+            <h2>⚙️ Configuración</h2>
+            <button className="close-btn" onClick={() => setSettingsModalOpen(false)}>×</button>
+          </div>
+
+          <div className="modal-body">
+            <div className="settings-container">
+              {/* INFORMACIÓN DE CUENTA */}
+              <div className="settings-section">
+                <h3>👤 Información de Cuenta</h3>
+                <div className="settings-item">
+                  <label>Email</label>
+                  <div className="settings-value">{email}</div>
+                </div>
+                <div className="settings-item">
+                  <label>Plan</label>
+                  <div className="settings-value plan-badge">Plan Básico</div>
+                </div>
+                <div className="settings-item">
+                  <label>Proyectos Guardados</label>
+                  <div className="settings-value">{projects.length} proyectos</div>
+                </div>
+              </div>
+
+              {/* CAMBIAR CONTRASEÑA */}
+              <div className="settings-section">
+                <h3>🔐 Cambiar Contraseña</h3>
+                
+                <div className="settings-input-group">
+                  <label>Nueva Contraseña</label>
+                  <input
+                    type="password"
+                    placeholder="Ej: MiNuevaContraseña123"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="settings-input"
+                  />
+                </div>
+
+                <div className="settings-input-group">
+                  <label>Confirmar Contraseña</label>
+                  <input
+                    type="password"
+                    placeholder="Repite tu contraseña"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="settings-input"
+                  />
+                </div>
+
+                {passwordMessage && (
+                  <div className={`settings-message ${passwordMessage.includes('✓') ? 'success' : 'error'}`}>
+                    {passwordMessage}
+                  </div>
+                )}
+
+                <button className="btn-primary" onClick={handleChangePassword} style={{marginTop: '1rem'}}>
+                  🔒 Actualizar Contraseña
+                </button>
+              </div>
+
+              {/* INFORMACIÓN */}
+              <div className="settings-section info-section">
+                <h3>ℹ️ Información</h3>
+                <div className="info-box">
+                  <p><strong>Versión:</strong> 1.0.0</p>
+                  <p><strong>Creador:</strong> CarpinteriAPP Team</p>
+                  <p><strong>Soporte:</strong> support@carpinteriapp.com</p>
+                </div>
+              </div>
+
+              {/* CERRAR SESIÓN */}
+              <div className="settings-section danger-section">
+                <button 
+                  className="btn-danger"
+                  onClick={() => {
+                    setIsLoggedIn(false);
+                    setEmail('');
+                    setPassword('');
+                    setSettingsModalOpen(false);
+                  }}
+                >
+                  🚪 Cerrar Sesión
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <button className="btn-primary" onClick={() => setSettingsModalOpen(false)}>
             Cerrar
           </button>
         </div>
