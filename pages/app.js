@@ -1426,12 +1426,7 @@ export default function App() {
     </>
   );
 }
-  .cost-calculator {
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-  }
-
+  
   .cost-section {
     background: #f8f9fa;
     padding: 1.5rem;
