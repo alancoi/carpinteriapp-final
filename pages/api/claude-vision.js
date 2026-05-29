@@ -15,7 +15,7 @@ async function analyzeWithModel(imageBase64) {
   const apiKey = process.env.CLAUDE_API_KEY;
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 90000); // 90 segundos
+  const timeout = setTimeout(() => controller.abort(), 60000);
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -27,7 +27,7 @@ async function analyzeWithModel(imageBase64) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 4000,
+        max_tokens: 2500,
         messages: [
           {
             role: 'user',
@@ -51,45 +51,33 @@ SI inclinado: "📐 Foto inclinada. Tomala de frente."
 SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden:
 
 ## 1. DIMENSIONES (cm)
-Tabla simple: Ancho | Alto | Profundidad | Espesor | Detalles
+Tabla: Medida | Valor
+Ancho | XX cm
+Alto | XX cm
+Profundidad | XX cm
+Espesor placa | XX mm
+(+ detalles importantes de componentes si tiene)
 
-## 2. PLANO ASCII (compacto y claro)
-Diagrama frontal SIMPLE en 10-15 lineas max con medidas principales
+## 2. PLANO ASCII (compacto, 8-12 lineas)
+Diagrama frontal simple y claro con medidas principales
 
 ## 3. CORTES PLACA 275x183cm
 Tabla: Pieza | Cantidad | Largo | Ancho | cm2
-Calculo: Area total | Area usada | Desperdicio (cm2 y %)
+(solo las piezas principales)
+Calculo: Area total | Area usada | Desperdicio % y cm2
 
 ## 4. MATERIALES EXACTOS
-- Tableros: tipo, cantidad, medidas
-- Herrajes: tipo, cantidad (correderas, jaladores, etc)
-- Tornillos: tipo exacto con medida (ej: 7x50mm), cantidad
-- Clavos: tipo, cantidad
-- Cantos: material, cantidad ml
-- Adhesivos: tipo, cantidad
+Tableros: tipo, cantidad, medidas exactas
+Herrajes: tipo y cantidad (correderas, jaladores, bisagras, etc)
+Tornillos: tipo exacto con medida (ej: confirmat 7x50mm), cantidad
+Clavos/Remaches: tipo, cantidad
+Cantos: material, cantidad total ml
+Adhesivos: tipo, cantidad
 
-## 5. HERRAMIENTAS NECESARIAS
-Lista simple: sierra, taladro, destornillador, nivel, metro, lija, etc
+## 5. NOTAS IMPORTANTES
+3-5 puntos criticos: cuidados, tolerancias, verificaciones, ensambles criticos, cualidades especiales del material
 
-## 6. PASOS DE ARMADO (5-7 pasos)
-Formato: PASO N - Nombre | Tiempo | Instrucciones claras
-
-## 7. ACABADO FINAL
-Recomendacion: Pintura/barniz/sellador, aplicacion, secado
-
-## 8. NIVEL DIFICULTAD
-Facil / Medio / Dificil + Justificacion (ej: "Medio: requiere taladro y medidas exactas")
-
-## 9. NOTAS IMPORTANTES
-3-5 puntos: cuidados, esperas, verificaciones criticas
-
-## 10. ALTERNATIVAS DE MATERIALES
-2-3 opciones: "Se puede reemplazar X por Y si..."
-
-## 11. TIEMPO TOTAL
-Suma: preparacion + armado + acabado = HORAS TOTALES
-
-Responde COMPLETO, NO abrevies. Se conciso pero detallado.`,
+Se conciso pero EXACTO. Carpinteros profesionales entienden abbreviaciones.`,
               },
             ],
           },
