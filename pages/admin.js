@@ -5,7 +5,10 @@ export default function Admin() {
   const [adminPassword, setAdminPassword] = useState('');
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(false);
   const [activeTab, setActiveTab] = useState('usuarios');
-  const [usuarios, setUsuarios] = useState([]);
+  const [createUserModal, setCreateUserModal] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPlan, setNewUserPlan] = useState('basico');
+  const [createUserMessage, setCreateUserMessage] = useState('');
   const [contactos, setContactos] = useState([]);
   const [calificaciones, setCalificaciones] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -43,6 +46,45 @@ export default function Admin() {
       console.error('Error cargando datos:', error);
     }
     setLoading(false);
+  };
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    
+    if (!newUserEmail.trim()) {
+      setCreateUserMessage('Por favor ingresa un email');
+      return;
+    }
+
+    try {
+      const response = await fetch('/api/auth/auto-register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: newUserEmail,
+          plan: newUserPlan,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setCreateUserMessage(`✓ Usuario creado! Email: ${data.user.email} | Contraseña: ${data.user.tempPassword}`);
+        setNewUserEmail('');
+        setNewUserPlan('basico');
+        
+        setTimeout(() => {
+          setCreateUserMessage('');
+          setCreateUserModal(false);
+          loadAllData();
+        }, 2000);
+      } else {
+        setCreateUserMessage('❌ Error: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setCreateUserMessage('❌ Error creando usuario');
+    }
   };
 
   if (!isAdminLoggedIn) {
@@ -186,7 +228,23 @@ export default function Admin() {
               {/* USUARIOS */}
               {activeTab === 'usuarios' && (
                 <div>
-                  <h2 style={{ color: '#FF8C00', marginTop: 0 }}>Usuarios Registrados</h2>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                    <h2 style={{ color: '#FF8C00', margin: 0 }}>Usuarios Registrados ({usuarios.length})</h2>
+                    <button
+                      onClick={() => setCreateUserModal(true)}
+                      style={{
+                        padding: '0.8rem 1.2rem',
+                        background: 'linear-gradient(135deg, #4CAF50, #45a049)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        fontWeight: '700',
+                      }}
+                    >
+                      ➕ Crear Usuario
+                    </button>
+                  </div>
                   <div style={{ overflowX: 'auto' }}>
                     <table style={{
                       width: '100%',
@@ -280,6 +338,125 @@ export default function Admin() {
           )}
         </div>
       </div>
+
+      {/* MODAL CREAR USUARIO */}
+      {createUserModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #1F2A47 0%, #141B33 100%)',
+            padding: '2rem',
+            borderRadius: '15px',
+            border: '1px solid #2D3A52',
+            width: '90%',
+            maxWidth: '400px',
+          }}>
+            <h2 style={{ color: '#FF8C00', marginTop: 0 }}>➕ Crear Usuario Manual</h2>
+            
+            <form onSubmit={handleCreateUser}>
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', color: '#A0AEC0', marginBottom: '0.5rem', fontWeight: '600' }}>Email</label>
+                <input
+                  type="email"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  placeholder="usuario@email.com"
+                  style={{
+                    width: '100%',
+                    padding: '0.8rem',
+                    background: '#0A0E27',
+                    border: '1px solid #2D3A52',
+                    color: '#fff',
+                    borderRadius: '8px',
+                    boxSizing: 'border-box',
+                  }}
+                />
+              </div>
+
+              <div style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', color: '#A0AEC0', marginBottom: '0.5rem', fontWeight: '600' }}>Plan</label>
+                <select
+                  value={newUserPlan}
+                  onChange={(e) => setNewUserPlan(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '0.8rem',
+                    background: '#0A0E27',
+                    border: '1px solid #2D3A52',
+                    color: '#fff',
+                    borderRadius: '8px',
+                    boxSizing: 'border-box',
+                  }}
+                >
+                  <option value="basico">Básico</option>
+                  <option value="premium">Premium</option>
+                </select>
+              </div>
+
+              {createUserMessage && (
+                <div style={{
+                  padding: '1rem',
+                  background: createUserMessage.includes('✓') ? 'rgba(76, 175, 80, 0.2)' : 'rgba(244, 67, 54, 0.2)',
+                  border: `1px solid ${createUserMessage.includes('✓') ? '#4CAF50' : '#F44336'}`,
+                  color: createUserMessage.includes('✓') ? '#4CAF50' : '#F44336',
+                  borderRadius: '8px',
+                  marginBottom: '1rem',
+                  fontSize: '0.85rem',
+                  wordBreak: 'break-all',
+                }}>
+                  {createUserMessage}
+                </div>
+              )}
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                <button
+                  type="submit"
+                  style={{
+                    padding: '0.8rem',
+                    background: 'linear-gradient(135deg, #4CAF50, #45a049)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: '700',
+                  }}
+                >
+                  ✓ Crear
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCreateUserModal(false);
+                    setNewUserEmail('');
+                    setCreateUserMessage('');
+                  }}
+                  style={{
+                    padding: '0.8rem',
+                    background: '#F44336',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    fontWeight: '700',
+                  }}
+                >
+                  ✕ Cancelar
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }

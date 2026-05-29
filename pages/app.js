@@ -817,9 +817,15 @@ export default function App() {
             </div>
 
             <button 
+              type="button"
               className="btn-primary" 
               onClick={simulatePremiumPurchase}
-              style={{marginTop: '1.5rem', background: 'linear-gradient(135deg, #0D47A1, #FF8C00)'}}
+              style={{
+                marginTop: '1.5rem', 
+                background: 'linear-gradient(135deg, #0D47A1, #FF8C00)',
+                width: '100%',
+                pointerEvents: 'auto'
+              }}
             >
               💳 Comprar Premium - $9.000
             </button>
