@@ -8,6 +8,10 @@ export default function App() {
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [costModalOpen, setCostModalOpen] = useState(false);
+  const [chatModalOpen, setChatModalOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
   const [preview, setPreview] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -72,10 +76,36 @@ export default function App() {
 
   const handleFeedback = (isUseful) => {
     setFeedback(isUseful ? 'positive' : 'negative');
-    // Aquí guardarías el feedback en BD para mejorar
     setTimeout(() => {
       setFeedback(null);
     }, 2000);
+  };
+
+  const handleChatSend = async () => {
+    if (!chatInput.trim()) return;
+
+    const userMessage = { role: 'user', text: chatInput };
+    setChatMessages([...chatMessages, userMessage]);
+    setChatInput('');
+    setChatLoading(true);
+
+    try {
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: chatInput,
+          previousMessages: chatMessages,
+        }),
+      });
+
+      const data = await response.json();
+      setChatMessages(prev => [...prev, { role: 'assistant', text: data.response }]);
+    } catch (error) {
+      setChatMessages(prev => [...prev, { role: 'assistant', text: '❌ Error conectando. Intenta de nuevo.' }]);
+    } finally {
+      setChatLoading(false);
+    }
   };
 
   if (!isLoggedIn) {
@@ -270,6 +300,38 @@ export default function App() {
         .result-value-big { font-size: 1.8rem; color: #FF8C00; font-weight: 800; font-family: 'Courier New', monospace; }
         .result-profit { font-size: 1.4rem; color: #4CAF50; font-weight: 800; font-family: 'Courier New', monospace; }
         
+        /* CHAT STYLES */
+        .chat-modal { display: flex; flex-direction: column; height: 80vh; padding: 0; }
+        .chat-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
+        .chat-welcome { text-align: center; padding: 2rem 1rem; }
+        .chat-welcome-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .chat-welcome h3 { color: #FF8C00; margin-bottom: 0.5rem; font-size: 1.2rem; }
+        .chat-welcome p { color: #A0AEC0; margin-bottom: 0.8rem; font-size: 0.9rem; }
+        .chat-welcome ul { list-style: none; text-align: left; display: inline-block; color: #A0AEC0; font-size: 0.85rem; }
+        .chat-welcome li { margin: 0.5rem 0; }
+        
+        .chat-message { display: flex; margin-bottom: 0.5rem; }
+        .chat-message.user { justify-content: flex-end; }
+        .chat-message.assistant { justify-content: flex-start; }
+        .chat-text { max-width: 80%; padding: 0.8rem 1rem; border-radius: 12px; word-wrap: break-word; line-height: 1.5; }
+        .chat-message.user .chat-text { background: linear-gradient(135deg, #0D47A1, #FF8C00); color: #FFFFFF; border-radius: 12px 2px 12px 12px; }
+        .chat-message.assistant .chat-text { background: rgba(13, 71, 161, 0.2); color: #A0AEC0; border: 1px solid #0D47A1; border-radius: 2px 12px 12px 12px; }
+        
+        .chat-typing { display: flex; gap: 4px; padding: 0.8rem 1rem; }
+        .chat-typing span { width: 8px; height: 8px; border-radius: 50%; background: #FF8C00; animation: typing 1.4s infinite; }
+        .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
+        .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typing { 0%, 60%, 100% { opacity: 0.3; } 30% { opacity: 1; } }
+        
+        .chat-input-container { display: flex; gap: 0.8rem; padding: 1rem; background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%); border-top: 1px solid #2D3A52; }
+        .chat-input { flex: 1; padding: 0.8rem; background: #0A0E27; border: 1px solid #2D3A52; color: #FFFFFF; border-radius: 8px; font-size: 0.9rem; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        .chat-input:focus { outline: none; border-color: #FF8C00; box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2); }
+        .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
+        .chat-send-btn { padding: 0.8rem 1.2rem; background: linear-gradient(135deg, #0D47A1, #FF8C00); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s; }
+        .chat-send-btn:hover:not(:disabled) { transform: scale(1.05); }
+        .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        
         .modal-wide { max-width: 100%; }
       `}</style>
 
@@ -309,7 +371,7 @@ export default function App() {
                 <p className="menu-desc">Presupuestos y ganancias automáticos</p>
               </div>
 
-              <div className="menu-card">
+              <div className="menu-card" onClick={() => setChatModalOpen(true)} style={{cursor: 'pointer'}}>
                 <span className="menu-icon">💬</span>
                 <div className="menu-title">Chat 24/7 IA</div>
                 <p className="menu-desc">Asesor disponible siempre</p>
@@ -614,6 +676,65 @@ export default function App() {
           <button className="btn-primary" onClick={() => setCostModalOpen(false)}>
             Cerrar
           </button>
+        </div>
+      </div>
+
+      {/* MODAL CHAT 24/7 */}
+      <div className={`modal-overlay ${chatModalOpen ? 'active' : ''}`}>
+        <div className="modal-content chat-modal">
+          <div className="modal-header">
+            <h2>💬 Chat IA 24/7</h2>
+            <button className="close-btn" onClick={() => {setChatModalOpen(false); setChatMessages([]);}}>×</button>
+          </div>
+
+          <div className="chat-container">
+            <div className="chat-messages">
+              {chatMessages.length === 0 && (
+                <div className="chat-welcome">
+                  <div className="chat-welcome-icon">🤖</div>
+                  <h3>Hola! Soy tu Asesor IA</h3>
+                  <p>Puedo ayudarte con:</p>
+                  <ul>
+                    <li>💡 Consultas de carpintería</li>
+                    <li>📐 Diseño de muebles</li>
+                    <li>💰 Presupuestos</li>
+                    <li>🔧 Técnicas y materiales</li>
+                  </ul>
+                </div>
+              )}
+              {chatMessages.map((msg, idx) => (
+                <div key={idx} className={`chat-message ${msg.role}`}>
+                  <div className="chat-text">{msg.text}</div>
+                </div>
+              ))}
+              {chatLoading && (
+                <div className="chat-message assistant">
+                  <div className="chat-typing">
+                    <span></span><span></span><span></span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="chat-input-container">
+              <input
+                type="text"
+                className="chat-input"
+                placeholder="Escribe tu pregunta..."
+                value={chatInput}
+                onChange={(e) => setChatInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleChatSend()}
+                disabled={chatLoading}
+              />
+              <button
+                className="chat-send-btn"
+                onClick={handleChatSend}
+                disabled={chatLoading || !chatInput.trim()}
+              >
+                ✈️
+              </button>
+            </div>
+          </div>
         </div>
       </div>
     </>
