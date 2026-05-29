@@ -52,8 +52,8 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Error creando usuario:', error);
     return res.status(500).json({
-      error: 'Error creando usuario',
-      details: error.message,
+      error: error.message || 'Error creando usuario',
+      details: error.toString(),
     });
   }
 }
