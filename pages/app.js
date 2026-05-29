@@ -13,8 +13,10 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
   const [costMaterials, setCostMaterials] = useState('');
-  const [costLabor, setCostLabor] = useState('');
-  const [salePrice, setSalePrice] = useState('');
+  const [costHours, setCostHours] = useState('');
+  const [costHourlyRate, setCostHourlyRate] = useState('');
+  const [costOperative, setCostOperative] = useState('');
+  const [desiredMargin, setDesiredMargin] = useState(50);
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -242,6 +244,16 @@ export default function App() {
         .cost-table tr.cost-total { background: rgba(255, 140, 0, 0.15); }
         .cost-table tr.cost-total td { font-weight: 700; color: #FF8C00; padding: 1rem 0.8rem; }
         
+        .recommendations { margin-top: 1rem; }
+        .recommendation-list { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        .recommendation-item { padding: 1rem; border-radius: 8px; border-left: 4px solid #2D3A52; }
+        .recommendation-item.basic { border-left-color: #999; background: rgba(100, 100, 100, 0.1); }
+        .recommendation-item.normal { border-left-color: #0D47A1; background: rgba(13, 71, 161, 0.1); }
+        .recommendation-item.premium { border-left-color: #FF8C00; background: rgba(255, 140, 0, 0.1); }
+        .rec-title { font-weight: 700; color: #FFFFFF; margin-bottom: 0.3rem; font-size: 0.95rem; }
+        .rec-desc { color: #A0AEC0; font-size: 0.8rem; margin-bottom: 0.5rem; }
+        .rec-margin { color: #FF8C00; font-weight: 600; font-size: 0.85rem; }
+        
         .modal-wide { max-width: 100%; }
       `}</style>
 
@@ -430,7 +442,7 @@ export default function App() {
             <div className="cost-calculator">
               {/* INPUTS */}
               <div className="cost-section">
-                <h3>📝 Datos del Presupuesto</h3>
+                <h3>📝 Datos del Proyecto</h3>
                 
                 <div className="cost-group">
                   <label>💵 Costo Materiales (ARS)</label>
@@ -444,23 +456,23 @@ export default function App() {
                 </div>
 
                 <div className="cost-row">
-                  <div className="cost-group half">
+                  <div className="cost-group">
                     <label>⏱️ Horas de Trabajo</label>
                     <input 
                       type="number" 
                       placeholder="Ej: 8"
-                      value={costLabor}
-                      onChange={(e) => setCostLabor(e.target.value)}
+                      value={costHours}
+                      onChange={(e) => setCostHours(e.target.value)}
                       className="cost-input"
                     />
                   </div>
-                  <div className="cost-group half">
+                  <div className="cost-group">
                     <label>💼 Tarifa/Hora (ARS)</label>
                     <input 
                       type="number" 
                       placeholder="Ej: 500"
-                      value={salePrice}
-                      onChange={(e) => setSalePrice(e.target.value)}
+                      value={costHourlyRate}
+                      onChange={(e) => setCostHourlyRate(e.target.value)}
                       className="cost-input"
                     />
                   </div>
@@ -471,62 +483,120 @@ export default function App() {
                   <input 
                     type="number" 
                     placeholder="Ej: 1000 (transporte, embalaje)"
-                    value={costMaterials ? '' : ''}
-                    onChange={(e) => setCostMaterials(e.target.value)}
+                    value={costOperative}
+                    onChange={(e) => setCostOperative(e.target.value)}
                     className="cost-input"
                   />
                 </div>
               </div>
 
-              {/* RESULTADOS */}
-              <div className="cost-section">
-                <h3>💡 Opciones de Precio</h3>
-                <div className="price-options">
-                  <div className="price-card basic">
-                    <div className="price-level">BÁSICO</div>
-                    <div className="price-margin">30% margen</div>
-                    <div className="price-value">$15.500</div>
-                    <div className="price-profit">+4.500 ganancia</div>
-                  </div>
+              {/* DESGLOSE DE COSTOS */}
+              {costMaterials || costHours || costOperative ? (
+                <div className="cost-section">
+                  <h3>📊 Desglose de Costos</h3>
+                  <table className="cost-table">
+                    <tbody>
+                      <tr>
+                        <td>Materiales</td>
+                        <td className="cost-value">${Number(costMaterials || 0).toLocaleString('es-AR')}</td>
+                      </tr>
+                      {costHours && costHourlyRate && (
+                        <tr>
+                          <td>Mano de obra ({costHours}h × ${costHourlyRate}/h)</td>
+                          <td className="cost-value">${(Number(costHours || 0) * Number(costHourlyRate || 0)).toLocaleString('es-AR')}</td>
+                        </tr>
+                      )}
+                      {costOperative && (
+                        <tr>
+                          <td>Gastos operativos</td>
+                          <td className="cost-value">${Number(costOperative || 0).toLocaleString('es-AR')}</td>
+                        </tr>
+                      )}
+                      <tr className="cost-total">
+                        <td>COSTO TOTAL</td>
+                        <td className="cost-value">${(Number(costMaterials || 0) + (Number(costHours || 0) * Number(costHourlyRate || 0)) + Number(costOperative || 0)).toLocaleString('es-AR')}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              ) : null}
 
-                  <div className="price-card normal">
-                    <div className="price-level">NORMAL</div>
-                    <div className="price-margin">50% margen</div>
-                    <div className="price-value">$19.000</div>
-                    <div className="price-profit">+8.000 ganancia</div>
-                  </div>
+              {/* OPCIONES DE PRECIO */}
+              {costMaterials ? (
+                <div className="cost-section">
+                  <h3>💡 Opciones de Precio por Margen</h3>
+                  <div className="price-options">
+                    {/* BÁSICO - 30% */}
+                    {(() => {
+                      const total = Number(costMaterials || 0) + (Number(costHours || 0) * Number(costHourlyRate || 0)) + Number(costOperative || 0);
+                      const basicPrice = total * 1.30;
+                      const basicProfit = basicPrice - total;
+                      return (
+                        <div className="price-card basic">
+                          <div className="price-level">BÁSICO</div>
+                          <div className="price-margin">30% margen</div>
+                          <div className="price-value">${basicPrice.toLocaleString('es-AR', {maximumFractionDigits: 0})}</div>
+                          <div className="price-profit">+${basicProfit.toLocaleString('es-AR', {maximumFractionDigits: 0})} ganancia</div>
+                        </div>
+                      );
+                    })()}
 
-                  <div className="price-card premium">
-                    <div className="price-level">PREMIUM</div>
-                    <div className="price-margin">70% margen</div>
-                    <div className="price-value">$22.500</div>
-                    <div className="price-profit">+11.500 ganancia</div>
+                    {/* NORMAL - 50% */}
+                    {(() => {
+                      const total = Number(costMaterials || 0) + (Number(costHours || 0) * Number(costHourlyRate || 0)) + Number(costOperative || 0);
+                      const normalPrice = total * 1.50;
+                      const normalProfit = normalPrice - total;
+                      return (
+                        <div className="price-card normal">
+                          <div className="price-level">NORMAL</div>
+                          <div className="price-margin">50% margen</div>
+                          <div className="price-value">${normalPrice.toLocaleString('es-AR', {maximumFractionDigits: 0})}</div>
+                          <div className="price-profit">+${normalProfit.toLocaleString('es-AR', {maximumFractionDigits: 0})} ganancia</div>
+                        </div>
+                      );
+                    })()}
+
+                    {/* PREMIUM - 70% */}
+                    {(() => {
+                      const total = Number(costMaterials || 0) + (Number(costHours || 0) * Number(costHourlyRate || 0)) + Number(costOperative || 0);
+                      const premiumPrice = total * 1.70;
+                      const premiumProfit = premiumPrice - total;
+                      return (
+                        <div className="price-card premium">
+                          <div className="price-level">PREMIUM</div>
+                          <div className="price-margin">70% margen</div>
+                          <div className="price-value">${premiumPrice.toLocaleString('es-AR', {maximumFractionDigits: 0})}</div>
+                          <div className="price-profit">+${premiumProfit.toLocaleString('es-AR', {maximumFractionDigits: 0})} ganancia</div>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
-              </div>
+              ) : null}
 
-              {/* DESGLOSE */}
-              <div className="cost-section">
-                <h3>📊 Desglose de Costos</h3>
-                <table className="cost-table">
-                  <tr>
-                    <td>Materiales</td>
-                    <td className="cost-value">$5.000</td>
-                  </tr>
-                  <tr>
-                    <td>Mano de obra (8h × $500)</td>
-                    <td className="cost-value">$4.000</td>
-                  </tr>
-                  <tr>
-                    <td>Gastos operativos</td>
-                    <td className="cost-value">$1.000</td>
-                  </tr>
-                  <tr className="cost-total">
-                    <td>COSTO TOTAL</td>
-                    <td className="cost-value">$10.000</td>
-                  </tr>
-                </table>
-              </div>
+              {/* RECOMENDACIONES */}
+              {costMaterials ? (
+                <div className="cost-section recommendations">
+                  <h3>📌 Recomendaciones de Precio</h3>
+                  <div className="recommendation-list">
+                    <div className="recommendation-item basic">
+                      <div className="rec-title">🏠 Trabajo Básico</div>
+                      <div className="rec-desc">Mobiliario simple, sin detalles</div>
+                      <div className="rec-margin">Margen recomendado: 30%</div>
+                    </div>
+                    <div className="recommendation-item normal">
+                      <div className="rec-title">🏢 Trabajo Normal</div>
+                      <div className="rec-desc">Muebles estándar, detalles regulares</div>
+                      <div className="rec-margin">Margen recomendado: 50%</div>
+                    </div>
+                    <div className="recommendation-item premium">
+                      <div className="rec-title">✨ Trabajo Premium</div>
+                      <div className="rec-desc">Diseño personalizado, alta calidad</div>
+                      <div className="rec-margin">Margen recomendado: 70%</div>
+                    </div>
+                  </div>
+                </div>
+              ) : null}
             </div>
           </div>
 
