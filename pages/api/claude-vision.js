@@ -52,55 +52,55 @@ SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden (TODO EN ESPAÑOL, sin p
 
 ## 1. DIMENSIONES (cm)
 
-Crea tabla con bordes Unicode como esta (copiar exacto):
-╔════════════════════╦═════════════════╗
-║ Medida             ║ Valor           ║
-╠════════════════════╬═════════════════╣
-║ Ancho              ║ XX cm           ║
-║ Alto               ║ XX cm           ║
-║ Profundidad        ║ XX cm           ║
-║ Espesor placa      ║ XX mm           ║
-╚════════════════════╩═════════════════╝
+╔═══════════════════╦═══════════════╗
+║ Medida            ║ Valor         ║
+╠═══════════════════╬═══════════════╣
+║ Ancho             ║ XX cm         ║
+║ Alto              ║ XX cm         ║
+║ Profundidad       ║ XX cm         ║
+║ Espesor placa     ║ XX mm         ║
+╚═══════════════════╩═══════════════╝
 
 *Componentes:* lista de partes principales
 
-## 2. PLANO ASCII (compacto, 8-12 lineas)
-Diagrama frontal simple y claro con medidas principales
+## 2. PLANO ASCII (8-12 lineas max)
+Diagrama frontal simple con medidas principales
 
 ## 3. CORTES PLACA 275x183cm
 
-Tabla con bordes Unicode:
-╔════════════════╦══════════╦════════╦═══════╦═════════╗
-║ Pieza          ║ Cantidad ║ Largo  ║ Ancho ║ cm²     ║
-╠════════════════╬══════════╬════════╬═══════╬═════════╣
-║ ...            ║ ...      ║ ...    ║ ...   ║ ...     ║
-╚════════════════╩══════════╩════════╩═══════╩═════════╝
+╔═══════════════╦════╦═══════╦═══════╦═════════╗
+║ Pieza         ║ Qty║ Largo ║ Ancho ║ cm²     ║
+╠═══════════════╬════╬═══════╬═══════╬═════════╣
+║ Tapa mesa     ║ 1  ║ 140   ║ 70    ║ 9.800   ║
+║ ...           ║ .. ║ ...   ║ ...   ║ ...     ║
+╚═══════════════╩════╩═══════╩═══════╩═════════╝
 
-Luego tabla de calculo:
-╔═══════════════════════╦═══════════╗
-║ Concepto              ║ Valor     ║
-╠═══════════════════════╬═══════════╣
-║ Area total placa      ║ XX cm²    ║
-║ Area usada            ║ XX cm²    ║
-║ Desperdicio % y cm²   ║ XX%       ║
-╚═══════════════════════╩═══════════╝
+Calculo desperdicio:
+╔═════════════════════╦══════════════╗
+║ Concepto            ║ Valor        ║
+╠═════════════════════╬══════════════╣
+║ Area total placa    ║ 50.325 cm²   ║
+║ Area usada          ║ XX cm²       ║
+║ Desperdicio         ║ XX% / XX cm² ║
+╚═════════════════════╩══════════════╝
 
 ## 4. MATERIALES EXACTOS
-Tableros: tipo, cantidad, medidas exactas
+Tableros: tipo, cantidad, medidas
 Herrajes: tipo y cantidad (pines, tacos, etc)
-Tornillos: tipo exacto con medida (ej: confirmat 7x50mm), cantidad
+Tornillos: tipo con medida exacta, cantidad
 Clavos: tipo, cantidad
-Cantos: material, cantidad total ml
+Cantos: material, cantidad ml
 Adhesivos: tipo, cantidad
 
 ## 5. NOTAS IMPORTANTES
-3-5 puntos criticos en ESPAÑOL CLARO: cuidados, tolerancias, verificaciones, detalles importantes
+3-5 puntos criticos: cuidados, tolerancias, verificaciones, detalles importantes
 
-IMPORTANTE: 
-- Responde TODO EN ESPAÑOL. Sin palabras en ingles.
-- Usa tablas con caracteres Unicode (╔ ║ ╚ etc) para bordes claros
-- NO uses HTML (<table>, <tr>, <td>)
-- Se conciso pero EXACTO.`,
+REGLAS ESTRICTAS:
+- TODO EN ESPAÑOL, sin ingles
+- Tablas con bordes Unicode (╔ ╚ ║ ═ ╠ etc)
+- NUNCA texto que salga del cuadro
+- Columnas CORTAS y balanceadas
+- Se conciso pero EXACTO`,
               },
             ],
           },
