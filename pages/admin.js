@@ -9,6 +9,8 @@ export default function Admin() {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPlan, setNewUserPlan] = useState('basico');
   const [createUserMessage, setCreateUserMessage] = useState('');
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [generatedCredentials, setGeneratedCredentials] = useState(null);
   const [usuarios, setUsuarios] = useState([]);
   const [contactos, setContactos] = useState([]);
   const [calificaciones, setCalificaciones] = useState([]);
@@ -70,15 +72,22 @@ export default function Admin() {
       const data = await response.json();
 
       if (data.success) {
-        setCreateUserMessage(`✓ Usuario creado! Email: ${data.user.email} | Contraseña: ${data.user.tempPassword}`);
+        // Guardar credenciales y mostrar modal especial
+        setGeneratedCredentials({
+          email: data.user.email,
+          password: data.user.tempPassword,
+          plan: data.user.plan,
+        });
+        setShowPasswordModal(true);
+        setCreateUserMessage('');
         setNewUserEmail('');
         setNewUserPlan('basico');
+        setCreateUserModal(false);
         
+        // Recargar usuarios después de 1 segundo
         setTimeout(() => {
-          setCreateUserMessage('');
-          setCreateUserModal(false);
           loadAllData();
-        }, 2000);
+        }, 1000);
       } else {
         setCreateUserMessage('❌ Error: ' + data.error);
       }
@@ -86,6 +95,35 @@ export default function Admin() {
       console.error('Error:', error);
       setCreateUserMessage('❌ Error creando usuario');
     }
+  };
+
+  const handleDeleteUser = async (userId) => {
+    if (!confirm('¿Estás seguro de que quieres eliminar este usuario?')) return;
+
+    try {
+      const response = await fetch('/api/admin/delete-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        alert('✓ Usuario eliminado');
+        loadAllData();
+      } else {
+        alert('❌ Error: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      alert('❌ Error eliminando usuario');
+    }
+  };
+
+  const copyToClipboard = (text) => {
+    navigator.clipboard.writeText(text);
+    alert('✓ Copiado al portapapeles!');
   };
 
   if (!isAdminLoggedIn) {
@@ -261,6 +299,7 @@ export default function Admin() {
                           <th style={{ padding: '1rem', textAlign: 'left', color: '#FF8C00', fontWeight: '700' }}>Plan</th>
                           <th style={{ padding: '1rem', textAlign: 'left', color: '#FF8C00', fontWeight: '700' }}>Proyectos</th>
                           <th style={{ padding: '1rem', textAlign: 'left', color: '#FF8C00', fontWeight: '700' }}>Fecha</th>
+                          <th style={{ padding: '1rem', textAlign: 'left', color: '#FF8C00', fontWeight: '700' }}>Acciones</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -270,6 +309,23 @@ export default function Admin() {
                             <td style={{ padding: '1rem', color: user.plan === 'premium' ? '#4CAF50' : '#A0AEC0' }}>{user.plan}</td>
                             <td style={{ padding: '1rem' }}>{user.proyectosGuardados}</td>
                             <td style={{ padding: '1rem', fontSize: '0.85rem' }}>{new Date(user.createdAt).toLocaleDateString('es-AR')}</td>
+                            <td style={{ padding: '1rem' }}>
+                              <button
+                                onClick={() => handleDeleteUser(user._id)}
+                                style={{
+                                  padding: '0.5rem 1rem',
+                                  background: '#F44336',
+                                  color: 'white',
+                                  border: 'none',
+                                  borderRadius: '6px',
+                                  cursor: 'pointer',
+                                  fontWeight: '600',
+                                  fontSize: '0.85rem',
+                                }}
+                              >
+                                ✕ Eliminar
+                              </button>
+                            </td>
                           </tr>
                         ))}
                       </tbody>
@@ -455,6 +511,128 @@ export default function Admin() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* MODAL CONTRASEÑA GENERADA */}
+      {showPasswordModal && generatedCredentials && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.7)',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: 'linear-gradient(135deg, #1F2A47 0%, #141B33 100%)',
+            padding: '2.5rem',
+            borderRadius: '15px',
+            border: '2px solid #4CAF50',
+            width: '90%',
+            maxWidth: '450px',
+          }}>
+            <h2 style={{ color: '#4CAF50', marginTop: 0, textAlign: 'center' }}>✓ Usuario Creado Exitosamente</h2>
+            
+            <div style={{
+              background: '#0A0E27',
+              padding: '1.5rem',
+              borderRadius: '10px',
+              marginBottom: '1.5rem',
+              border: '1px solid #2D3A52',
+            }}>
+              <div style={{ marginBottom: '1.5rem' }}>
+                <label style={{ color: '#A0AEC0', fontSize: '0.9rem', fontWeight: '600' }}>📧 Email:</label>
+                <div style={{
+                  background: '#141B33',
+                  padding: '0.8rem',
+                  borderRadius: '8px',
+                  marginTop: '0.5rem',
+                  color: '#FFFFFF',
+                  wordBreak: 'break-all',
+                  fontFamily: 'monospace',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                  <span>{generatedCredentials.email}</span>
+                  <button
+                    onClick={() => copyToClipboard(generatedCredentials.email)}
+                    style={{
+                      background: 'transparent',
+                      color: '#FF8C00',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '1.2rem',
+                      marginLeft: '0.5rem',
+                    }}
+                  >
+                    📋
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ color: '#A0AEC0', fontSize: '0.9rem', fontWeight: '600' }}>🔐 Contraseña:</label>
+                <div style={{
+                  background: '#141B33',
+                  padding: '0.8rem',
+                  borderRadius: '8px',
+                  marginTop: '0.5rem',
+                  color: '#FFFFFF',
+                  wordBreak: 'break-all',
+                  fontFamily: 'monospace',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                }}>
+                  <span>{generatedCredentials.password}</span>
+                  <button
+                    onClick={() => copyToClipboard(generatedCredentials.password)}
+                    style={{
+                      background: 'transparent',
+                      color: '#FF8C00',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '1.2rem',
+                      marginLeft: '0.5rem',
+                    }}
+                  >
+                    📋
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ marginTop: '1.5rem', padding: '1rem', background: '#FFF3E0', borderRadius: '8px', borderLeft: '4px solid #FF8C00' }}>
+                <p style={{ margin: 0, color: '#D84315', fontSize: '0.85rem', fontWeight: '600' }}>
+                  ⚠️ Guarda estas credenciales. El usuario puede cambiar la contraseña después.
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                setShowPasswordModal(false);
+                setGeneratedCredentials(null);
+              }}
+              style={{
+                width: '100%',
+                padding: '1rem',
+                background: 'linear-gradient(135deg, #4CAF50, #45a049)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontWeight: '700',
+                fontSize: '1rem',
+              }}
+            >
+              ✓ Entendido
+            </button>
           </div>
         </div>
       )}
