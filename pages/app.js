@@ -7,10 +7,14 @@ export default function App() {
   const [password, setPassword] = useState('');
   const [premiumModalOpen, setPremiumModalOpen] = useState(false);
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
+  const [costModalOpen, setCostModalOpen] = useState(false);
   const [preview, setPreview] = useState(null);
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
   const [feedback, setFeedback] = useState(null);
+  const [costMaterials, setCostMaterials] = useState('');
+  const [costLabor, setCostLabor] = useState('');
+  const [salePrice, setSalePrice] = useState('');
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -234,7 +238,7 @@ export default function App() {
                 <p className="menu-desc">Carga fotos y obtén planos exactos</p>
               </div>
 
-              <div className="menu-card">
+              <div className="menu-card" onClick={() => setCostModalOpen(true)} style={{cursor: 'pointer'}}>
                 <span className="menu-icon">💰</span>
                 <div className="menu-title">Calcular Costos</div>
                 <p className="menu-desc">Presupuestos y ganancias automáticos</p>
@@ -376,6 +380,206 @@ export default function App() {
           </button>
         </div>
       </div>
+
+      {/* MODAL COSTOS Y GANANCIAS */}
+      <div className={`modal-overlay ${costModalOpen ? 'active' : ''}`}>
+        <div className="modal-content modal-wide">
+          <div className="modal-header">
+            <h2>💰 Costos y Ganancias</h2>
+            <button className="close-btn" onClick={() => setCostModalOpen(false)}>×</button>
+          </div>
+
+          <div className="modal-body">
+            <div className="cost-calculator">
+              {/* INPUTS */}
+              <div className="cost-section">
+                <h3>📝 Datos del Presupuesto</h3>
+                
+                <div className="cost-group">
+                  <label>💵 Costo Materiales (ARS)</label>
+                  <input 
+                    type="number" 
+                    placeholder="Ej: 5000"
+                    value={costMaterials}
+                    onChange={(e) => setCostMaterials(e.target.value)}
+                    className="cost-input"
+                  />
+                </div>
+
+                <div className="cost-row">
+                  <div className="cost-group half">
+                    <label>⏱️ Horas de Trabajo</label>
+                    <input 
+                      type="number" 
+                      placeholder="Ej: 8"
+                      value={costLabor}
+                      onChange={(e) => setCostLabor(e.target.value)}
+                      className="cost-input"
+                    />
+                  </div>
+                  <div className="cost-group half">
+                    <label>💼 Tarifa/Hora (ARS)</label>
+                    <input 
+                      type="number" 
+                      placeholder="Ej: 500"
+                      value={salePrice}
+                      onChange={(e) => setSalePrice(e.target.value)}
+                      className="cost-input"
+                    />
+                  </div>
+                </div>
+
+                <div className="cost-group">
+                  <label>📦 Gastos Operativos (ARS)</label>
+                  <input 
+                    type="number" 
+                    placeholder="Ej: 1000 (transporte, embalaje)"
+                    value={costMaterials ? '' : ''}
+                    onChange={(e) => setCostMaterials(e.target.value)}
+                    className="cost-input"
+                  />
+                </div>
+              </div>
+
+              {/* RESULTADOS */}
+              <div className="cost-section">
+                <h3>💡 Opciones de Precio</h3>
+                <div className="price-options">
+                  <div className="price-card basic">
+                    <div className="price-level">BÁSICO</div>
+                    <div className="price-margin">30% margen</div>
+                    <div className="price-value">$15.500</div>
+                    <div className="price-profit">+4.500 ganancia</div>
+                  </div>
+
+                  <div className="price-card normal">
+                    <div className="price-level">NORMAL</div>
+                    <div className="price-margin">50% margen</div>
+                    <div className="price-value">$19.000</div>
+                    <div className="price-profit">+8.000 ganancia</div>
+                  </div>
+
+                  <div className="price-card premium">
+                    <div className="price-level">PREMIUM</div>
+                    <div className="price-margin">70% margen</div>
+                    <div className="price-value">$22.500</div>
+                    <div className="price-profit">+11.500 ganancia</div>
+                  </div>
+                </div>
+              </div>
+
+              {/* DESGLOSE */}
+              <div className="cost-section">
+                <h3>📊 Desglose de Costos</h3>
+                <table className="cost-table">
+                  <tr>
+                    <td>Materiales</td>
+                    <td className="cost-value">$5.000</td>
+                  </tr>
+                  <tr>
+                    <td>Mano de obra (8h × $500)</td>
+                    <td className="cost-value">$4.000</td>
+                  </tr>
+                  <tr>
+                    <td>Gastos operativos</td>
+                    <td className="cost-value">$1.000</td>
+                  </tr>
+                  <tr className="cost-total">
+                    <td>COSTO TOTAL</td>
+                    <td className="cost-value">$10.000</td>
+                  </tr>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <button className="btn-primary" onClick={() => setCostModalOpen(false)}>
+            Cerrar
+          </button>
+        </div>
+      </div>
     </>
   );
 }
+
+
+export const styles = `
+  .cost-calculator {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+  }
+
+  .cost-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #FF8C00;
+  }
+
+  .cost-section h3 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.1rem;
+    color: #0D47A1;
+    font-weight: 600;
+  }
+
+  .cost-group {
+    margin-bottom: 1rem;
+  }
+
+  .cost-group label {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: #333;
+    margin-bottom: 0.5rem;
+  }
+
+  .cost-input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-family: 'Courier New', monospace;
+  }
+
+  .cost-input:focus {
+    outline: none;
+    border-color: #FF8C00;
+    box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.1);
+  }
+
+  .cost-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .price-options {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .price-card {
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+    border: 2px solid #ddd;
+  }
+
+  .price-card.basic { background: #f0f0f0; border-color: #999; }
+  .price-card.normal { background: #E3F2FD; border-color: #0D47A1; }
+  .price-card.premium { background: #FFF3E0; border-color: #FF8C00; }
+
+  .price-level { font-weight: 700; font-size: 1rem; margin-bottom: 0.5rem; }
+  .price-value { font-size: 1.8rem; font-weight: 700; color: #0D47A1; font-family: monospace; }
+  .price-profit { font-size: 0.9rem; color: #28a745; font-weight: 600; }
+
+  .cost-table { width: 100%; border-collapse: collapse; }
+  .cost-table tr { border-bottom: 1px solid #ddd; }
+  .cost-table td { padding: 0.75rem; text-align: left; font-family: monospace; }
+  .cost-table tr.cost-total { background: #FFF3E0; font-weight: 700; }
+`;
