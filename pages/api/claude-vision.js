@@ -51,20 +51,20 @@ SI inclinado: "📐 Foto inclinada. Tomala de frente."
 SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden (TODO EN ESPAÑOL, sin palabras en ingles):
 
 ## 1. DIMENSIONES (cm)
-Tabla: Medida | Valor
-Ancho | XX cm
-Alto | XX cm
-Profundidad | XX cm
-Espesor placa | XX mm
+Crea una tabla HTML simple con borde. Ejemplo:
+<table border="1" style="width:100%; border-collapse:collapse; text-align:left;">
+<tr><th>Medida</th><th>Valor</th></tr>
+<tr><td>Ancho</td><td>XX cm</td></tr>
+<tr><td>Alto</td><td>XX cm</td></tr>
+</table>
 *Componentes:* lista de partes principales
 
 ## 2. PLANO ASCII (compacto, 8-12 lineas)
 Diagrama frontal simple y claro con medidas principales
 
 ## 3. CORTES PLACA 275x183cm
-Tabla: Pieza | Cantidad | Largo | Ancho | cm2
-(solo piezas principales)
-Calculo: Area total | Area usada | Desperdicio % y cm2
+Crea tabla HTML con: Pieza | Cantidad | Largo | Ancho | cm2
+Luego tabla HTML de calculo: Concepto | Valor
 
 ## 4. MATERIALES EXACTOS
 Tableros: tipo, cantidad, medidas exactas
@@ -77,9 +77,10 @@ Adhesivos: tipo, cantidad
 ## 5. NOTAS IMPORTANTES
 3-5 puntos criticos en ESPAÑOL CLARO: cuidados, tolerancias, verificaciones, detalles importantes
 
-IMPORTANTE: Responde TODO EN ESPAÑOL. Sin palabras en ingles como "layout", "items", "pin", etc. 
-Usa palabras en español: distribucion, articulos, pasador, etc.
-Se conciso pero EXACTO. Carpinteros profesionales entienden abbreviaciones.`,
+IMPORTANTE: 
+- Responde TODO EN ESPAÑOL. Sin palabras en ingles.
+- Usa tablas HTML real (<table>) para datos, NO Markdown pipes
+- Se conciso pero EXACTO.`,
               },
             ],
           },
