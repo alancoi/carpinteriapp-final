@@ -52,14 +52,14 @@ SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden (TODO EN ESPAÑOL, sin p
 
 ## 1. DIMENSIONES (cm)
 
-╔═══════════════════╦═══════════════╗
-║ Medida            ║ Valor         ║
-╠═══════════════════╬═══════════════╣
-║ Ancho             ║ XX cm         ║
-║ Alto              ║ XX cm         ║
-║ Profundidad       ║ XX cm         ║
-║ Espesor placa     ║ XX mm         ║
-╚═══════════════════╩═══════════════╝
+╔═════════════════════╦═════════════════╗
+║  Medida             ║  Valor          ║
+╠═════════════════════╬═════════════════╣
+║  Ancho              ║  XX cm          ║
+║  Alto               ║  XX cm          ║
+║  Profundidad        ║  XX cm          ║
+║  Espesor placa      ║  XX mm          ║
+╚═════════════════════╩═════════════════╝
 
 *Componentes:* lista de partes principales
 
@@ -68,21 +68,21 @@ Diagrama frontal simple con medidas principales
 
 ## 3. CORTES PLACA 275x183cm
 
-╔═══════════════╦════╦═══════╦═══════╦═════════╗
-║ Pieza         ║ Qty║ Largo ║ Ancho ║ cm²     ║
-╠═══════════════╬════╬═══════╬═══════╬═════════╣
-║ Tapa mesa     ║ 1  ║ 140   ║ 70    ║ 9.800   ║
-║ ...           ║ .. ║ ...   ║ ...   ║ ...     ║
-╚═══════════════╩════╩═══════╩═══════╩═════════╝
+╔═════════════════╦═══════╦═════════╦═════════╦═══════════╗
+║  Pieza          ║  Qty  ║  Largo  ║  Ancho  ║  cm²      ║
+╠═════════════════╬═══════╬═════════╬═════════╬═══════════╣
+║  Tapa mesa      ║  1    ║  140    ║  70     ║  9.800    ║
+║  ...            ║  ..   ║  ...    ║  ...    ║  ...      ║
+╚═════════════════╩═══════╩═════════╩═════════╩═══════════╝
 
 Calculo desperdicio:
-╔═════════════════════╦══════════════╗
-║ Concepto            ║ Valor        ║
-╠═════════════════════╬══════════════╣
-║ Area total placa    ║ 50.325 cm²   ║
-║ Area usada          ║ XX cm²       ║
-║ Desperdicio         ║ XX% / XX cm² ║
-╚═════════════════════╩══════════════╝
+╔═══════════════════════╦════════════════╗
+║  Concepto             ║  Valor         ║
+╠═══════════════════════╬════════════════╣
+║  Area total placa     ║  50.325 cm²    ║
+║  Area usada           ║  XX cm²        ║
+║  Desperdicio          ║  XX% / XX cm²  ║
+╚═══════════════════════╩════════════════╝
 
 ## 4. MATERIALES EXACTOS
 Tableros: tipo, cantidad, medidas
@@ -97,9 +97,10 @@ Adhesivos: tipo, cantidad
 
 REGLAS ESTRICTAS:
 - TODO EN ESPAÑOL, sin ingles
-- Tablas con bordes Unicode (╔ ╚ ║ ═ ╠ etc)
-- NUNCA texto que salga del cuadro
-- Columnas CORTAS y balanceadas
+- Tablas con bordes Unicode (╔ ╚ ║ ═ ╠ etc) - NUNCA rotos
+- Espacios GENEROSOS dentro de celdas (padding)
+- Columnas NUNCA se salen del cuadro
+- Bordes SIEMPRE perfectamente alineados
 - Se conciso pero EXACTO`,
               },
             ],
