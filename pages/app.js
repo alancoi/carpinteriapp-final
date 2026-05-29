@@ -206,6 +206,43 @@ export default function App() {
         .feedback-btn.positive { background: rgba(76, 175, 80, 0.2); border-color: #4CAF50; color: #4CAF50; }
         .feedback-btn.negative { background: rgba(244, 67, 54, 0.2); border-color: #F44336; color: #F44336; }
         .feedback-message { text-align: center; color: #4CAF50; font-size: 0.8rem; margin-top: 0.8rem; }
+        
+        /* COSTOS Y GANANCIAS - ESTILOS PREMIUM */
+        .cost-calculator { display: flex; flex-direction: column; gap: 1.5rem; }
+        .cost-section { background: rgba(13, 71, 161, 0.1); border: 1px solid #0D47A1; border-radius: 12px; padding: 1.2rem; border-left: 4px solid #FF8C00; }
+        .cost-section h3 { margin: 0 0 1rem 0; font-size: 1rem; color: #FF8C00; font-weight: 700; }
+        .cost-group { margin-bottom: 1rem; }
+        .cost-group label { display: block; font-size: 0.85rem; font-weight: 600; color: #A0AEC0; margin-bottom: 0.5rem; }
+        .cost-input { width: 100%; padding: 0.75rem; background: #1F2A47; border: 1px solid #2D3A52; color: #FFFFFF; border-radius: 8px; font-size: 0.9rem; font-family: 'Courier New', monospace; transition: all 0.3s; }
+        .cost-input:focus { outline: none; border-color: #FF8C00; box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2); }
+        .cost-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+        
+        .price-options { display: grid; grid-template-columns: 1fr; gap: 1rem; }
+        .price-card { padding: 1.5rem; border-radius: 12px; border: 2px solid #2D3A52; text-align: center; transition: all 0.3s; position: relative; overflow: hidden; }
+        .price-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; opacity: 0; transition: opacity 0.3s; }
+        .price-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.3); }
+        
+        .price-card.basic { background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%); border-color: #2D3A52; }
+        .price-card.normal { background: linear-gradient(135deg, rgba(13, 71, 161, 0.2) 0%, rgba(13, 71, 161, 0.1) 100%); border-color: #0D47A1; }
+        .price-card.premium { background: linear-gradient(135deg, rgba(255, 140, 0, 0.2) 0%, rgba(255, 140, 0, 0.1) 100%); border: 2px solid #FF8C00; box-shadow: 0 0 20px rgba(255, 140, 0, 0.3); }
+        .price-card.premium::after { content: '⭐ RECOMENDADO'; position: absolute; top: 10px; right: 10px; background: #FF8C00; color: #0A0E27; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.65rem; font-weight: 700; }
+        
+        .price-level { font-weight: 700; font-size: 1.1rem; margin-bottom: 0.5rem; color: #FFFFFF; }
+        .price-margin { font-size: 0.8rem; color: #A0AEC0; margin-bottom: 0.8rem; }
+        .price-value { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; font-family: 'Courier New', monospace; }
+        .price-card.basic .price-value { color: #A0AEC0; }
+        .price-card.normal .price-value { color: #0D47A1; }
+        .price-card.premium .price-value { color: #FF8C00; }
+        .price-profit { font-size: 0.9rem; color: #4CAF50; font-weight: 700; }
+        
+        .cost-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
+        .cost-table tr { border-bottom: 1px solid #2D3A52; }
+        .cost-table td { padding: 0.8rem; text-align: left; font-size: 0.85rem; color: #A0AEC0; }
+        .cost-table td.cost-value { text-align: right; color: #FF8C00; font-weight: 700; font-family: 'Courier New', monospace; }
+        .cost-table tr.cost-total { background: rgba(255, 140, 0, 0.15); }
+        .cost-table tr.cost-total td { font-weight: 700; color: #FF8C00; padding: 1rem 0.8rem; }
+        
+        .modal-wide { max-width: 100%; }
       `}</style>
 
       <div className="phone-frame">
