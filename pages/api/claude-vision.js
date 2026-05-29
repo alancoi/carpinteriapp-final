@@ -170,9 +170,12 @@ export default async function handler(req, res) {
       cached: false,
     });
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error en claude-vision:', error.message);
+    const errorMessage = error.message ? error.message.substring(0, 200) : 'Error desconocido';
     return res.status(500).json({
-      error: '⏱️ ' + error.message,
+      success: false,
+      error: 'Error procesando imagen',
+      message: errorMessage,
     });
   }
 }

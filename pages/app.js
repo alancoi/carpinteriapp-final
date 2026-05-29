@@ -41,7 +41,14 @@ export default function App() {
           body: JSON.stringify({ imageBase64: base64Image, mimeType: mimeType }),
         });
 
-        const data = await response.json();
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          console.error('JSON Parse Error. Raw response:', responseText.substring(0, 200));
+          throw new Error('Error al procesar respuesta del servidor');
+        }
 
         if (!response.ok) {
           throw new Error(data.message || data.details || data.error || 'Error desconocido');
