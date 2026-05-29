@@ -11,7 +11,7 @@ function isImageResolutionValid(imageBase64) {
   return sizeInBytes > 20000;
 }
 
-async function analyzeWithModel(imageBase64) {
+async function analyzeWithModel(imageBase64, mimeType = 'image/jpeg') {
   const apiKey = process.env.CLAUDE_API_KEY;
 
   const controller = new AbortController();
@@ -36,7 +36,7 @@ async function analyzeWithModel(imageBase64) {
                 type: 'image',
                 source: {
                   type: 'base64',
-                  media_type: 'image/png',
+                  media_type: mimeType,
                   data: imageBase64,
                 },
               },
@@ -115,7 +115,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { imageBase64 } = req.body;
+    const { imageBase64, mimeType = 'image/jpeg' } = req.body;
 
     if (!imageBase64) {
       return res.status(400).json({ error: 'Imagen requerida' });
@@ -142,7 +142,7 @@ export default async function handler(req, res) {
       });
     }
 
-    const result = await analyzeWithModel(imageBase64);
+    const result = await analyzeWithModel(imageBase64, mimeType);
 
     if (!result.analysis || result.analysis.trim().length === 0) {
       return res.status(400).json({

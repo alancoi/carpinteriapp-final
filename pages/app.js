@@ -23,6 +23,8 @@ export default function App() {
     const file = e.target.files[0];
     if (!file) return;
 
+    const mimeType = file.type || 'image/jpeg'; // Detectar tipo automáticamente
+
     const reader = new FileReader();
     reader.onload = async (event) => {
       setPreview(event.target.result);
@@ -36,7 +38,7 @@ export default function App() {
         const response = await fetch('/api/claude-vision', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: base64Image }),
+          body: JSON.stringify({ imageBase64: base64Image, mimeType: mimeType }),
         });
 
         const data = await response.json();
