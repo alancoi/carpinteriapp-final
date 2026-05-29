@@ -48,7 +48,7 @@ SI NO mueble: "❌ No es mueble. Sube foto clara."
 SI borroso/oscuro: "⚠️ Imagen borrosa. Mejor iluminacion y resolucion."
 SI inclinado: "📐 Foto inclinada. Tomala de frente."
 
-SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden:
+SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden (TODO EN ESPAÑOL, sin palabras en ingles):
 
 ## 1. DIMENSIONES (cm)
 Tabla: Medida | Valor
@@ -56,27 +56,29 @@ Ancho | XX cm
 Alto | XX cm
 Profundidad | XX cm
 Espesor placa | XX mm
-(+ detalles importantes de componentes si tiene)
+*Componentes:* lista de partes principales
 
 ## 2. PLANO ASCII (compacto, 8-12 lineas)
 Diagrama frontal simple y claro con medidas principales
 
 ## 3. CORTES PLACA 275x183cm
 Tabla: Pieza | Cantidad | Largo | Ancho | cm2
-(solo las piezas principales)
+(solo piezas principales)
 Calculo: Area total | Area usada | Desperdicio % y cm2
 
 ## 4. MATERIALES EXACTOS
 Tableros: tipo, cantidad, medidas exactas
-Herrajes: tipo y cantidad (correderas, jaladores, bisagras, etc)
+Herrajes: tipo y cantidad (pines, tacos, etc)
 Tornillos: tipo exacto con medida (ej: confirmat 7x50mm), cantidad
-Clavos/Remaches: tipo, cantidad
+Clavos: tipo, cantidad
 Cantos: material, cantidad total ml
 Adhesivos: tipo, cantidad
 
 ## 5. NOTAS IMPORTANTES
-3-5 puntos criticos: cuidados, tolerancias, verificaciones, ensambles criticos, cualidades especiales del material
+3-5 puntos criticos en ESPAÑOL CLARO: cuidados, tolerancias, verificaciones, detalles importantes
 
+IMPORTANTE: Responde TODO EN ESPAÑOL. Sin palabras en ingles como "layout", "items", "pin", etc. 
+Usa palabras en español: distribucion, articulos, pasador, etc.
 Se conciso pero EXACTO. Carpinteros profesionales entienden abbreviaciones.`,
               },
             ],
