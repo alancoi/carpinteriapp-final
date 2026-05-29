@@ -9,6 +9,9 @@ export default function App() {
   const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const [costModalOpen, setCostModalOpen] = useState(false);
   const [chatModalOpen, setChatModalOpen] = useState(false);
+  const [projectsModalOpen, setProjectsModalOpen] = useState(false);
+  const [projects, setProjects] = useState([]);
+  const [selectedProject, setSelectedProject] = useState(null);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
@@ -106,6 +109,21 @@ export default function App() {
     } finally {
       setChatLoading(false);
     }
+  };
+
+  const saveProject = () => {
+    if (!analysis) return;
+    
+    const newProject = {
+      id: Date.now(),
+      name: `Proyecto ${new Date().toLocaleDateString('es-AR')}`,
+      date: new Date().toLocaleString('es-AR'),
+      analysis: analysis,
+      preview: preview,
+      description: analysis.substring(0, 100) + '...',
+    };
+
+    setProjects([newProject, ...projects]);
   };
 
   if (!isLoggedIn) {
@@ -332,6 +350,31 @@ export default function App() {
         .chat-send-btn:hover:not(:disabled) { transform: scale(1.05); }
         .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
+        /* PROJECTS STYLES */
+        .projects-list { display: flex; flex-direction: column; gap: 1rem; }
+        .project-card { padding: 1.2rem; background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%); border: 1px solid #2D3A52; border-radius: 12px; cursor: pointer; transition: all 0.3s; }
+        .project-card:hover { border-color: #FF8C00; box-shadow: 0 10px 30px rgba(255, 140, 0, 0.2); transform: translateY(-3px); }
+        .project-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem; }
+        .project-header h4 { margin: 0; color: #FFFFFF; font-size: 1rem; }
+        .project-date { font-size: 0.75rem; color: #A0AEC0; }
+        .project-desc { margin: 0 0 0.8rem 0; color: #A0AEC0; font-size: 0.85rem; line-height: 1.4; }
+        .project-action { color: #FF8C00; font-weight: 600; font-size: 0.85rem; }
+        
+        .empty-projects { text-align: center; padding: 3rem 1rem; }
+        .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
+        .empty-projects h3 { color: #A0AEC0; margin-bottom: 0.5rem; }
+        .empty-projects p { color: #666; font-size: 0.9rem; }
+        
+        .project-detail { display: flex; flex-direction: column; gap: 1rem; }
+        .back-btn { padding: 0.6rem 1rem; background: none; border: 1px solid #2D3A52; color: #A0AEC0; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s; margin-bottom: 1rem; }
+        .back-btn:hover { border-color: #FF8C00; color: #FF8C00; }
+        .project-detail h3 { color: #FF8C00; margin: 0; font-size: 1.3rem; }
+        .project-meta { display: flex; gap: 1rem; color: #A0AEC0; font-size: 0.85rem; }
+        .project-preview { text-align: center; max-height: 300px; margin: 1rem 0; border-radius: 8px; overflow: hidden; }
+        .project-preview img { max-width: 100%; max-height: 300px; border-radius: 8px; }
+        .btn-delete { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #F44336, #d32f2f); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; margin-top: 1rem; }
+        .btn-delete:hover { transform: translateY(-2px); }
+        
         .modal-wide { max-width: 100%; }
       `}</style>
 
@@ -377,7 +420,7 @@ export default function App() {
                 <p className="menu-desc">Asesor disponible siempre</p>
               </div>
 
-              <div className="menu-card">
+              <div className="menu-card" onClick={() => setProjectsModalOpen(true)} style={{cursor: 'pointer'}}>
                 <span className="menu-icon">📊</span>
                 <div className="menu-title">Mis Proyectos</div>
                 <p className="menu-desc">Historial de trabajos</p>
@@ -500,6 +543,12 @@ export default function App() {
                 </div>
               )}
             </>
+          )}
+
+          {analysis && !analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐') && (
+            <button className="btn-primary save-project-btn" onClick={saveProject} style={{marginBottom: '0.8rem', background: 'linear-gradient(135deg, #4CAF50, #45a049)'}}>
+              💾 Guardar Proyecto
+            </button>
           )}
 
           <button className="btn-primary" onClick={() => {setUploadModalOpen(false); setPreview(null); setAnalysis(null); setFeedback(null);}}>
@@ -735,6 +784,62 @@ export default function App() {
               </button>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* MODAL MIS PROYECTOS */}
+      <div className={`modal-overlay ${projectsModalOpen ? 'active' : ''}`}>
+        <div className="modal-content modal-wide">
+          <div className="modal-header">
+            <h2>📊 Mis Proyectos</h2>
+            <button className="close-btn" onClick={() => {setProjectsModalOpen(false); setSelectedProject(null);}}>×</button>
+          </div>
+
+          <div className="modal-body">
+            {selectedProject ? (
+              <div className="project-detail">
+                <button className="back-btn" onClick={() => setSelectedProject(null)}>← Volver</button>
+                <h3>{selectedProject.name}</h3>
+                <div className="project-meta">
+                  <span>📅 {selectedProject.date}</span>
+                </div>
+                <div className="project-preview">
+                  {selectedProject.preview && <img src={selectedProject.preview} alt="Vista previa" />}
+                </div>
+                <div className="analysis-result">
+                  {selectedProject.analysis}
+                </div>
+                <button className="btn-delete" onClick={() => {setProjects(projects.filter(p => p.id !== selectedProject.id)); setSelectedProject(null);}}>
+                  🗑️ Eliminar Proyecto
+                </button>
+              </div>
+            ) : (
+              <div className="projects-list">
+                {projects.length === 0 ? (
+                  <div className="empty-projects">
+                    <div className="empty-icon">📂</div>
+                    <h3>Sin proyectos aún</h3>
+                    <p>Los proyectos que guardes aparecerán aquí</p>
+                  </div>
+                ) : (
+                  projects.map(project => (
+                    <div key={project.id} className="project-card" onClick={() => setSelectedProject(project)}>
+                      <div className="project-header">
+                        <h4>{project.name}</h4>
+                        <span className="project-date">{project.date}</span>
+                      </div>
+                      <p className="project-desc">{project.description}</p>
+                      <div className="project-action">Ver detalles →</div>
+                    </div>
+                  ))
+                )}
+              </div>
+            )}
+          </div>
+
+          <button className="btn-primary" onClick={() => {setProjectsModalOpen(false); setSelectedProject(null);}}>
+            Cerrar
+          </button>
         </div>
       </div>
     </>
