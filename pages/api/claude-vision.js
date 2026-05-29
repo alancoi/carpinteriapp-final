@@ -51,20 +51,39 @@ SI inclinado: "📐 Foto inclinada. Tomala de frente."
 SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden (TODO EN ESPAÑOL, sin palabras en ingles):
 
 ## 1. DIMENSIONES (cm)
-Crea una tabla HTML simple con borde. Ejemplo:
-<table border="1" style="width:100%; border-collapse:collapse; text-align:left;">
-<tr><th>Medida</th><th>Valor</th></tr>
-<tr><td>Ancho</td><td>XX cm</td></tr>
-<tr><td>Alto</td><td>XX cm</td></tr>
-</table>
+
+Crea tabla con bordes Unicode como esta (copiar exacto):
+╔════════════════════╦═════════════════╗
+║ Medida             ║ Valor           ║
+╠════════════════════╬═════════════════╣
+║ Ancho              ║ XX cm           ║
+║ Alto               ║ XX cm           ║
+║ Profundidad        ║ XX cm           ║
+║ Espesor placa      ║ XX mm           ║
+╚════════════════════╩═════════════════╝
+
 *Componentes:* lista de partes principales
 
 ## 2. PLANO ASCII (compacto, 8-12 lineas)
 Diagrama frontal simple y claro con medidas principales
 
 ## 3. CORTES PLACA 275x183cm
-Crea tabla HTML con: Pieza | Cantidad | Largo | Ancho | cm2
-Luego tabla HTML de calculo: Concepto | Valor
+
+Tabla con bordes Unicode:
+╔════════════════╦══════════╦════════╦═══════╦═════════╗
+║ Pieza          ║ Cantidad ║ Largo  ║ Ancho ║ cm²     ║
+╠════════════════╬══════════╬════════╬═══════╬═════════╣
+║ ...            ║ ...      ║ ...    ║ ...   ║ ...     ║
+╚════════════════╩══════════╩════════╩═══════╩═════════╝
+
+Luego tabla de calculo:
+╔═══════════════════════╦═══════════╗
+║ Concepto              ║ Valor     ║
+╠═══════════════════════╬═══════════╣
+║ Area total placa      ║ XX cm²    ║
+║ Area usada            ║ XX cm²    ║
+║ Desperdicio % y cm²   ║ XX%       ║
+╚═══════════════════════╩═══════════╝
 
 ## 4. MATERIALES EXACTOS
 Tableros: tipo, cantidad, medidas exactas
@@ -79,7 +98,8 @@ Adhesivos: tipo, cantidad
 
 IMPORTANTE: 
 - Responde TODO EN ESPAÑOL. Sin palabras en ingles.
-- Usa tablas HTML real (<table>) para datos, NO Markdown pipes
+- Usa tablas con caracteres Unicode (╔ ║ ╚ etc) para bordes claros
+- NO uses HTML (<table>, <tr>, <td>)
 - Se conciso pero EXACTO.`,
               },
             ],
