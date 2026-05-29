@@ -11,6 +11,14 @@ export default function App() {
   const [chatModalOpen, setChatModalOpen] = useState(false);
   const [projectsModalOpen, setProjectsModalOpen] = useState(false);
   const [settingsModalOpen, setSettingsModalOpen] = useState(false);
+  const [contactModalOpen, setContactModalOpen] = useState(false);
+  const [ratingModalOpen, setRatingModalOpen] = useState(false);
+  const [contactMessage, setContactMessage] = useState('');
+  const [contactError, setContactError] = useState('');
+  const [stars, setStars] = useState(0);
+  const [ratingComment, setRatingComment] = useState('');
+  const [ratingImprovement, setRatingImprovement] = useState('');
+  const [ratingMessage, setRatingMessage] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordMessage, setPasswordMessage] = useState('');
@@ -151,6 +159,38 @@ export default function App() {
     
     setTimeout(() => {
       setPasswordMessage('');
+    }, 2000);
+  };
+
+  const handleSendContact = () => {
+    if (!contactError.trim()) {
+      setContactMessage('Por favor describe el problema o error');
+      return;
+    }
+    
+    setContactMessage('✓ Mensaje enviado. Gracias por reportar, nuestro equipo lo revisará pronto');
+    setContactError('');
+    
+    setTimeout(() => {
+      setContactMessage('');
+      setContactModalOpen(false);
+    }, 2000);
+  };
+
+  const handleSubmitRating = () => {
+    if (stars === 0) {
+      setRatingMessage('Por favor selecciona una calificación');
+      return;
+    }
+    
+    setRatingMessage('✓ ¡Gracias por tu calificación! Tu feedback nos ayuda a mejorar');
+    setStars(0);
+    setRatingComment('');
+    setRatingImprovement('');
+    
+    setTimeout(() => {
+      setRatingMessage('');
+      setRatingModalOpen(false);
     }, 2000);
   };
 
@@ -437,8 +477,32 @@ export default function App() {
         .info-box strong { color: #FF8C00; }
         
         .danger-section { background: linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%); border: 1px solid #F44336; }
+        .danger-section { background: linear-gradient(135deg, rgba(244, 67, 54, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%); border: 1px solid #F44336; }
         .btn-danger { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #F44336, #d32f2f); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; }
         .btn-danger:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(244, 67, 54, 0.3); }
+        
+        /* FOOTER BUTTONS */
+        .footer-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; margin-top: 1rem; }
+        .footer-btn { padding: 0.8rem; background: rgba(255, 140, 0, 0.15); color: #FF8C00; border: 1px solid #FF8C00; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 0.85rem; transition: all 0.3s; }
+        .footer-btn:hover { background: rgba(255, 140, 0, 0.25); }
+        
+        /* CONTACT & RATING */
+        .contact-textarea { width: 100%; padding: 0.8rem; background: #1F2A47; border: 1px solid #2D3A52; color: #FFFFFF; border-radius: 8px; font-size: 0.9rem; font-family: inherit; resize: vertical; transition: all 0.3s; }
+        .contact-textarea:focus { outline: none; border-color: #FF8C00; box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2); }
+        .contact-textarea::placeholder { color: #666; }
+        
+        .rating-section { text-align: center; margin-bottom: 1.5rem; }
+        .stars-container { display: flex; justify-content: center; gap: 0.8rem; margin: 1rem 0; }
+        .star-btn { background: none; border: none; font-size: 2.5rem; cursor: pointer; opacity: 0.3; transition: all 0.3s; }
+        .star-btn:hover { opacity: 0.7; transform: scale(1.1); }
+        .star-btn.active { opacity: 1; transform: scale(1.2); }
+        
+        .rating-input { margin-bottom: 1rem; }
+        .rating-input label { display: block; color: #A0AEC0; font-size: 0.85rem; font-weight: 600; margin-bottom: 0.5rem; }
+        
+        .message-box { padding: 1rem; border-radius: 8px; font-weight: 600; margin-bottom: 1rem; text-align: center; }
+        .message-box.success { background: rgba(76, 175, 80, 0.2); border: 1px solid #4CAF50; color: #4CAF50; }
+        .message-box.error { background: rgba(244, 67, 54, 0.2); border: 1px solid #F44336; color: #F44336; }
         
         .modal-wide { max-width: 100%; }
       `}</style>
@@ -501,6 +565,15 @@ export default function App() {
             <button className="premium-button" onClick={() => setPremiumModalOpen(true)}>
               <i className="fas fa-crown"></i> Beneficios Plan Premium
             </button>
+
+            <div className="footer-buttons">
+              <button className="footer-btn" onClick={() => setContactModalOpen(true)}>
+                📧 Reportar Error
+              </button>
+              <button className="footer-btn" onClick={() => setRatingModalOpen(true)}>
+                ⭐ Calificar App
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -1000,6 +1073,98 @@ export default function App() {
 
           <button className="btn-primary" onClick={() => setSettingsModalOpen(false)}>
             Cerrar
+          </button>
+        </div>
+      </div>
+
+      {/* MODAL CONTACTO/REPORTAR ERROR */}
+      <div className={`modal-overlay ${contactModalOpen ? 'active' : ''}`}>
+        <div className="modal-content">
+          <div className="modal-header">
+            <h2>📧 Reportar Error</h2>
+            <button className="close-btn" onClick={() => {setContactModalOpen(false); setContactError(''); setContactMessage('');}}>×</button>
+          </div>
+
+          <div className="modal-body">
+            <p style={{color: '#A0AEC0', marginBottom: '1rem'}}>Cuéntanos qué problema encontraste para que podamos mejorar</p>
+            
+            <textarea
+              className="contact-textarea"
+              placeholder="Describe el error o problema que encontraste..."
+              value={contactError}
+              onChange={(e) => setContactError(e.target.value)}
+              rows="6"
+            />
+
+            {contactMessage && (
+              <div className={`message-box ${contactMessage.includes('✓') ? 'success' : 'error'}`}>
+                {contactMessage}
+              </div>
+            )}
+          </div>
+
+          <button className="btn-primary" onClick={handleSendContact}>
+            ✉️ Enviar Reporte
+          </button>
+        </div>
+      </div>
+
+      {/* MODAL CALIFICAR APP */}
+      <div className={`modal-overlay ${ratingModalOpen ? 'active' : ''}`}>
+        <div className="modal-content">
+          <div className="modal-header">
+            <h2>⭐ Calificar CarpinteriAPP</h2>
+            <button className="close-btn" onClick={() => {setRatingModalOpen(false); setStars(0); setRatingComment(''); setRatingImprovement(''); setRatingMessage('');}}>×</button>
+          </div>
+
+          <div className="modal-body">
+            <div className="rating-section">
+              <p style={{color: '#A0AEC0', marginBottom: '1rem'}}>¿Qué te pareció la app?</p>
+              
+              <div className="stars-container">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    className={`star-btn ${stars >= star ? 'active' : ''}`}
+                    onClick={() => setStars(star)}
+                  >
+                    ⭐
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="rating-input">
+              <label>¿Qué te pareció? (opcional)</label>
+              <textarea
+                placeholder="Cuéntanos tu opinión..."
+                value={ratingComment}
+                onChange={(e) => setRatingComment(e.target.value)}
+                rows="3"
+                className="contact-textarea"
+              />
+            </div>
+
+            <div className="rating-input">
+              <label>¿Qué mejorarías? (opcional)</label>
+              <textarea
+                placeholder="Sugerencias para mejorar..."
+                value={ratingImprovement}
+                onChange={(e) => setRatingImprovement(e.target.value)}
+                rows="3"
+                className="contact-textarea"
+              />
+            </div>
+
+            {ratingMessage && (
+              <div className={`message-box ${ratingMessage.includes('✓') ? 'success' : 'error'}`}>
+                {ratingMessage}
+              </div>
+            )}
+          </div>
+
+          <button className="btn-primary" onClick={handleSubmitRating}>
+            ✓ Enviar Calificación
           </button>
         </div>
       </div>
