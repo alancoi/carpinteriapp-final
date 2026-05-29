@@ -208,7 +208,7 @@ export default function App() {
     }
   };
 
-  const handleChangePassword = () => {
+  const handleChangePassword = async () => {
     if (!newPassword || !confirmPassword) {
       setPasswordMessage('Por favor completa todos los campos');
       return;
@@ -222,14 +222,33 @@ export default function App() {
       return;
     }
     
-    setPassword(newPassword);
-    setPasswordMessage('✓ Contraseña actualizada correctamente');
-    setNewPassword('');
-    setConfirmPassword('');
-    
-    setTimeout(() => {
-      setPasswordMessage('');
-    }, 2000);
+    try {
+      const response = await fetch('/api/auth/change-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          newPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setPasswordMessage('✓ Contraseña actualizada correctamente');
+        setNewPassword('');
+        setConfirmPassword('');
+        
+        setTimeout(() => {
+          setPasswordMessage('');
+        }, 2000);
+      } else {
+        setPasswordMessage('❌ Error: ' + data.error);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setPasswordMessage('❌ Error actualizando contraseña');
+    }
   };
 
   const deleteProject = async (projectId) => {
