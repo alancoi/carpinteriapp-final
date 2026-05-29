@@ -9,6 +9,7 @@ export default function Admin() {
   const [newUserEmail, setNewUserEmail] = useState('');
   const [newUserPlan, setNewUserPlan] = useState('basico');
   const [createUserMessage, setCreateUserMessage] = useState('');
+  const [usuarios, setUsuarios] = useState([]);
   const [contactos, setContactos] = useState([]);
   const [calificaciones, setCalificaciones] = useState([]);
   const [loading, setLoading] = useState(false);
