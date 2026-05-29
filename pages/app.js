@@ -264,6 +264,14 @@ export default function App() {
         .feature-item { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem; background: rgba(255, 140, 0, 0.05); border: 1px solid #2D3A52; border-radius: 8px; border-left: 3px solid #FF8C00; }
         .feature-item i { font-size: 1.4rem; color: #FF8C00; min-width: 25px; }
         .feature-item span { color: #A0AEC0; font-size: 0.85rem; }
+        
+        .coming-soon-container { text-align: center; padding: 1.5rem; }
+        .coming-soon-icon { font-size: 3rem; margin-bottom: 1rem; display: block; }
+        .coming-soon-container h3 { color: #FF8C00; font-size: 1.5rem; margin-bottom: 1rem; }
+        .coming-soon-container p { color: #A0AEC0; font-size: 0.95rem; margin-bottom: 1.5rem; }
+        .coming-soon-features { display: flex; flex-direction: column; gap: 0.8rem; margin-bottom: 1.5rem; }
+        .coming-soon-text { color: #666; font-size: 0.85rem; font-style: italic; margin-top: 1rem; }
+        
         .btn-primary { width: 100%; padding: 0.9rem; background: linear-gradient(135deg, #0D47A1, #FF8C00); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 0.95rem; transition: all 0.3s; }
         .btn-primary:active { transform: scale(0.98); }
         .file-input-wrapper { margin: 1rem 0; }
@@ -505,37 +513,36 @@ export default function App() {
             <button className="close-btn" onClick={() => setPremiumModalOpen(false)}>×</button>
           </div>
 
-          <div className="premium-price">
-            <div className="price">$9.000</div>
-            <div className="sub">por mes - Acceso ilimitado</div>
-          </div>
+          <div className="coming-soon-container">
+            <div className="coming-soon-icon">🚀</div>
+            <h3>¡Próximamente!</h3>
+            <p>Estamos trabajando en opciones premium exclusivas para llevar tu experiencia al siguiente nivel.</p>
+            
+            <div className="coming-soon-features">
+              <div className="feature-item">
+                <i className="fas fa-infinity"></i>
+                <span>Uso Ilimitado de todas las funciones</span>
+              </div>
+              <div className="feature-item">
+                <i className="fas fa-file-pdf"></i>
+                <span>Exportar planos en PDF</span>
+              </div>
+              <div className="feature-item">
+                <i className="fas fa-file-excel"></i>
+                <span>Presupuestos en Excel</span>
+              </div>
+              <div className="feature-item">
+                <i className="fas fa-history"></i>
+                <span>Historial ilimitado de proyectos</span>
+              </div>
+              <div className="feature-item">
+                <i className="fas fa-star"></i>
+                <span>Acceso prioritario a nuevas funciones</span>
+              </div>
+            </div>
 
-          <div className="premium-features">
-            <div className="feature-item">
-              <i className="fas fa-infinity"></i>
-              <span>Uso Ilimitado de todas las funciones</span>
-            </div>
-            <div className="feature-item">
-              <i className="fas fa-file-pdf"></i>
-              <span>Exportar planos en PDF</span>
-            </div>
-            <div className="feature-item">
-              <i className="fas fa-file-excel"></i>
-              <span>Presupuestos en Excel</span>
-            </div>
-            <div className="feature-item">
-              <i className="fas fa-history"></i>
-              <span>Historial ilimitado de proyectos</span>
-            </div>
-            <div className="feature-item">
-              <i className="fas fa-star"></i>
-              <span>Acceso prioritario a nuevas funciones</span>
-            </div>
+            <p className="coming-soon-text">Te notificaremos cuando esté disponible</p>
           </div>
-
-          <button className="btn-primary">
-            <i className="fas fa-credit-card"></i> Actualizar Ahora - $9.000/mes
-          </button>
         </div>
       </div>
 
@@ -798,8 +805,8 @@ export default function App() {
               {chatMessages.length === 0 && (
                 <div className="chat-welcome">
                   <div className="chat-welcome-icon">🤖</div>
-                  <h3>Hola! Soy tu Asesor IA</h3>
-                  <p>Puedo ayudarte con:</p>
+                  <h3>Resuelvo todas tus dudas sobre carpintería</h3>
+                  <p>¿En qué te puedo ayudar?</p>
                   <ul>
                     <li>💡 Consultas de carpintería</li>
                     <li>📐 Diseño de muebles</li>
