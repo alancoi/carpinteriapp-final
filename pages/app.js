@@ -254,6 +254,22 @@ export default function App() {
         .rec-desc { color: #A0AEC0; font-size: 0.8rem; margin-bottom: 0.5rem; }
         .rec-margin { color: #FF8C00; font-weight: 600; font-size: 0.85rem; }
         
+        .margin-slider-container { display: flex; flex-direction: column; gap: 1rem; }
+        .margin-slider { width: 100%; height: 6px; border-radius: 3px; background: linear-gradient(90deg, #2D3A52 0%, #0D47A1 50%, #FF8C00 100%); outline: none; -webkit-appearance: none; cursor: pointer; }
+        .margin-slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 24px; height: 24px; border-radius: 50%; background: #FF8C00; cursor: pointer; box-shadow: 0 0 10px rgba(255, 140, 0, 0.5); border: 2px solid #0A0E27; }
+        .margin-slider::-moz-range-thumb { width: 24px; height: 24px; border-radius: 50%; background: #FF8C00; cursor: pointer; box-shadow: 0 0 10px rgba(255, 140, 0, 0.5); border: 2px solid #0A0E27; }
+        .margin-display { display: flex; justify-content: center; }
+        .margin-value { font-size: 2rem; font-weight: 800; color: #FF8C00; font-family: 'Courier New', monospace; }
+        
+        .result-section { background: linear-gradient(135deg, rgba(255, 140, 0, 0.15) 0%, rgba(13, 71, 161, 0.15) 100%); border: 2px solid #FF8C00; }
+        .final-result { display: flex; flex-direction: column; gap: 1.2rem; margin-top: 1rem; }
+        .result-row { display: flex; justify-content: space-between; align-items: center; padding: 0.8rem; background: rgba(13, 71, 161, 0.2); border-radius: 8px; }
+        .result-row.highlight { background: rgba(255, 140, 0, 0.2); border: 1px solid #FF8C00; padding: 1rem; }
+        .result-label { color: #A0AEC0; font-size: 0.9rem; font-weight: 600; }
+        .result-value { font-size: 1.3rem; color: #FFFFFF; font-weight: 700; font-family: 'Courier New', monospace; }
+        .result-value-big { font-size: 1.8rem; color: #FF8C00; font-weight: 800; font-family: 'Courier New', monospace; }
+        .result-profit { font-size: 1.4rem; color: #4CAF50; font-weight: 800; font-family: 'Courier New', monospace; }
+        
         .modal-wide { max-width: 100%; }
       `}</style>
 
@@ -521,56 +537,51 @@ export default function App() {
                 </div>
               ) : null}
 
-              {/* OPCIONES DE PRECIO */}
+              {/* INPUT DE % GANANCIA */}
               {costMaterials ? (
                 <div className="cost-section">
-                  <h3>💡 Opciones de Precio por Margen</h3>
-                  <div className="price-options">
-                    {/* BÁSICO - 30% */}
-                    {(() => {
-                      const total = Number(costMaterials || 0) + (Number(costHours || 0) * Number(costHourlyRate || 0)) + Number(costOperative || 0);
-                      const basicPrice = total * 1.30;
-                      const basicProfit = basicPrice - total;
-                      return (
-                        <div className="price-card basic">
-                          <div className="price-level">BÁSICO</div>
-                          <div className="price-margin">30% margen</div>
-                          <div className="price-value">${basicPrice.toLocaleString('es-AR', {maximumFractionDigits: 0})}</div>
-                          <div className="price-profit">+${basicProfit.toLocaleString('es-AR', {maximumFractionDigits: 0})} ganancia</div>
-                        </div>
-                      );
-                    })()}
-
-                    {/* NORMAL - 50% */}
-                    {(() => {
-                      const total = Number(costMaterials || 0) + (Number(costHours || 0) * Number(costHourlyRate || 0)) + Number(costOperative || 0);
-                      const normalPrice = total * 1.50;
-                      const normalProfit = normalPrice - total;
-                      return (
-                        <div className="price-card normal">
-                          <div className="price-level">NORMAL</div>
-                          <div className="price-margin">50% margen</div>
-                          <div className="price-value">${normalPrice.toLocaleString('es-AR', {maximumFractionDigits: 0})}</div>
-                          <div className="price-profit">+${normalProfit.toLocaleString('es-AR', {maximumFractionDigits: 0})} ganancia</div>
-                        </div>
-                      );
-                    })()}
-
-                    {/* PREMIUM - 70% */}
-                    {(() => {
-                      const total = Number(costMaterials || 0) + (Number(costHours || 0) * Number(costHourlyRate || 0)) + Number(costOperative || 0);
-                      const premiumPrice = total * 1.70;
-                      const premiumProfit = premiumPrice - total;
-                      return (
-                        <div className="price-card premium">
-                          <div className="price-level">PREMIUM</div>
-                          <div className="price-margin">70% margen</div>
-                          <div className="price-value">${premiumPrice.toLocaleString('es-AR', {maximumFractionDigits: 0})}</div>
-                          <div className="price-profit">+${premiumProfit.toLocaleString('es-AR', {maximumFractionDigits: 0})} ganancia</div>
-                        </div>
-                      );
-                    })()}
+                  <h3>💰 ¿Cuánto % quieres ganar?</h3>
+                  <div className="margin-slider-container">
+                    <input 
+                      type="range" 
+                      min="10" 
+                      max="200" 
+                      value={desiredMargin}
+                      onChange={(e) => setDesiredMargin(Number(e.target.value))}
+                      className="margin-slider"
+                    />
+                    <div className="margin-display">
+                      <span className="margin-value">{desiredMargin}%</span>
+                    </div>
                   </div>
+                </div>
+              ) : null}
+
+              {/* RESULTADO DE PRECIO */}
+              {costMaterials && desiredMargin ? (
+                <div className="cost-section result-section">
+                  <h3>✅ Tu Precio de Venta</h3>
+                  {(() => {
+                    const total = Number(costMaterials || 0) + (Number(costHours || 0) * Number(costHourlyRate || 0)) + Number(costOperative || 0);
+                    const salePrice = total * (1 + desiredMargin / 100);
+                    const profit = salePrice - total;
+                    return (
+                      <div className="final-result">
+                        <div className="result-row">
+                          <span className="result-label">Costo Total:</span>
+                          <span className="result-value">${total.toLocaleString('es-AR', {maximumFractionDigits: 0})}</span>
+                        </div>
+                        <div className="result-row highlight">
+                          <span className="result-label">Precio de Venta:</span>
+                          <span className="result-value-big">${salePrice.toLocaleString('es-AR', {maximumFractionDigits: 0})}</span>
+                        </div>
+                        <div className="result-row">
+                          <span className="result-label">Tu Ganancia:</span>
+                          <span className="result-profit">${profit.toLocaleString('es-AR', {maximumFractionDigits: 0})}</span>
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </div>
               ) : null}
 
