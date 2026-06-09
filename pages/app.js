@@ -956,7 +956,11 @@ export default function App() {
           {analysis && !loading && (
             <>
               <div className="analysis-result">
-                {analysis}
+                {analysis.startsWith('<div') ? (
+                  <div dangerouslySetInnerHTML={{ __html: analysis }} />
+                ) : (
+                  <>{analysis}</>
+                )}
               </div>
               
               {!analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐') && (
@@ -1254,7 +1258,11 @@ export default function App() {
                   {selectedProject.preview && <img src={selectedProject.preview} alt="Vista previa" />}
                 </div>
                 <div className="analysis-result">
-                  {selectedProject.analysis}
+                  {selectedProject.analysis && selectedProject.analysis.startsWith('<div') ? (
+                    <div dangerouslySetInnerHTML={{ __html: selectedProject.analysis }} />
+                  ) : (
+                    <>{selectedProject.analysis}</>
+                  )}
                 </div>
                 <button className="btn-delete" onClick={() => deleteProject(selectedProject._id)}>
                   🗑️ Eliminar Proyecto
