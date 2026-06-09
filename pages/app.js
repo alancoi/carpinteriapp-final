@@ -963,7 +963,7 @@ export default function App() {
                 )}
               </div>
               
-              {!analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐') && (
+              {(analysis.startsWith('<div') || (!analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐'))) && (
                 <div className="feedback-section">
                   <label className="feedback-label">¿Fue útil este análisis?</label>
                   <div className="feedback-buttons">
@@ -990,13 +990,13 @@ export default function App() {
             </>
           )}
 
-          {analysis && !analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐') && (
+          {analysis && (analysis.startsWith('<div') || (!analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐'))) && (
             <button className="btn-primary save-project-btn" onClick={saveProject} style={{marginBottom: '0.8rem', background: 'linear-gradient(135deg, #4CAF50, #45a049)'}}>
               💾 Guardar Proyecto
             </button>
           )}
 
-          {analysis && !analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐') && (
+          {analysis && (analysis.startsWith('<div') || (!analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐'))) && (
             <button className="btn-primary" onClick={downloadPDF} style={{marginBottom: '0.8rem', background: 'linear-gradient(135deg, #FF6B6B, #FF5252)'}}>
               📄 Descargar PDF
             </button>
