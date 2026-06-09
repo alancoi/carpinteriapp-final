@@ -42,9 +42,7 @@ async function analyzeWithModel(imageBase64, mimeType = 'image/jpeg') {
               },
               {
                 type: 'text',
-                text: `⚠️ IMPORTANTE: Las medidas que proporciones son APROXIMADAS en CENTÍMETROS, basadas exclusivamente en la imagen enviada. Para medidas exactas, se recomienda verificar con un instrumento de medición en persona.
-
-Verifica si esta imagen es un mueble de BUENA CALIDAD.
+                text: `Verifica si esta imagen es un mueble de BUENA CALIDAD.
 
 SI NO mueble: "❌ No es mueble. Sube foto clara."
 SI borroso/oscuro: "⚠️ Imagen borrosa. Mejor iluminacion y resolucion."
@@ -103,7 +101,10 @@ REGLAS ESTRICTAS:
 - Espacios GENEROSOS dentro de celdas (padding)
 - Columnas NUNCA se salen del cuadro
 - Bordes SIEMPRE perfectamente alineados
-- Se conciso pero EXACTO`,
+- Se conciso pero EXACTO
+
+---
+⚠️ NOTA FINAL: Las medidas son APROXIMADAS en CENTÍMETROS basadas en la imagen enviada. CarpinteriAPP permite obtener análisis y medidas de forma rápida y eficiente, democratizando el acceso a herramientas profesionales de carpintería.`,
               },
             ],
           },
