@@ -104,7 +104,7 @@ REGLAS ESTRICTAS:
 - Se conciso pero EXACTO
 
 ---
-⚠️ NOTA FINAL: Las medidas son APROXIMADAS en CENTÍMETROS basadas en la imagen enviada. CarpinteriAPP permite obtener análisis y medidas de forma rápida y eficiente, democratizando el acceso a herramientas profesionales de carpintería.`,
+⚠️ NOTA FINAL: Las medidas son APROXIMADAS en CENTÍMETROS basadas en la imagen enviada.`,
               },
             ],
           },
