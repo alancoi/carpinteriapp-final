@@ -42,7 +42,9 @@ async function analyzeWithModel(imageBase64, mimeType = 'image/jpeg') {
               },
               {
                 type: 'text',
-                text: `Verifica si esta imagen es un mueble de BUENA CALIDAD.
+                text: `⚠️ IMPORTANTE: Las medidas que proporciones son APROXIMADAS en CENTÍMETROS, basadas exclusivamente en la imagen enviada. Para medidas exactas, se recomienda verificar con un instrumento de medición en persona.
+
+Verifica si esta imagen es un mueble de BUENA CALIDAD.
 
 SI NO mueble: "❌ No es mueble. Sube foto clara."
 SI borroso/oscuro: "⚠️ Imagen borrosa. Mejor iluminacion y resolucion."
