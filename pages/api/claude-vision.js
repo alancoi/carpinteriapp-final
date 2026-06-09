@@ -48,60 +48,50 @@ SI NO mueble: "❌ No es mueble. Sube foto clara."
 SI borroso/oscuro: "⚠️ Imagen borrosa. Mejor iluminacion y resolucion."
 SI inclinado: "📐 Foto inclinada. Tomala de frente."
 
-SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden (TODO EN ESPAÑOL, sin palabras en ingles):
+SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden (TODO EN ESPAÑOL):
 
-## 1. DIMENSIONES (cm)
+## 1. COMPONENTES Y MEDIDAS
 
-╔═════════════════════╦═════════════════╗
-║  Medida             ║  Valor          ║
-╠═════════════════════╬═════════════════╣
-║  Ancho              ║  XX cm          ║
-║  Alto               ║  XX cm          ║
-║  Profundidad        ║  XX cm          ║
-║  Espesor placa      ║  XX mm          ║
-╚═════════════════════╩═════════════════╝
+Para CADA componente visible:
+Nombre | Cantidad | Largo(cm) | Ancho(cm) | Espesor(cm) | Material
 
-*Componentes:* lista de partes principales
+Tablero superior | 1 | 183 | 64 | 1.8 | MDF
+Tablero estante | 2 | 183 | 53 | 1.8 | MDF
+Pata | 4 | 5 | 5 | 81 | Madera sólida
+[continúa TODOS los componentes]
 
-## 2. PLANO ASCII (8-12 lineas max)
-Diagrama frontal simple con medidas principales
+## 2. LISTA DE COMPRA
 
-## 3. CORTES PLACA 275x183cm
+Tableros MDF: [cantidad en m², medidas principales]
+Madera: [tipo, cantidad total, secciones]
+Herrajes: [tipo exacto, cantidad]
+Tornillos: [diámetro × largo, cantidad]
+Clavos: [medida exacta, cantidad]
+Cantos: [material, metros lineales]
+Adhesivos: [tipo, cantidad]
 
-╔═════════════════╦═══════╦═════════╦═════════╦═══════════╗
-║  Pieza          ║  Qty  ║  Largo  ║  Ancho  ║  cm²      ║
-╠═════════════════╬═══════╬═════════╬═════════╬═══════════╣
-║  Tapa mesa      ║  1    ║  140    ║  70     ║  9.800    ║
-║  ...            ║  ..   ║  ...    ║  ...    ║  ...      ║
-╚═════════════════╩═══════╩═════════╩═════════╩═══════════╝
+## 3. CORTES DE PLACA 275×183cm
 
-Calculo desperdicio:
-╔═══════════════════════╦════════════════╗
-║  Concepto             ║  Valor         ║
-╠═══════════════════════╬════════════════╣
-║  Area total placa     ║  50.325 cm²    ║
-║  Area usada           ║  XX cm²        ║
-║  Desperdicio          ║  XX% / XX cm²  ║
-╚═══════════════════════╩════════════════╝
+╔═══════════════╦═════╦═══════╦═══════╦═══════════╗
+║ Pieza         ║ Qty ║ Largo ║ Ancho ║ cm²       ║
+╠═══════════════╬═════╬═══════╬═══════╬═══════════╣
+║ [componente]  ║ [n] ║ [L]   ║ [A]   ║ [área]    ║
+╚═══════════════╩═════╩═══════╩═══════╩═══════════╝
 
-## 4. MATERIALES EXACTOS
-Tableros: tipo, cantidad, medidas
-Herrajes: tipo y cantidad (pines, tacos, etc)
-Tornillos: tipo con medida exacta, cantidad
-Clavos: tipo, cantidad
-Cantos: material, cantidad ml
-Adhesivos: tipo, cantidad
+Área total placa: [XX] cm² | Área usada: [XX] cm² | Desperdicio: [XX]% / [XX] cm²
 
-## 5. NOTAS IMPORTANTES
-3-5 puntos criticos: cuidados, tolerancias, verificaciones, detalles importantes
+## 4. NOTAS CRÍTICAS (máximo 3)
+
+- [dato crítico técnico]
+- [dato crítico técnico]
+- [dato crítico técnico]
 
 REGLAS ESTRICTAS:
-- TODO EN ESPAÑOL, sin ingles
-- Tablas con bordes Unicode (╔ ╚ ║ ═ ╠ etc) - NUNCA rotos
-- Espacios GENEROSOS dentro de celdas (padding)
-- Columnas NUNCA se salen del cuadro
-- Bordes SIEMPRE perfectamente alineados
-- Se conciso pero EXACTO
+- TODO EN ESPAÑOL
+- Tablas con bordes Unicode - NUNCA rotos
+- SIN explicaciones de armado
+- Formato compacto y legible
+- Conciso pero exacto
 
 ---
 ⚠️ NOTA FINAL: Las medidas son APROXIMADAS en CENTÍMETROS basadas en la imagen enviada.`,
