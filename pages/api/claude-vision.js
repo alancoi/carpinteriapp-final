@@ -45,38 +45,37 @@ async function analyzeWithModel(imageBase64, mimeType = 'image/jpeg') {
                 text: `Verifica si esta imagen es un mueble de BUENA CALIDAD.
 
 SI NO mueble: "❌ No es mueble. Sube foto clara."
-SI borroso/oscuro: "⚠️ Imagen borrosa. Mejor iluminacion y resolucion."
-SI inclinado: "📐 Foto inclinada. Tomala de frente."
+SI borroso/oscuro: "⚠️ Imagen borrosa. Mejor iluminación y resolución."
+SI inclinado: "📐 Foto inclinada. Tómala de frente."
 
 SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden (TODO EN ESPAÑOL):
 
 ## 1. COMPONENTES Y MEDIDAS
 
-Para CADA componente visible:
-Nombre | Cantidad | Largo(cm) | Ancho(cm) | Espesor(cm) | Material
-
-Tablero superior | 1 | 183 | 64 | 1.8 | MDF
-Tablero estante | 2 | 183 | 53 | 1.8 | MDF
-Pata | 4 | 5 | 5 | 81 | Madera sólida
-[continúa TODOS los componentes]
+╔═══════════════════╦════════════╦═════════════╦═══════════╦════════════╦═══════════════════╗
+║ Componente        ║ Cantidad   ║ Largo (cm)  ║ Ancho(cm) ║ Espesor(cm)║ Material          ║
+╠═══════════════════╬════════════╬═════════════╬═══════════╬════════════╬═══════════════════╣
+║ Tablero superior  ║ 1          ║ 183         ║ 64        ║ 1.8        ║ MDF               ║
+║ Pata              ║ 4          ║ 5           ║ 5         ║ 81         ║ Madera sólida     ║
+║ [componente]      ║ [n]        ║ [L]         ║ [A]       ║ [E]        ║ [Material]        ║
+╚═══════════════════╩════════════╩═════════════╩═══════════╩════════════╩═══════════════════╝
 
 ## 2. LISTA DE COMPRA
 
-Tableros MDF: [cantidad en m², medidas principales]
-Madera: [tipo, cantidad total, secciones]
-Herrajes: [tipo exacto, cantidad]
-Tornillos: [diámetro × largo, cantidad]
-Clavos: [medida exacta, cantidad]
-Cantos: [material, metros lineales]
-Adhesivos: [tipo, cantidad]
+- Madera: [tipo, cantidad m², medidas principales]
+- Herrajes: [tipo exacto, cantidad unidades]
+- Tornillos: [diámetro × largo mm], [cantidad unidades]
+- Clavos: [medida exacta mm], [cantidad unidades]
+- Cantos: [material], [cantidad metros lineales]
+- Adhesivos: [tipo], [cantidad]
 
 ## 3. CORTES DE PLACA 275×183cm
 
-╔═══════════════╦═════╦═══════╦═══════╦═══════════╗
-║ Pieza         ║ Qty ║ Largo ║ Ancho ║ cm²       ║
-╠═══════════════╬═════╬═══════╬═══════╬═══════════╣
-║ [componente]  ║ [n] ║ [L]   ║ [A]   ║ [área]    ║
-╚═══════════════╩═════╩═══════╩═══════╩═══════════╝
+╔═════════════════╦════════════╦═════════════╦═══════════╦═══════════════╗
+║ Pieza           ║ Cantidad   ║ Largo (cm)  ║ Ancho(cm) ║ Área (cm²)    ║
+╠═════════════════╬════════════╬═════════════╬═══════════╬═══════════════╣
+║ [componente]    ║ [n]        ║ [L]         ║ [A]       ║ [área]        ║
+╚═════════════════╩════════════╩═════════════╩═══════════╩═══════════════╝
 
 Área total placa: [XX] cm² | Área usada: [XX] cm² | Desperdicio: [XX]% / [XX] cm²
 
@@ -90,11 +89,12 @@ REGLAS ESTRICTAS:
 - TODO EN ESPAÑOL
 - Tablas con bordes Unicode - NUNCA rotos
 - SIN explicaciones de armado
-- Formato compacto y legible
-- Conciso pero exacto
+- Usar "Cantidad" (no "Qty")
+- Usar "unidades" completo (no "uds")
+- Formato compacto y claro
 
 ---
-⚠️ NOTA FINAL: Las medidas son APROXIMADAS en CENTÍMETROS basadas en la imagen enviada.`,
+⚠️ NOTA FINAL: Las medidas son APROXIMADAS en centímetros basadas en la imagen enviada.`,
               },
             ],
           },
