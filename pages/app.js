@@ -195,10 +195,22 @@ export default function App() {
         html2canvas: { scale: 2 },
         jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
       };
-      html2pdf().set(opt).from(element).save();
+      window.html2pdf().set(opt).from(element).save();
     };
     document.head.appendChild(script);
   };
+
+  // Auto-scroll a los botones cuando aparece el análisis
+  useEffect(() => {
+    if (analysis && !analysis.includes('❌')) {
+      setTimeout(() => {
+        const buttons = document.querySelector('.modal-body');
+        if (buttons) {
+          buttons.scrollTop = buttons.scrollHeight;
+        }
+      }, 300);
+    }
+  }, [analysis]);
 
   const handleChatSend = async () => {
     if (!chatInput.trim()) return;
@@ -585,7 +597,13 @@ export default function App() {
         .spinner { display: inline-block; width: 40px; height: 40px; border: 4px solid rgba(255, 140, 0, 0.2); border-top-color: #FF8C00; border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 1rem; }
         @keyframes spin { to { transform: rotate(360deg); } }
         .loading-text { font-size: 0.9rem; font-weight: 600; color: #A0AEC0; }
-        .analysis-result { background: #0A0E27; border: 1px solid #0D47A1; border-left: 4px solid #FF8C00; color: #A0AEC0; padding: 1.5rem; border-radius: 8px; font-size: 0.75rem; max-height: 400px; overflow-y: auto; white-space: pre-wrap; font-family: 'Courier New', monospace; margin-top: 1rem; line-height: 1.8; letter-spacing: 0.3px; }
+        .analysis-result { background: #0A0E27; border: 1px solid #0D47A1; border-left: 4px solid #FF8C00; color: #A0AEC0; padding: 1.5rem; border-radius: 8px; font-size: 0.85rem; max-height: 500px; overflow-y: auto; overflow-x: auto; white-space: pre-wrap; font-family: 'Courier New', monospace; margin-top: 1rem; line-height: 1.6; letter-spacing: 0.2px; word-break: break-word; }
+        @media (max-width: 768px) {
+          .analysis-result { font-size: 0.8rem; padding: 1rem; max-height: 600px; line-height: 1.5; }
+        }
+        @media (max-width: 480px) {
+          .analysis-result { font-size: 0.75rem; padding: 0.8rem; max-height: 70vh; overflow-x: auto; }
+        }
         .analysis-result strong { color: #FF8C00; font-weight: 700; }
         .feedback-section { margin-top: 1.2rem; padding-top: 1rem; border-top: 1px solid #2D3A52; }
         .feedback-label { font-size: 0.85rem; color: #A0AEC0; margin-bottom: 0.8rem; display: block; }
