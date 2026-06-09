@@ -180,6 +180,26 @@ export default function App() {
     }, 2000);
   };
 
+  const downloadPDF = () => {
+    if (!analysis) return;
+    
+    // Cargar html2pdf desde CDN
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.onload = () => {
+      const element = document.querySelector('.analysis-result');
+      const opt = {
+        margin: 10,
+        filename: 'analisis-carpinteria.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+      };
+      html2pdf().set(opt).from(element).save();
+    };
+    document.head.appendChild(script);
+  };
+
   const handleChatSend = async () => {
     if (!chatInput.trim()) return;
 
@@ -951,6 +971,12 @@ export default function App() {
           {analysis && !analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐') && (
             <button className="btn-primary save-project-btn" onClick={saveProject} style={{marginBottom: '0.8rem', background: 'linear-gradient(135deg, #4CAF50, #45a049)'}}>
               💾 Guardar Proyecto
+            </button>
+          )}
+
+          {analysis && !analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐') && (
+            <button className="btn-primary" onClick={downloadPDF} style={{marginBottom: '0.8rem', background: 'linear-gradient(135deg, #FF6B6B, #FF5252)'}}>
+              📄 Descargar PDF
             </button>
           )}
 
