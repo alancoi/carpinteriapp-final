@@ -52,13 +52,10 @@ SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden (TODO EN ESPAÑOL):
 
 ## 1. COMPONENTES Y MEDIDAS
 
-╔═══════════════════╦════════════╦═════════════╦═══════════╦════════════╦═══════════════════╗
-║ Componente        ║ Cantidad   ║ Largo (cm)  ║ Ancho(cm) ║ Espesor(cm)║ Material          ║
-╠═══════════════════╬════════════╬═════════════╬═══════════╬════════════╬═══════════════════╣
-║ Tablero superior  ║ 1          ║ 183         ║ 64        ║ 1.8        ║ MDF               ║
-║ Pata              ║ 4          ║ 5           ║ 5         ║ 81         ║ Madera sólida     ║
-║ [componente]      ║ [n]        ║ [L]         ║ [A]       ║ [E]        ║ [Material]        ║
-╚═══════════════════╩════════════╩═════════════╩═══════════╩════════════╩═══════════════════╝
+Tablero superior: Cantidad=1 | L:183cm A:64cm E:1.8cm | Madera sólida
+Tablero estante: Cantidad=2 | L:183cm A:53cm E:1.8cm | Madera sólida
+Pata: Cantidad=4 | L:5cm A:5cm E:81cm | Madera sólida
+[componente]: Cantidad=[n] | L:[L]cm A:[A]cm E:[E]cm | [Material]
 
 ## 2. LISTA DE COMPRA
 
@@ -71,13 +68,11 @@ SI BUENA CALIDAD, proporciona EXACTAMENTE en este orden (TODO EN ESPAÑOL):
 
 ## 3. CORTES DE PLACA 275×183cm
 
-╔═════════════════╦════════════╦═════════════╦═══════════╦═══════════════╗
-║ Pieza           ║ Cantidad   ║ Largo (cm)  ║ Ancho(cm) ║ Área (cm²)    ║
-╠═════════════════╬════════════╬═════════════╬═══════════╬═══════════════╣
-║ [componente]    ║ [n]        ║ [L]         ║ [A]       ║ [área]        ║
-╚═════════════════╩════════════╩═════════════╩═══════════╩═══════════════╝
+Tablero superior: 1x183x64cm = 11.712cm² 
+Tablero estante: 2x183x53cm = 19.398cm²
+[componente]: [n]x[L]x[A]cm = [área]cm²
 
-Área total placa: [XX] cm² | Área usada: [XX] cm² | Desperdicio: [XX]% / [XX] cm²
+Área total placa: 50.325cm² | Área usada: [XX]cm² | Desperdicio: [XX]% / [XX]cm²
 
 ## 4. NOTAS CRÍTICAS (máximo 3)
 
