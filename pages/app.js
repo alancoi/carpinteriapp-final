@@ -183,6 +183,25 @@ export default function App() {
   const downloadPDF = () => {
     if (!analysis) return;
     
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
+    script.onload = () => {
+      const element = document.querySelector('.analysis-result');
+      const options = {
+        margin: [10, 10, 10, 10],
+        filename: 'analisis-carpinteria.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true },
+        jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' }
+      };
+      window.html2pdf().set(options).from(element).save();
+    };
+    document.head.appendChild(script);
+  };
+
+  const downloadPDF = () => {
+    if (!analysis) return;
+    
     // Cargar html2pdf desde CDN
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js';
