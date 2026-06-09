@@ -95,11 +95,41 @@ export default function App() {
     }
   };
 
+  // Función para comprimir imagen automáticamente
+  const compressImage = (base64String, mimeType) => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Redimensionar si es muy grande (máx 2000px)
+        if (width > 2000 || height > 2000) {
+          const ratio = Math.min(2000 / width, 2000 / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Comprimir con calidad 0.8 (80%)
+        const compressedBase64 = canvas.toDataURL(mimeType, 0.8).split(',')[1];
+        resolve(compressedBase64);
+      };
+      img.src = 'data:' + mimeType + ';base64,' + base64String;
+    });
+  };
+
   const handleFileUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const mimeType = file.type || 'image/jpeg'; // Detectar tipo automáticamente
+    const mimeType = file.type || 'image/jpeg';
 
     const reader = new FileReader();
     reader.onload = async (event) => {
@@ -108,13 +138,16 @@ export default function App() {
       setAnalysis(null);
       setFeedback(null);
 
-      const base64Image = event.target.result.split(',')[1];
-
       try {
+        const base64Original = event.target.result.split(',')[1];
+        
+        // Comprimir imagen automáticamente
+        const base64Compressed = await compressImage(base64Original, mimeType);
+
         const response = await fetch('/api/claude-vision', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: base64Image, mimeType: mimeType }),
+          body: JSON.stringify({ imageBase64: base64Compressed, mimeType: mimeType }),
         });
 
         const responseText = await response.text();
