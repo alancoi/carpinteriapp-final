@@ -585,7 +585,7 @@ export default function App() {
 
   // Auto-scroll a los botones cuando aparece el análisis
   useEffect(() => {
-    if (analysis && !analysis.includes('❌')) {
+    if (analysis && (typeof analysis === 'object' || !analysis.includes('❌'))) {
       setTimeout(() => {
         const buttons = document.querySelector('.modal-body');
         if (buttons) {
@@ -1373,13 +1373,13 @@ export default function App() {
             </>
           )}
 
-          {analysis && (analysis.startsWith('<div') || (!analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐'))) && (
+          {analysis && (typeof analysis === 'object' || (typeof analysis === 'string' && !analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐'))) && (
             <button className="btn-primary save-project-btn" onClick={saveProject} style={{marginBottom: '0.8rem', background: 'linear-gradient(135deg, #4CAF50, #45a049)'}}>
               💾 Guardar Proyecto
             </button>
           )}
 
-          {analysis && (analysis.startsWith('<div') || (!analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐'))) && (
+          {analysis && (typeof analysis === 'object' || (typeof analysis === 'string' && !analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐'))) && (
             <button className="btn-primary" onClick={downloadPDF} style={{marginBottom: '0.8rem', background: 'linear-gradient(135deg, #FF6B6B, #FF5252)'}}>
               📄 Descargar PDF
             </button>
@@ -1641,11 +1641,15 @@ export default function App() {
                   {selectedProject.preview && <img src={selectedProject.preview} alt="Vista previa" />}
                 </div>
                 <div className="analysis-result">
-                  {selectedProject.analysis && selectedProject.analysis.startsWith('<div') ? (
-                    <div dangerouslySetInnerHTML={{ __html: selectedProject.analysis }} />
-                  ) : (
-                    <>{selectedProject.analysis}</>
-                  )}
+                  {selectedProject.analysis ? (
+                    typeof selectedProject.analysis === 'object' ? (
+                      <AnalysisRenderer data={selectedProject.analysis} />
+                    ) : typeof selectedProject.analysis === 'string' && selectedProject.analysis.startsWith('<div') ? (
+                      <div dangerouslySetInnerHTML={{ __html: selectedProject.analysis }} />
+                    ) : (
+                      <>{selectedProject.analysis}</>
+                    )
+                  ) : null}
                 </div>
                 <button className="btn-delete" onClick={() => deleteProject(selectedProject._id)}>
                   🗑️ Eliminar Proyecto
