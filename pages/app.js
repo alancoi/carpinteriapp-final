@@ -560,38 +560,54 @@ export default function App() {
         
         // MATERIALES
         if (analysis.materiales && analysis.materiales.length > 0) {
+          // Calcular espacio necesario
+          const materialesSpace = 20 + (analysis.materiales.length * 6);
+          if (y + materialesSpace > h - margin) {
+            pdf.addPage();
+            y = margin;
+          }
+          
           addSection('MATERIALES', 20);
           
-          pdf.setFontSize(9);
+          pdf.setFontSize(8);
           pdf.setTextColor(...gris);
           pdf.setFont(undefined, 'normal');
           
           analysis.materiales.forEach((m, idx) => {
-            if (y > h - 20) {
-              pdf.addPage();
-              y = margin;
-            }
-            
             // Línea alternada
             if (idx % 2 === 0) {
               pdf.setFillColor(249, 249, 249);
-              pdf.rect(margin, y - 3, contentW, 6, 'F');
+              pdf.rect(margin, y - 2, contentW, 5, 'F');
             }
             
-            pdf.text(m.nombre, margin + 3, y);
+            // Nombre del material con límite de ancho
+            const maxWidthNombre = contentW - 60;
+            const lineasNombre = pdf.splitTextToSize(m.nombre, maxWidthNombre);
+            if (lineasNombre.length > 0) {
+              pdf.text(lineasNombre[0], margin + 2, y);
+            }
+            
+            // Cantidad alineada a la derecha
             pdf.setFont(undefined, 'bold');
             pdf.setTextColor(...naranja);
-            pdf.text(m.cantidad, w - margin - 3, y, { align: 'right' });
+            pdf.text(m.cantidad, w - margin - 2, y, { align: 'right' });
             pdf.setFont(undefined, 'normal');
             pdf.setTextColor(...gris);
             
-            y += 6;
+            y += 5;
           });
           addSpacing(3);
         }
         
         // COMPONENTES
         if (analysis.componentes && analysis.componentes.length > 0) {
+          // Calcular espacio necesario
+          const componentesSpace = 20 + (analysis.componentes.length * 8);
+          if (y + componentesSpace > h - margin) {
+            pdf.addPage();
+            y = margin;
+          }
+          
           addSection('COMPONENTES PRINCIPALES', 25);
           
           pdf.setFontSize(8);
@@ -599,14 +615,15 @@ export default function App() {
           pdf.setFont(undefined, 'normal');
           
           analysis.componentes.forEach((c, idx) => {
-            if (y > h - 25) {
+            if (y > h - 20) {
               pdf.addPage();
               y = margin;
             }
             
             pdf.setTextColor(...azul);
             pdf.setFont(undefined, 'bold');
-            pdf.text(c.nombre, margin + 2, y);
+            const lineasComp = pdf.splitTextToSize(c.nombre, contentW - 4);
+            pdf.text(lineasComp[0], margin + 2, y);
             
             y += 4;
             pdf.setTextColor(...gris);
@@ -627,6 +644,13 @@ export default function App() {
         
         // TABLA DE CORTES
         if (analysis.cortes && analysis.cortes.length > 0) {
+          // Calcular espacio necesario (título + headers + mínimo 3 filas)
+          const cortesSpace = 25 + (Math.min(analysis.cortes.length, 3) * 5);
+          if (y + cortesSpace > h - margin) {
+            pdf.addPage();
+            y = margin;
+          }
+          
           addSection('CORTES DE PLACA', 40);
           
           const colW = [55, 40, 20, 25];
