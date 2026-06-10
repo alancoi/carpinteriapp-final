@@ -1,6 +1,75 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 
+const AnalysisRenderer = ({ data }) => {
+  if (!data || !data.tipo_mueble) return null;
+  
+  return (
+    <div style={{ padding: '15px', fontSize: '14px', lineHeight: '1.6' }}>
+      <h3 style={{ color: '#1565C0', marginTop: 0 }}>{data.tipo_mueble} - {data.estilo}</h3>
+      
+      <div style={{ marginBottom: '15px', padding: '12px', background: '#FFF3E0', border: '2px solid #FF8C00', borderRadius: '4px' }}>
+        <strong>Medidas:</strong> {data.medidas.largo}cm × {data.medidas.ancho}cm × {data.medidas.alto}cm
+      </div>
+      
+      {data.materiales && data.materiales.length > 0 && (
+        <div style={{ marginBottom: '15px' }}>
+          <strong>Materiales:</strong>
+          {data.materiales.map((m, i) => <div key={i}>• {m.nombre}: {m.cantidad}</div>)}
+        </div>
+      )}
+      
+      {data.componentes && data.componentes.length > 0 && (
+        <div style={{ marginBottom: '15px' }}>
+          <strong>Componentes:</strong>
+          {data.componentes.map((c, i) => <div key={i}>• {c.nombre} ({c.cantidad}) - {c.medidas}</div>)}
+        </div>
+      )}
+      
+      {data.cortes && data.cortes.length > 0 && (
+        <div style={{ marginBottom: '15px' }}>
+          <strong>Cortes:</strong>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+            <thead>
+              <tr style={{ background: '#1565C0', color: 'white' }}>
+                <th style={{ padding: '6px', textAlign: 'left' }}>Componente</th>
+                <th style={{ padding: '6px', textAlign: 'left' }}>Medidas</th>
+                <th style={{ padding: '6px', textAlign: 'left' }}>Cant</th>
+                <th style={{ padding: '6px', textAlign: 'left' }}>Desperdicio</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.cortes.map((c, i) => (
+                <tr key={i} style={{ background: i % 2 === 0 ? '#f9f9f9' : 'white' }}>
+                  <td style={{ padding: '6px' }}>{c.componente}</td>
+                  <td style={{ padding: '6px' }}>{c.medidas}</td>
+                  <td style={{ padding: '6px' }}>{c.cantidad}</td>
+                  <td style={{ padding: '6px', color: '#FF8C00', fontWeight: 'bold' }}>{c.desperdicio}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+      
+      {data.desperdicio_total && (
+        <div style={{ marginBottom: '15px', padding: '10px', background: '#FFF3E0', borderRadius: '4px' }}>
+          <strong>Desperdicio total:</strong> {data.desperdicio_total}
+        </div>
+      )}
+      
+      {data.notas && data.notas.length > 0 && (
+        <div style={{ padding: '10px', background: '#f0f7ff', border: '1px solid #1565C0', borderRadius: '4px' }}>
+          <strong>Recomendaciones:</strong>
+          {data.notas.map((n, i) => <div key={i}>• {n}</div>)}
+        </div>
+      )}
+      
+      <p style={{ fontSize: '11px', color: '#999', marginTop: '15px', marginBottom: 0 }}>⚠️ Medidas aproximadas</p>
+    </div>
+  );
+};
+
 // Función para generar HTML desde datos JSON del mueble
 const generateAnalysisHTML = (data) => {
   if (!data.tipo_mueble) return '';
@@ -303,9 +372,8 @@ export default function App() {
           if (parsed.error) {
             setAnalysis(parsed.error);
           } else {
-            // Convertir JSON a HTML renderizable
-            const html = generateAnalysisHTML(parsed);
-            setAnalysis(html);
+            // Guardar como objeto para renderizar con React
+            setAnalysis(parsed);
           }
         } catch (e) {
           setAnalysis(data.analysis);
@@ -1271,14 +1339,14 @@ export default function App() {
           {analysis && !loading && (
             <>
               <div className="analysis-result">
-                {analysis.startsWith('<div') ? (
-                  <div dangerouslySetInnerHTML={{ __html: analysis }} />
+                {typeof analysis === 'object' ? (
+                  <AnalysisRenderer data={analysis} />
                 ) : (
                   <>{analysis}</>
                 )}
               </div>
               
-              {(analysis.startsWith('<div') || (!analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐'))) && (
+              {(typeof analysis === 'string' && !analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐')) && (
                 <div className="feedback-section">
                   <label className="feedback-label">¿Fue útil este análisis?</label>
                   <div className="feedback-buttons">
