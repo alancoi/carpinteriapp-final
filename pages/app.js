@@ -428,7 +428,14 @@ export default function App() {
 
         // Parsear JSON de Claude Vision
         try {
-          const parsed = JSON.parse(data.analysis);
+          // Limpiar JSON - quitar saltos de línea y espacios extra
+          const cleanedAnalysis = data.analysis
+            .trim()
+            .replace(/\n/g, ' ')
+            .replace(/\r/g, ' ')
+            .replace(/\s+/g, ' ');
+          
+          const parsed = JSON.parse(cleanedAnalysis);
           if (parsed.error) {
             setAnalysis(parsed.error);
           } else {
@@ -453,7 +460,8 @@ export default function App() {
             }
           }
         } catch (e) {
-          setAnalysis(data.analysis);
+          console.error('Error parseando JSON:', e, 'Raw:', data.analysis.substring(0, 100));
+          setAnalysis('❌ Error al procesar la imagen. Intenta con una foto más clara.');
           // Decrementar usos incluso si hay error al parsear
           if (userId) {
             try {

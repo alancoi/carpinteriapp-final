@@ -48,18 +48,19 @@ INSTRUCCIONES CRÍTICAS:
 - Identifica QUÉ mueble es REALMENTE (mesa, armario, estante, silla, escritorio, etc)
 - Analiza la forma, estructura, componentes visibles
 - Extrae medidas visuales aproximadas pero REALISTAS
-- Devuelve SOLO JSON en UNA LÍNEA, sin explicaciones
+- Devuelve SOLO JSON en UNA ÚNICA LÍNEA, SIN SALTOS DE LÍNEA, sin explicaciones
 
 SI NO es mueble: {"error":"No es mueble o imagen inapropiada"}
 
-SI ES MUEBLE, devuelve JSON EXACTO en este formato (UNA LÍNEA):
+SI ES MUEBLE, devuelve JSON EXACTO en UNA SOLA LÍNEA (sin \\n, sin espacios extras):
 {"tipo_mueble":"[TIPO REAL que VES]","estilo":"[estilo visual]","medidas":{"largo":[número],"ancho":[número],"alto":[número]},"materiales":[{"nombre":"[material]","cantidad":"[cantidad]"}],"componentes":[{"nombre":"[nombre componente]","cantidad":[num],"medidas":"[medidas]","espesor":"[espesor o N/A]"}],"cortes":[{"componente":"[nombre]","medidas":"[L×A]","cantidad":[num],"desperdicio":"[%]"}],"desperdicio_total":"[%]","notas":["[nota técnica 1]","[nota técnica 2]","[nota técnica 3]"]}
 
 IMPORTANTE:
 - ANALIZA LA IMAGEN REALMENTE, no uses plantillas
 - El tipo_mueble debe coincidir CON LO QUE VES en la foto
 - Las medidas deben ser realistas para ese tipo de mueble
-- Los componentes deben ser los VISIBLES en la imagen`,
+- Los componentes deben ser los VISIBLES en la imagen
+- RESPONDE SOLO CON EL JSON, NADA MÁS`,
               },
             ],
           },
