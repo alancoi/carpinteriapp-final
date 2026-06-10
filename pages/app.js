@@ -334,9 +334,9 @@ export default function App() {
       }
 
       setUserId(data.user.id);
-      setNombre(data.user.nombre);
+      setNombre(data.user.nombre); // NOMBRE DE LA BD
       setPlan(data.user.plan || 'basico');
-      setUsosHoy(20); // Reset a 20 usos al hacer login
+      setUsosHoy(data.user.usosHoyRestantes || 20); // USOS DE LA BD, NO RESETEAR
       setIsLoggedIn(true);
       setAuthError('');
     } catch (error) {
@@ -434,13 +434,42 @@ export default function App() {
           } else {
             // Guardar como objeto para renderizar con React
             setAnalysis(parsed);
-            // Decrementar usos
-            setUsosHoy(prev => Math.max(0, prev - 1));
+            
+            // Decrementar usos en BD
+            if (userId) {
+              try {
+                const usosResponse = await fetch('/api/users/decrementar-usos', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ userId }),
+                });
+                const usosData = await usosResponse.json();
+                if (usosData.usosHoyRestantes !== undefined) {
+                  setUsosHoy(usosData.usosHoyRestantes);
+                }
+              } catch (err) {
+                console.error('Error decrementando usos:', err);
+              }
+            }
           }
         } catch (e) {
           setAnalysis(data.analysis);
           // Decrementar usos incluso si hay error al parsear
-          setUsosHoy(prev => Math.max(0, prev - 1));
+          if (userId) {
+            try {
+              const usosResponse = await fetch('/api/users/decrementar-usos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ userId }),
+              });
+              const usosData = await usosResponse.json();
+              if (usosData.usosHoyRestantes !== undefined) {
+                setUsosHoy(usosData.usosHoyRestantes);
+              }
+            } catch (err) {
+              console.error('Error decrementando usos:', err);
+            }
+          }
         }
       } catch (error) {
         setAnalysis(`❌ ${error.message}`);
@@ -845,9 +874,6 @@ export default function App() {
     setChatMessages([...chatMessages, userMessage]);
     setChatInput('');
     setChatLoading(true);
-    
-    // Decrementar usos
-    setUsosHoy(prev => Math.max(0, prev - 1));
 
     try {
       const response = await fetch('/api/chat', {
@@ -861,6 +887,23 @@ export default function App() {
 
       const data = await response.json();
       setChatMessages(prev => [...prev, { role: 'assistant', text: data.response }]);
+      
+      // Decrementar usos en BD
+      if (userId) {
+        try {
+          const usosResponse = await fetch('/api/users/decrementar-usos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId }),
+          });
+          const usosData = await usosResponse.json();
+          if (usosData.usosHoyRestantes !== undefined) {
+            setUsosHoy(usosData.usosHoyRestantes);
+          }
+        } catch (err) {
+          console.error('Error decrementando usos:', err);
+        }
+      }
     } catch (error) {
       setChatMessages(prev => [...prev, { role: 'assistant', text: '❌ Error conectando. Intenta de nuevo.' }]);
     } finally {

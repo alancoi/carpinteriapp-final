@@ -30,6 +30,18 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
 
+    // Verificar si debe resetear usos (cada 24 horas)
+    const ahora = new Date();
+    const ultimoReset = new Date(user.ultimoResetUsos || user.createdAt);
+    const diff = ahora - ultimoReset;
+    const hours = diff / (1000 * 60 * 60);
+    
+    if (hours >= 24) {
+      user.usosHoyRestantes = 20;
+      user.ultimoResetUsos = ahora;
+      await user.save();
+    }
+
     return res.status(200).json({
       success: true,
       message: 'Login exitoso',
@@ -38,6 +50,7 @@ export default async function handler(req, res) {
         nombre: user.nombre,
         email: user.email,
         plan: user.plan,
+        usosHoyRestantes: user.usosHoyRestantes || 20,
         proyectosGuardados: user.proyectosGuardados,
       },
     });
@@ -49,3 +62,4 @@ export default async function handler(req, res) {
     });
   }
 }
+

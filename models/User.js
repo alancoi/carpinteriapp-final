@@ -27,6 +27,14 @@ const userSchema = new mongoose.Schema(
       enum: ['basico', 'premium'],
       default: 'basico',
     },
+    usosHoyRestantes: {
+      type: Number,
+      default: 20,
+    },
+    ultimoResetUsos: {
+      type: Date,
+      default: new Date(),
+    },
     proyectosGuardados: {
       type: Number,
       default: 0,
