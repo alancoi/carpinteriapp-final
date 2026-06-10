@@ -35,6 +35,7 @@ export default async function handler(req, res) {
       message: 'Login exitoso',
       user: {
         id: user._id,
+        nombre: user.nombre,
         email: user.email,
         plan: user.plan,
         proyectosGuardados: user.proyectosGuardados,

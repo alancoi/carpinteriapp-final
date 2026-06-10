@@ -269,6 +269,8 @@ const generateAnalysisHTML = (data) => {
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
+  const [nombre, setNombre] = useState('');
+  const [plan, setPlan] = useState('basico');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [registerMode, setRegisterMode] = useState(false);
@@ -311,6 +313,11 @@ export default function App() {
     e.preventDefault();
     setAuthError('');
     
+    if (registerMode && !nombre) {
+      setAuthError('Por favor completa tu nombre');
+      return;
+    }
+    
     if (!email || !password) {
       setAuthError('Por favor completa todos los campos');
       return;
@@ -322,7 +329,7 @@ export default function App() {
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(registerMode ? { nombre, email, password } : { email, password }),
       });
 
       const data = await response.json();
@@ -333,6 +340,8 @@ export default function App() {
       }
 
       setUserId(data.user.id);
+      setNombre(data.user.nombre);
+      setPlan(data.user.plan || 'basico');
       setIsLoggedIn(true);
       setAuthError('');
       setRegisterMode(false);
@@ -1109,6 +1118,19 @@ export default function App() {
                 {registerMode ? '📝 Registro' : '🔐 Login'}
               </h2>
               
+              {registerMode && (
+                <div className="form-group">
+                  <label className="label">Nombre Completo</label>
+                  <input 
+                    type="text" 
+                    placeholder="Tu nombre" 
+                    value={nombre} 
+                    onChange={(e) => setNombre(e.target.value)} 
+                    required 
+                  />
+                </div>
+              )}
+              
               <div className="form-group">
                 <label className="label">Email (Usuario)</label>
                 <input 
@@ -1438,11 +1460,11 @@ export default function App() {
 
             <div className="user-section">
               <div className="user-info">
-                <div className="user-name">{email}</div>
+                <div className="user-name">{nombre}</div>
                 <div className="user-email">Usuario activo</div>
-                <div className="plan-badge">Plan Básico</div>
+                <div className="plan-badge">Plan {plan === 'premium' ? 'Premium' : 'Básico'}</div>
               </div>
-              <button className="logout-btn" onClick={() => {setIsLoggedIn(false); setEmail(''); setPassword('');}}>
+              <button className="logout-btn" onClick={() => {setIsLoggedIn(false); setNombre(''); setEmail(''); setPassword(''); setPlan('basico');}}>
                 <i className="fas fa-sign-out-alt"></i> Salir
               </button>
             </div>
@@ -1473,8 +1495,8 @@ export default function App() {
               </div>
             </div>
 
-            <button className="premium-button" onClick={() => setPremiumModalOpen(true)}>
-              <i className="fas fa-crown"></i> Beneficios Plan Premium
+            <button className="premium-button" disabled style={{opacity: 0.5, cursor: 'not-allowed'}}>
+              <i className="fas fa-crown"></i> Beneficios Plan Premium - Proximamente
             </button>
 
             <div className="footer-buttons">
@@ -1528,12 +1550,13 @@ export default function App() {
             <button 
               type="button"
               className="btn-primary" 
-              onClick={simulatePremiumPurchase}
+              disabled
               style={{
                 marginTop: '1.5rem', 
                 background: 'linear-gradient(135deg, #0D47A1, #FF8C00)',
                 width: '100%',
-                pointerEvents: 'auto'
+                opacity: 0.5,
+                cursor: 'not-allowed'
               }}
             >
               🔜 Proximamente

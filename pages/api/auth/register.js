@@ -8,10 +8,10 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { email, password } = req.body;
+    const { nombre, email, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email y contraseña requeridos' });
+    if (!nombre || !email || !password) {
+      return res.status(400).json({ error: 'Por favor completa todos los campos' });
     }
 
     if (password.length < 6) {
@@ -31,6 +31,7 @@ export default async function handler(req, res) {
 
     // Crear usuario
     const newUser = await User.create({
+      nombre,
       email,
       password: hashedPassword,
       plan: 'basico',
@@ -41,6 +42,7 @@ export default async function handler(req, res) {
       message: 'Usuario registrado exitosamente',
       user: {
         id: newUser._id,
+        nombre: newUser.nombre,
         email: newUser.email,
         plan: newUser.plan,
       },
