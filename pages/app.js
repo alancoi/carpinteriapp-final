@@ -457,12 +457,11 @@ export default function App() {
   };
 
   const downloadPDF = () => {
-    if (!analysis) {
+    if (!analysis || typeof analysis !== 'object') {
       alert('Por favor completa un análisis primero');
       return;
     }
     
-    // Cargar solo jsPDF
     const script = document.createElement('script');
     script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
     
@@ -470,171 +469,280 @@ export default function App() {
       try {
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF('p', 'mm', 'a4');
+        const w = 210;
+        const h = 297;
+        const margin = 12;
+        const contentW = w - (margin * 2);
+        let y = margin;
         
-        let yPos = 15;
+        // COLORES
+        const azul = [21, 101, 192];
+        const naranja = [255, 140, 0];
+        const gris = [100, 100, 100];
+        const grisClaro = [220, 220, 220];
         
-        // ENCABEZADO
-        pdf.setFontSize(18);
-        pdf.setTextColor(21, 101, 192);
-        pdf.text('ANÁLISIS TÉCNICO DE MUEBLE', 15, yPos);
-        yPos += 8;
+        // FUNCIONES HELPER
+        const addSection = (title) => {
+          if (y > h - 40) pdf.addPage();
+          pdf.setFontSize(13);
+          pdf.setTextColor(...azul);
+          pdf.setFont(undefined, 'bold');
+          pdf.text(title, margin, y);
+          y += 8;
+          pdf.setDrawColor(...naranja);
+          pdf.line(margin, y - 2, w - margin, y - 2);
+          y += 6;
+        };
         
-        pdf.setFontSize(10);
-        pdf.setTextColor(100, 100, 100);
-        pdf.text('CarpinteriAPP - El futuro de la carpintería', 15, yPos);
-        yPos += 7;
+        const addSpacing = (space = 3) => { y += space; };
         
-        pdf.setDrawColor(255, 140, 0);
-        pdf.line(15, yPos, 195, yPos);
-        yPos += 10;
+        // PORTADA
+        pdf.setFontSize(24);
+        pdf.setTextColor(...azul);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('ANÁLISIS TÉCNICO', w / 2, y, { align: 'center' });
+        y += 10;
+        pdf.setFontSize(24);
+        pdf.text('DE MUEBLE', w / 2, y, { align: 'center' });
+        y += 18;
+        
+        pdf.setFontSize(11);
+        pdf.setTextColor(...gris);
+        pdf.setFont(undefined, 'normal');
+        pdf.text(`${analysis.tipo_mueble} • ${analysis.estilo}`, w / 2, y, { align: 'center' });
+        y += 12;
+        
+        pdf.setFontSize(9);
+        pdf.setTextColor(180, 180, 180);
+        const fecha = new Date().toLocaleDateString('es-AR');
+        pdf.text(`CarpinteriAPP • ${fecha}`, w / 2, y, { align: 'center' });
+        y += 25;
         
         // MEDIDAS PRINCIPALES
-        pdf.setFontSize(12);
-        pdf.setTextColor(21, 101, 192);
-        pdf.text('MEDIDAS PRINCIPALES DEL MUEBLE', 15, yPos);
-        yPos += 8;
+        addSection('MEDIDAS PRINCIPALES');
         
-        // Recuadros de medidas
-        const medidas = [
-          { label: 'LARGO', valor: '180cm' },
-          { label: 'ANCHO', valor: '60cm' },
-          { label: 'ALTO', valor: '180cm' }
+        const medWidth = (contentW - 8) / 3;
+        const measures = [
+          { label: 'LARGO', value: `${analysis.medidas.largo}cm` },
+          { label: 'ANCHO', value: `${analysis.medidas.ancho}cm` },
+          { label: 'ALTO', value: `${analysis.medidas.alto}cm` }
         ];
         
-        medidas.forEach((medida, idx) => {
-          const xOffset = 20 + (idx * 55);
-          
+        let xMed = margin;
+        measures.forEach((m) => {
           // Recuadro
-          pdf.setDrawColor(21, 101, 192);
-          pdf.setLineWidth(1);
-          pdf.rect(xOffset, yPos - 8, 45, 20);
+          pdf.setFillColor(255, 243, 224);
+          pdf.setDrawColor(...naranja);
+          pdf.setLineWidth(0.5);
+          pdf.rect(xMed, y, medWidth, 18, 'FD');
           
           // Label
-          pdf.setFontSize(9);
-          pdf.setTextColor(100, 100, 100);
-          pdf.text(medida.label, xOffset + 22.5, yPos - 2, { align: 'center' });
+          pdf.setFontSize(8);
+          pdf.setTextColor(230, 81, 0);
+          pdf.setFont(undefined, 'bold');
+          pdf.text(m.label, xMed + medWidth / 2, y + 4, { align: 'center' });
           
           // Valor
-          pdf.setFontSize(14);
-          pdf.setTextColor(255, 140, 0);
+          pdf.setFontSize(12);
+          pdf.setTextColor(...naranja);
           pdf.setFont(undefined, 'bold');
-          pdf.text(medida.valor, xOffset + 22.5, yPos + 8, { align: 'center' });
+          pdf.text(m.value, xMed + medWidth / 2, y + 12, { align: 'center' });
+          
+          xMed += medWidth + 4;
+        });
+        y += 25;
+        addSpacing();
+        
+        // MATERIALES
+        if (analysis.materiales && analysis.materiales.length > 0) {
+          addSection('MATERIALES');
+          
+          pdf.setFontSize(9);
+          pdf.setTextColor(...gris);
           pdf.setFont(undefined, 'normal');
-        });
-        
-        yPos += 25;
-        
-        // CORTES DE PLACA
-        pdf.setFontSize(12);
-        pdf.setTextColor(21, 101, 192);
-        pdf.text('CORTES DE PLACA - MEDIDAS ESPECÍFICAS', 15, yPos);
-        yPos += 8;
-        
-        // Tabla de cortes
-        const tableData = [
-          ['Componente', 'Medidas (L × A)', 'Cant.'],
-          ['Laterales/Costados', '180 × 60cm', '2'],
-          ['Tablero Superior', '180 × 85cm', '1'],
-          ['Estantes', '80 × 60cm', '2'],
-          ['Refuerzos', '80 × 10cm', '4']
-        ];
-        
-        pdf.setFontSize(9);
-        tableData.forEach((row, idx) => {
-          const rowHeight = 6;
           
-          if (idx === 0) {
-            pdf.setFillColor(21, 101, 192);
-            pdf.setTextColor(255, 255, 255);
-            pdf.rect(15, yPos, 55, rowHeight, 'F');
-            pdf.rect(70, yPos, 80, rowHeight, 'F');
-            pdf.rect(150, yPos, 45, rowHeight, 'F');
-          } else {
-            pdf.setFillColor(245, 245, 245);
-            pdf.setTextColor(85, 85, 85);
-            pdf.rect(15, yPos, 55, rowHeight);
-            pdf.rect(70, yPos, 80, rowHeight);
-            pdf.rect(150, yPos, 45, rowHeight);
-          }
+          analysis.materiales.forEach((m, idx) => {
+            if (y > h - 25) {
+              pdf.addPage();
+              y = margin;
+            }
+            
+            // Línea alternada
+            if (idx % 2 === 0) {
+              pdf.setFillColor(249, 249, 249);
+              pdf.rect(margin, y - 3, contentW, 6, 'F');
+            }
+            
+            pdf.text(m.nombre, margin + 3, y);
+            pdf.setFont(undefined, 'bold');
+            pdf.setTextColor(...naranja);
+            pdf.text(m.cantidad, w - margin - 3, y, { align: 'right' });
+            pdf.setFont(undefined, 'normal');
+            pdf.setTextColor(...gris);
+            
+            y += 6;
+          });
+          addSpacing(3);
+        }
+        
+        // COMPONENTES
+        if (analysis.componentes && analysis.componentes.length > 0) {
+          addSection('COMPONENTES PRINCIPALES');
           
-          pdf.text(row[0], 18, yPos + 4.5);
-          pdf.text(row[1], 73, yPos + 4.5);
-          pdf.text(row[2], 168, yPos + 4.5, { align: 'center' });
+          pdf.setFontSize(8);
+          pdf.setTextColor(...gris);
+          pdf.setFont(undefined, 'normal');
           
-          yPos += rowHeight;
-        });
+          analysis.componentes.forEach((c, idx) => {
+            if (y > h - 30) {
+              pdf.addPage();
+              y = margin;
+            }
+            
+            pdf.setTextColor(...azul);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(c.nombre, margin + 2, y);
+            
+            y += 4;
+            pdf.setTextColor(...gris);
+            pdf.setFont(undefined, 'normal');
+            pdf.setFontSize(7);
+            
+            pdf.text(`Cant: ${c.cantidad}  •  Med: ${c.medidas}`, margin + 3, y);
+            if (c.espesor && c.espesor !== 'N/A') {
+              y += 3;
+              pdf.text(`Espesor: ${c.espesor}`, margin + 3, y);
+            }
+            
+            y += 5;
+            pdf.setFontSize(8);
+          });
+          addSpacing(2);
+        }
         
-        yPos += 5;
-        
-        // LISTA DE COMPRA
-        pdf.setFontSize(12);
-        pdf.setTextColor(21, 101, 192);
-        pdf.text('LISTA DE COMPRA', 15, yPos);
-        yPos += 7;
-        
-        const compraData = [
-          ['Material', 'Cantidad'],
-          ['MDF/Madera', '~6 m²'],
-          ['Tornillos 5×40mm', '24 unidades'],
-          ['Canto PVC', '~8 metros'],
-          ['Adhesivo PVA', '250 ml']
-        ];
-        
-        pdf.setFontSize(9);
-        compraData.forEach((row, idx) => {
-          const rowHeight = 5;
+        // TABLA DE CORTES
+        if (analysis.cortes && analysis.cortes.length > 0) {
+          addSection('CORTES DE PLACA');
           
-          if (idx === 0) {
-            pdf.setFillColor(21, 101, 192);
-            pdf.setTextColor(255, 255, 255);
-            pdf.rect(15, yPos, 90, rowHeight, 'F');
-            pdf.rect(105, yPos, 90, rowHeight, 'F');
-          } else {
-            pdf.setFillColor(250, 250, 250);
-            pdf.setTextColor(85, 85, 85);
-            pdf.rect(15, yPos, 90, rowHeight);
-            pdf.rect(105, yPos, 90, rowHeight);
-          }
+          const colW = [55, 40, 20, 25];
+          const headers = ['Componente', 'Medidas', 'Cant.', 'Desp.'];
           
-          pdf.text(row[0], 18, yPos + 3.5);
-          pdf.text(row[1], 108, yPos + 3.5);
+          // Headers
+          pdf.setFillColor(...azul);
+          pdf.setTextColor(255, 255, 255);
+          pdf.setFont(undefined, 'bold');
+          pdf.setFontSize(8);
           
-          yPos += rowHeight;
-        });
+          let xCol = margin;
+          headers.forEach((h, i) => {
+            pdf.rect(xCol, y, colW[i], 6, 'F');
+            pdf.text(h, xCol + 1, y + 4);
+            xCol += colW[i];
+          });
+          y += 7;
+          
+          // Rows
+          pdf.setFont(undefined, 'normal');
+          pdf.setTextColor(...gris);
+          pdf.setFontSize(7);
+          
+          analysis.cortes.forEach((c, idx) => {
+            if (y > h - 20) {
+              pdf.addPage();
+              y = margin;
+              addSection('CORTES DE PLACA (continuación)');
+            }
+            
+            if (idx % 2 === 0) {
+              pdf.setFillColor(250, 250, 250);
+              pdf.rect(margin, y, contentW, 5, 'F');
+            }
+            
+            xCol = margin;
+            
+            pdf.setTextColor(...gris);
+            pdf.setFont(undefined, 'normal');
+            pdf.text(c.componente.substring(0, 20), xCol + 1, y + 3);
+            xCol += colW[0];
+            
+            pdf.text(c.medidas, xCol + 1, y + 3);
+            xCol += colW[1];
+            
+            pdf.text(c.cantidad.toString(), xCol + 1, y + 3);
+            xCol += colW[2];
+            
+            pdf.setTextColor(...naranja);
+            pdf.setFont(undefined, 'bold');
+            pdf.text(c.desperdicio, xCol + 1, y + 3);
+            
+            y += 5;
+          });
+          addSpacing(3);
+        }
         
-        yPos += 5;
+        // DESPERDICIO TOTAL
+        if (y > h - 30) pdf.addPage();
+        addSection('DESPERDICIO TOTAL DE PLACA');
         
-        // NOTAS TÉCNICAS
-        pdf.setFontSize(11);
-        pdf.setTextColor(21, 101, 192);
-        pdf.text('NOTAS TÉCNICAS IMPORTANTES', 15, yPos);
-        yPos += 5;
+        pdf.setFillColor(255, 243, 224);
+        pdf.setDrawColor(...naranja);
+        pdf.setLineWidth(1);
+        pdf.rect(margin, y, contentW, 15, 'FD');
         
-        pdf.setFontSize(9);
-        pdf.setTextColor(85, 85, 85);
-        pdf.text('⚠️ Todas las medidas son aproximadas en centímetros', 18, yPos);
-        yPos += 4;
-        pdf.text('⚠️ Verificar escuadra y nivelación durante el armado', 18, yPos);
-        yPos += 4;
-        pdf.text('⚠️ Respetar tolerancias ±2mm en cortes precisos', 18, yPos);
+        pdf.setFontSize(8);
+        pdf.setTextColor(230, 81, 0);
+        pdf.setFont(undefined, 'bold');
+        pdf.text('275 × 183 cm', margin + 5, y + 4);
+        
+        pdf.setFontSize(18);
+        pdf.setTextColor(...naranja);
+        pdf.text(analysis.desperdicio_total, margin + 5, y + 11);
+        
+        y += 20;
+        addSpacing(3);
+        
+        // RECOMENDACIONES
+        if (analysis.notas && analysis.notas.length > 0) {
+          if (y > h - 35) pdf.addPage();
+          addSection('RECOMENDACIONES TÉCNICAS');
+          
+          pdf.setFontSize(8);
+          pdf.setTextColor(...gris);
+          pdf.setFont(undefined, 'normal');
+          
+          analysis.notas.forEach((n, idx) => {
+            if (y > h - 20) {
+              pdf.addPage();
+              y = margin;
+              addSection('RECOMENDACIONES (continuación)');
+            }
+            
+            const lines = pdf.splitTextToSize(`${idx + 1}. ${n}`, contentW - 5);
+            lines.forEach(line => {
+              pdf.text(line, margin + 3, y);
+              y += 4;
+            });
+            y += 2;
+          });
+        }
         
         // PIE DE PÁGINA
-        pdf.setFontSize(8);
-        pdf.setTextColor(150, 150, 150);
-        pdf.line(15, 285, 195, 285);
-        pdf.text(
-          `Generado: ${new Date().toLocaleDateString('es-AR')} | CarpinteriAPP © 2026 | Medidas aproximadas`,
-          105,
-          290,
-          { align: 'center' }
-        );
+        const pageCount = pdf.internal.pages.length - 1;
+        for (let i = 1; i <= pageCount; i++) {
+          pdf.setPage(i);
+          pdf.setFontSize(7);
+          pdf.setTextColor(180, 180, 180);
+          pdf.text(`Página ${i} de ${pageCount}`, w / 2, h - 5, { align: 'center' });
+          pdf.text('CarpinteriAPP - Análisis Profesional para Carpinteros', w / 2, h - 2, { align: 'center' });
+        }
         
-        pdf.save('analisis-carpinteria.pdf');
-        alert('✅ PDF descargado exitosamente');
+        // Descargar
+        const filename = `Analisis_${analysis.tipo_mueble}_${new Date().getTime()}.pdf`;
+        pdf.save(filename);
         
-      } catch(error) {
-        console.error('Error al generar PDF:', error);
-        alert('Error: ' + error.message);
+      } catch (error) {
+        console.error('Error generando PDF:', error);
+        alert('Error al generar PDF: ' + error.message);
       }
     };
     
