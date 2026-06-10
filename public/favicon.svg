@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1565C0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FF8C00;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Fondo redondeado -->
+  <rect width="200" height="200" rx="40" fill="url(#bgGradient)"/>
+  
+  <!-- Martillo -->
+  <g transform="translate(50, 40)">
+    <!-- Cabeza del martillo -->
+    <rect x="15" y="0" width="35" height="25" rx="4" fill="#FFA500" stroke="#333" stroke-width="1.5"/>
+    <!-- Muesca del martillo -->
+    <circle cx="32" cy="12" r="8" fill="#1565C0"/>
+    <!-- Mango del martillo -->
+    <rect x="28" y="25" width="8" height="45" fill="#E0E0E0" stroke="#333" stroke-width="1"/>
+    <!-- Base del mango -->
+    <circle cx="32" cy="73" r="6" fill="#333"/>
+  </g>
+  
+  <!-- Serrucho -->
+  <g transform="translate(75, 90) rotate(-20)">
+    <!-- Hoja del serrucho -->
+    <rect x="0" y="0" width="50" height="9" fill="#E0E0E0" stroke="#333" stroke-width="1"/>
+    <!-- Dientes del serrucho -->
+    <g stroke="#333" stroke-width="1" fill="none">
+      <line x1="6" y1="9" x2="9" y2="14"/>
+      <line x1="14" y1="9" x2="17" y2="14"/>
+      <line x1="22" y1="9" x2="25" y2="14"/>
+      <line x1="30" y1="9" x2="33" y2="14"/>
+      <line x1="38" y1="9" x2="41" y2="14"/>
+      <line x1="46" y1="9" x2="49" y2="14"/>
+    </g>
+    <!-- Mango del serrucho -->
+    <rect x="10" y="14" width="28" height="14" rx="3" fill="#FF8C00" stroke="#333" stroke-width="1.5"/>
+    <!-- Detalles del mango -->
+    <circle cx="18" cy="21" r="2" fill="#333"/>
+    <circle cx="32" cy="21" r="2" fill="#333"/>
+  </g>
+  
+  <!-- Brillo/Efecto -->
+  <rect width="200" height="200" rx="40" fill="none" stroke="#FFF" stroke-width="2" opacity="0.2"/>
+</svg>
