@@ -45,9 +45,9 @@ const AnalysisRenderer = ({ data }) => {
           <div style={{ color: '#1565C0', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '8px' }}>Materiales</div>
           <div style={{ background: '#f9f9f9', border: '1px solid #e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
             {data.materiales.map((m, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderBottom: i < data.materiales.length - 1 ? '1px solid #eee' : 'none', fontSize: '12px' }}>
-                <span style={{ fontWeight: '500', wordBreak: 'break-word' }}>{m.nombre}</span>
-                <span style={{ color: '#FF8C00', fontWeight: 'bold', marginLeft: '10px', whiteSpace: 'nowrap' }}>{m.cantidad}</span>
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', borderBottom: i < data.materiales.length - 1 ? '1px solid #eee' : 'none', fontSize: '12px', minWidth: 0 }}>
+                <span style={{ fontWeight: '500', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>{m.nombre}</span>
+                <span style={{ color: '#FF8C00', fontWeight: 'bold', marginLeft: '15px', whiteSpace: 'nowrap', flexShrink: 0 }}>{m.cantidad}</span>
               </div>
             ))}
           </div>
