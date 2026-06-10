@@ -5,54 +5,49 @@ const AnalysisRenderer = ({ data }) => {
   if (!data || !data.tipo_mueble) return null;
   
   return (
-    <div style={{ padding: '20px', fontSize: '14px', lineHeight: '1.7', color: '#333', fontFamily: 'Arial, sans-serif' }}>
+    <div style={{ padding: '15px', fontSize: '13px', lineHeight: '1.6', color: '#333', fontFamily: 'Arial, sans-serif' }}>
       
       {/* ENCABEZADO */}
-      <div style={{ marginBottom: '25px', paddingBottom: '15px', borderBottom: '3px solid #FF8C00' }}>
-        <h2 style={{ color: '#1565C0', fontSize: '20px', marginTop: 0, marginBottom: '5px' }}>Análisis Técnico de Mueble</h2>
-        <p style={{ color: '#999', fontSize: '12px', marginTop: 0, marginBottom: 0 }}>CarpinteriAPP - Análisis profesional</p>
+      <div style={{ marginBottom: '20px', paddingBottom: '12px', borderBottom: '3px solid #FF8C00' }}>
+        <h2 style={{ color: '#1565C0', fontSize: '18px', marginTop: 0, marginBottom: '3px' }}>Análisis Técnico de Mueble</h2>
+        <p style={{ color: '#999', fontSize: '11px', marginTop: 0, marginBottom: 0 }}>CarpinteriAPP</p>
       </div>
 
-      {/* TIPO Y ESTILO */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '25px' }}>
-        <div style={{ background: '#f9f9f9', padding: '15px', border: '1px solid #e0e0e0', borderRadius: '6px' }}>
-          <div style={{ fontSize: '11px', color: '#999', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '8px' }}>Tipo de Mueble</div>
-          <div style={{ fontSize: '16px', color: '#1565C0', fontWeight: 'bold' }}>{data.tipo_mueble}</div>
-        </div>
-        <div style={{ background: '#f9f9f9', padding: '15px', border: '1px solid #e0e0e0', borderRadius: '6px' }}>
-          <div style={{ fontSize: '11px', color: '#999', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '8px' }}>Estilo</div>
-          <div style={{ fontSize: '16px', color: '#1565C0', fontWeight: 'bold' }}>{data.estilo}</div>
+      {/* TIPO Y ESTILO - SOLO TEXTO */}
+      <div style={{ marginBottom: '20px' }}>
+        <div style={{ color: '#1565C0', fontWeight: 'bold', fontSize: '13px', marginBottom: '5px' }}>
+          {data.tipo_mueble} • {data.estilo}
         </div>
       </div>
 
       {/* MEDIDAS PRINCIPALES */}
-      <div style={{ marginBottom: '25px' }}>
-        <h3 style={{ color: '#1565C0', fontSize: '13px', textTransform: 'uppercase', fontWeight: 'bold', marginTop: 0, marginBottom: '12px' }}>Medidas Principales</h3>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '12px' }}>
-          <div style={{ background: '#FFF3E0', padding: '16px', border: '2px solid #FF8C00', borderRadius: '6px', textAlign: 'center' }}>
-            <div style={{ fontSize: '10px', color: '#E65100', fontWeight: 'bold', marginBottom: '8px' }}>LARGO</div>
-            <div style={{ fontSize: '22px', color: '#FF8C00', fontWeight: 'bold' }}>{data.medidas.largo}cm</div>
+      <div style={{ marginBottom: '20px' }}>
+        <div style={{ color: '#1565C0', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '10px' }}>Medidas</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(90px, 1fr))', gap: '10px' }}>
+          <div style={{ background: '#FFF3E0', padding: '12px', border: '2px solid #FF8C00', borderRadius: '4px', textAlign: 'center' }}>
+            <div style={{ fontSize: '9px', color: '#E65100', fontWeight: 'bold', marginBottom: '6px' }}>LARGO</div>
+            <div style={{ fontSize: '18px', color: '#FF8C00', fontWeight: 'bold' }}>{data.medidas.largo}cm</div>
           </div>
-          <div style={{ background: '#FFF3E0', padding: '16px', border: '2px solid #FF8C00', borderRadius: '6px', textAlign: 'center' }}>
-            <div style={{ fontSize: '10px', color: '#E65100', fontWeight: 'bold', marginBottom: '8px' }}>ANCHO</div>
-            <div style={{ fontSize: '22px', color: '#FF8C00', fontWeight: 'bold' }}>{data.medidas.ancho}cm</div>
+          <div style={{ background: '#FFF3E0', padding: '12px', border: '2px solid #FF8C00', borderRadius: '4px', textAlign: 'center' }}>
+            <div style={{ fontSize: '9px', color: '#E65100', fontWeight: 'bold', marginBottom: '6px' }}>ANCHO</div>
+            <div style={{ fontSize: '18px', color: '#FF8C00', fontWeight: 'bold' }}>{data.medidas.ancho}cm</div>
           </div>
-          <div style={{ background: '#FFF3E0', padding: '16px', border: '2px solid #FF8C00', borderRadius: '6px', textAlign: 'center' }}>
-            <div style={{ fontSize: '10px', color: '#E65100', fontWeight: 'bold', marginBottom: '8px' }}>ALTO</div>
-            <div style={{ fontSize: '22px', color: '#FF8C00', fontWeight: 'bold' }}>{data.medidas.alto}cm</div>
+          <div style={{ background: '#FFF3E0', padding: '12px', border: '2px solid #FF8C00', borderRadius: '4px', textAlign: 'center' }}>
+            <div style={{ fontSize: '9px', color: '#E65100', fontWeight: 'bold', marginBottom: '6px' }}>ALTO</div>
+            <div style={{ fontSize: '18px', color: '#FF8C00', fontWeight: 'bold' }}>{data.medidas.alto}cm</div>
           </div>
         </div>
       </div>
 
       {/* MATERIALES */}
       {data.materiales && data.materiales.length > 0 && (
-        <div style={{ marginBottom: '25px' }}>
-          <h3 style={{ color: '#1565C0', fontSize: '13px', textTransform: 'uppercase', fontWeight: 'bold', marginTop: 0, marginBottom: '12px' }}>Materiales</h3>
-          <div style={{ background: '#f9f9f9', border: '1px solid #e0e0e0', borderRadius: '6px', overflow: 'hidden' }}>
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{ color: '#1565C0', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '8px' }}>Materiales</div>
+          <div style={{ background: '#f9f9f9', border: '1px solid #e0e0e0', borderRadius: '4px', overflow: 'hidden' }}>
             {data.materiales.map((m, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 15px', borderBottom: i < data.materiales.length - 1 ? '1px solid #eee' : 'none', fontSize: '13px' }}>
-                <span style={{ fontWeight: '500' }}>{m.nombre}</span>
-                <span style={{ color: '#FF8C00', fontWeight: 'bold' }}>{m.cantidad}</span>
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 12px', borderBottom: i < data.materiales.length - 1 ? '1px solid #eee' : 'none', fontSize: '12px' }}>
+                <span style={{ fontWeight: '500', wordBreak: 'break-word' }}>{m.nombre}</span>
+                <span style={{ color: '#FF8C00', fontWeight: 'bold', marginLeft: '10px', whiteSpace: 'nowrap' }}>{m.cantidad}</span>
               </div>
             ))}
           </div>
@@ -61,16 +56,16 @@ const AnalysisRenderer = ({ data }) => {
 
       {/* COMPONENTES */}
       {data.componentes && data.componentes.length > 0 && (
-        <div style={{ marginBottom: '25px' }}>
-          <h3 style={{ color: '#1565C0', fontSize: '13px', textTransform: 'uppercase', fontWeight: 'bold', marginTop: 0, marginBottom: '12px' }}>Componentes Principales</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
+        <div style={{ marginBottom: '20px' }}>
+          <div style={{ color: '#1565C0', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '8px' }}>Componentes</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px' }}>
             {data.componentes.map((c, i) => (
-              <div key={i} style={{ background: '#f0f7ff', padding: '12px', border: '1px solid #1565C0', borderRadius: '6px', fontSize: '12px' }}>
-                <div style={{ fontWeight: 'bold', color: '#1565C0', marginBottom: '8px', fontSize: '13px' }}>{c.nombre}</div>
-                <div style={{ lineHeight: '1.6', color: '#555' }}>
+              <div key={i} style={{ background: '#f0f7ff', padding: '10px', border: '1px solid #1565C0', borderRadius: '4px', fontSize: '11px' }}>
+                <div style={{ fontWeight: 'bold', color: '#1565C0', marginBottom: '6px', wordBreak: 'break-word' }}>{c.nombre}</div>
+                <div style={{ lineHeight: '1.5', color: '#555' }}>
                   <div><strong>Cant:</strong> {c.cantidad}</div>
-                  <div><strong>Medidas:</strong> {c.medidas}</div>
-                  {c.espesor && c.espesor !== 'N/A' && <div><strong>Espesor:</strong> {c.espesor}</div>}
+                  <div><strong>Med:</strong> {c.medidas}</div>
+                  {c.espesor && c.espesor !== 'N/A' && <div><strong>Esp:</strong> {c.espesor}</div>}
                 </div>
               </div>
             ))}
@@ -80,24 +75,24 @@ const AnalysisRenderer = ({ data }) => {
 
       {/* TABLA DE CORTES */}
       {data.cortes && data.cortes.length > 0 && (
-        <div style={{ marginBottom: '25px', overflowX: 'auto' }}>
-          <h3 style={{ color: '#1565C0', fontSize: '13px', textTransform: 'uppercase', fontWeight: 'bold', marginTop: 0, marginBottom: '12px' }}>Cortes de Placa</h3>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px', minWidth: '300px' }}>
+        <div style={{ marginBottom: '20px', overflowX: 'auto' }}>
+          <div style={{ color: '#1565C0', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '8px' }}>Cortes</div>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', minWidth: '280px' }}>
             <thead>
               <tr style={{ background: '#1565C0', color: 'white' }}>
-                <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold' }}>Componente</th>
-                <th style={{ padding: '12px', textAlign: 'left', fontWeight: 'bold' }}>Medidas</th>
-                <th style={{ padding: '12px', textAlign: 'center', fontWeight: 'bold' }}>Cant</th>
-                <th style={{ padding: '12px', textAlign: 'center', fontWeight: 'bold' }}>Desperdicio</th>
+                <th style={{ padding: '8px', textAlign: 'left', fontWeight: 'bold', wordBreak: 'break-word' }}>Comp</th>
+                <th style={{ padding: '8px', textAlign: 'left', fontWeight: 'bold' }}>Med</th>
+                <th style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>Cant</th>
+                <th style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>Desp</th>
               </tr>
             </thead>
             <tbody>
               {data.cortes.map((c, i) => (
                 <tr key={i} style={{ background: i % 2 === 0 ? '#fafafa' : 'white', borderBottom: '1px solid #e0e0e0' }}>
-                  <td style={{ padding: '12px', fontWeight: '500' }}>{c.componente}</td>
-                  <td style={{ padding: '12px' }}>{c.medidas}</td>
-                  <td style={{ padding: '12px', textAlign: 'center' }}>{c.cantidad}</td>
-                  <td style={{ padding: '12px', textAlign: 'center', color: '#FF8C00', fontWeight: 'bold' }}>{c.desperdicio}</td>
+                  <td style={{ padding: '8px', fontWeight: '500', wordBreak: 'break-word' }}>{c.componente.substring(0, 15)}</td>
+                  <td style={{ padding: '8px', wordBreak: 'break-word' }}>{c.medidas}</td>
+                  <td style={{ padding: '8px', textAlign: 'center' }}>{c.cantidad}</td>
+                  <td style={{ padding: '8px', textAlign: 'center', color: '#FF8C00', fontWeight: 'bold' }}>{c.desperdicio}</td>
                 </tr>
               ))}
             </tbody>
@@ -107,20 +102,20 @@ const AnalysisRenderer = ({ data }) => {
 
       {/* DESPERDICIO */}
       {data.desperdicio_total && (
-        <div style={{ marginBottom: '25px', padding: '15px', background: '#FFF3E0', border: '2px solid #FF8C00', borderRadius: '6px' }}>
-          <div style={{ fontSize: '11px', color: '#E65100', fontWeight: 'bold', marginBottom: '8px' }}>DESPERDICIO TOTAL ESTIMADO</div>
-          <div style={{ fontSize: '22px', color: '#FF8C00', fontWeight: 'bold' }}>{data.desperdicio_total}</div>
+        <div style={{ marginBottom: '20px', padding: '12px', background: '#FFF3E0', border: '2px solid #FF8C00', borderRadius: '4px' }}>
+          <div style={{ fontSize: '10px', color: '#E65100', fontWeight: 'bold', marginBottom: '6px' }}>DESPERDICIO TOTAL</div>
+          <div style={{ fontSize: '18px', color: '#FF8C00', fontWeight: 'bold' }}>{data.desperdicio_total}</div>
         </div>
       )}
 
       {/* RECOMENDACIONES */}
       {data.notas && data.notas.length > 0 && (
-        <div style={{ marginBottom: '20px', padding: '15px', background: '#f0f7ff', border: '2px solid #1565C0', borderRadius: '6px' }}>
-          <h3 style={{ color: '#1565C0', fontSize: '13px', textTransform: 'uppercase', fontWeight: 'bold', marginTop: 0, marginBottom: '12px' }}>Recomendaciones</h3>
-          <div style={{ fontSize: '13px', color: '#555', lineHeight: '1.8' }}>
+        <div style={{ marginBottom: '15px', padding: '12px', background: '#f0f7ff', border: '2px solid #1565C0', borderRadius: '4px' }}>
+          <div style={{ color: '#1565C0', fontSize: '12px', textTransform: 'uppercase', fontWeight: 'bold', marginBottom: '8px' }}>Recomendaciones</div>
+          <div style={{ fontSize: '11px', color: '#555', lineHeight: '1.6' }}>
             {data.notas.map((n, i) => (
-              <div key={i} style={{ display: 'flex', marginBottom: i < data.notas.length - 1 ? '10px' : '0' }}>
-                <span style={{ color: '#FF8C00', fontWeight: 'bold', marginRight: '10px', minWidth: '20px' }}>•</span>
+              <div key={i} style={{ display: 'flex', marginBottom: i < data.notas.length - 1 ? '8px' : '0', wordBreak: 'break-word' }}>
+                <span style={{ color: '#FF8C00', fontWeight: 'bold', marginRight: '8px', minWidth: '16px' }}>•</span>
                 <span>{n}</span>
               </div>
             ))}
@@ -129,9 +124,8 @@ const AnalysisRenderer = ({ data }) => {
       )}
 
       {/* PIE */}
-      <div style={{ borderTop: '2px solid #e0e0e0', paddingTop: '15px', fontSize: '11px', color: '#999', textAlign: 'center' }}>
-        <p style={{ margin: '0 0 5px 0' }}>⚠️ Todas las medidas son aproximadas en centímetros</p>
-        <p style={{ margin: 0 }}>Análisis basado en imagen con IA - CarpinteriAPP</p>
+      <div style={{ borderTop: '1px solid #e0e0e0', paddingTop: '10px', fontSize: '10px', color: '#999', textAlign: 'center' }}>
+        Medidas aproximadas en cm
       </div>
 
     </div>
