@@ -206,103 +206,120 @@ export default function App() {
         pdf.setDrawColor(255, 140, 0);
         pdf.line(15, 30, 195, 30);
         
-        // Crear plano isométrico con SVG
-        pdf.setFontSize(12);
+        // Título de plano
+        pdf.setFontSize(11);
         pdf.setTextColor(21, 101, 192);
-        pdf.text('PLANO ISOMÉTRICO', 15, 45);
+        pdf.text('PLANO TÉCNICO - VISTA DEL MUEBLE', 15, 40);
         
-        // Crear SVG isométrico
-        const svgPlano = `
-          <svg width="180" height="120" xmlns="http://www.w3.org/2000/svg">
-            <!-- Cara superior (techo) -->
-            <polygon points="40,30 100,15 160,30 100,45" fill="#E8E8E8" stroke="#333" stroke-width="2"/>
-            
-            <!-- Cara frontal -->
-            <polygon points="40,30 40,95 100,110 100,45" fill="#F5F5F5" stroke="#333" stroke-width="2"/>
-            
-            <!-- Cara lateral derecha -->
-            <polygon points="100,45 100,110 160,95 160,30" fill="#D0D0D0" stroke="#333" stroke-width="2"/>
-            
-            <!-- Aristas principales -->
-            <line x1="40" y1="30" x2="100" y2="15" stroke="#333" stroke-width="1.5"/>
-            <line x1="100" y1="15" x2="160" y2="30" stroke="#333" stroke-width="1.5"/>
-            
-            <!-- Medidas - Altura -->
-            <line x1="25" y1="30" x2="25" y2="95" stroke="#FF8C00" stroke-width="1" stroke-dasharray="3,3"/>
-            <text x="8" y="65" font-family="Arial" font-size="9" font-weight="bold" fill="#FF8C00">73cm</text>
-            
-            <!-- Medidas - Ancho -->
-            <line x1="40" y1="115" x2="100" y2="115" stroke="#FF8C00" stroke-width="1" stroke-dasharray="3,3"/>
-            <text x="60" y="125" font-family="Arial" font-size="9" font-weight="bold" fill="#FF8C00">180cm</text>
-            
-            <!-- Medidas - Profundidad -->
-            <line x1="165" y1="25" x2="165" y2="50" stroke="#FF8C00" stroke-width="1" stroke-dasharray="3,3"/>
-            <text x="168" y="40" font-family="Arial" font-size="9" font-weight="bold" fill="#FF8C00">85cm</text>
-          </svg>
-        `;
+        // Obtener la foto del preview si existe
+        const previewImg = document.querySelector('.preview-image') || 
+                          document.querySelector('img[alt*="preview"]') ||
+                          document.querySelector('.upload-preview img');
         
-        // Convertir SVG a imagen
-        const svgBlob = new Blob([svgPlano], { type: 'image/svg+xml' });
-        const svgUrl = URL.createObjectURL(svgBlob);
-        const img = new Image();
-        
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = 180;
-          canvas.height = 120;
-          const ctx = canvas.getContext('2d');
-          ctx.fillStyle = '#FFFFFF';
-          ctx.fillRect(0, 0, 180, 120);
-          ctx.drawImage(img, 0, 0);
-          
-          const imgData = canvas.toDataURL('image/png');
-          pdf.addImage(imgData, 'PNG', 25, 50, 160, 55);
-          
-          // Especificaciones técnicas
+        if (previewImg && previewImg.src) {
+          // Agregar la foto del mueble
+          const imgSrc = previewImg.src;
+          window.html2canvas(previewImg, {
+            scale: 1.5,
+            useCORS: true,
+            logging: false,
+            backgroundColor: '#ffffff'
+          }).then((canvas) => {
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 160;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'PNG', 18, 45, imgWidth, imgHeight);
+            
+            // Medidas bajo la foto
+            const photoEndY = 45 + imgHeight + 5;
+            pdf.setFontSize(10);
+            pdf.setTextColor(255, 140, 0);
+            pdf.text('180cm (largo) × 85cm (ancho) × 73cm (alto)', 105, photoEndY, { align: 'center' });
+            
+            // Especificaciones técnicas
+            const specY = photoEndY + 12;
+            pdf.setFontSize(11);
+            pdf.setTextColor(21, 101, 192);
+            pdf.text('ESPECIFICACIONES TÉCNICAS', 15, specY);
+            
+            // Capturar información del análisis
+            const element = document.querySelector('.analysis-result');
+            window.html2canvas(element, {
+              scale: 1.2,
+              useCORS: true,
+              logging: false,
+              backgroundColor: '#ffffff'
+            }).then((canvasAnalysis) => {
+              const imgAnalysis = canvasAnalysis.toDataURL('image/png');
+              const analysisHeight = (canvasAnalysis.height * 160) / canvasAnalysis.width;
+              
+              pdf.addImage(imgAnalysis, 'PNG', 15, specY + 8, 160, analysisHeight);
+              
+              // Agregar más páginas si es necesario
+              let totalHeight = specY + 8 + analysisHeight;
+              const pageHeight = pdf.internal.pageSize.getHeight();
+              
+              if (totalHeight > pageHeight - 20) {
+                pdf.addPage();
+              }
+              
+              // Pie de página en todas las páginas
+              const pageCount = pdf.getNumberOfPages();
+              for (let i = 1; i <= pageCount; i++) {
+                pdf.setPage(i);
+                pdf.setFontSize(8);
+                pdf.setTextColor(150, 150, 150);
+                const lastPageHeight = pdf.internal.pageSize.getHeight();
+                pdf.line(15, lastPageHeight - 10, 195, lastPageHeight - 10);
+                pdf.text(
+                  `Documento generado: ${new Date().toLocaleDateString('es-AR')} | Medidas aproximadas en cm | CarpinteriAPP`,
+                  105,
+                  lastPageHeight - 5,
+                  { align: 'center' }
+                );
+              }
+              
+              pdf.save('analisis-carpinteria.pdf');
+            });
+          });
+        } else {
+          // Si no hay foto, solo agregar especificaciones
           pdf.setFontSize(11);
           pdf.setTextColor(21, 101, 192);
-          pdf.text('ESPECIFICACIONES TÉCNICAS', 15, 115);
+          pdf.text('ESPECIFICACIONES TÉCNICAS', 15, 50);
           
-          // Capturar y agregar información del análisis
           const element = document.querySelector('.analysis-result');
           window.html2canvas(element, {
-            scale: 1.5,
+            scale: 1.2,
             useCORS: true,
             logging: false,
             backgroundColor: '#ffffff'
           }).then((canvasAnalysis) => {
             const imgAnalysis = canvasAnalysis.toDataURL('image/png');
-            const scaledHeight = (canvasAnalysis.height * 160) / canvasAnalysis.width;
+            const analysisHeight = (canvasAnalysis.height * 160) / canvasAnalysis.width;
             
-            pdf.addImage(imgAnalysis, 'PNG', 15, 120, 160, scaledHeight);
-            
-            // Agregar más páginas si es necesario
-            let yPosition = 120 + scaledHeight + 10;
-            const pageHeight = pdf.internal.pageSize.getHeight();
-            
-            if (yPosition > pageHeight - 20) {
-              pdf.addPage();
-              yPosition = 20;
-            }
+            pdf.addImage(imgAnalysis, 'PNG', 15, 58, 160, analysisHeight);
             
             // Pie de página
-            pdf.setFontSize(8);
-            pdf.setTextColor(150, 150, 150);
-            const lastPageHeight = pdf.internal.pageSize.getHeight();
-            pdf.line(15, lastPageHeight - 10, 195, lastPageHeight - 10);
-            pdf.text(
-              `Documento generado: ${new Date().toLocaleDateString('es-AR')} | Medidas aproximadas en cm | CarpinteriAPP`,
-              105,
-              lastPageHeight - 5,
-              { align: 'center' }
-            );
+            const pageCount = pdf.getNumberOfPages();
+            for (let i = 1; i <= pageCount; i++) {
+              pdf.setPage(i);
+              pdf.setFontSize(8);
+              pdf.setTextColor(150, 150, 150);
+              const lastPageHeight = pdf.internal.pageSize.getHeight();
+              pdf.line(15, lastPageHeight - 10, 195, lastPageHeight - 10);
+              pdf.text(
+                `Documento generado: ${new Date().toLocaleDateString('es-AR')} | Medidas aproximadas en cm | CarpinteriAPP`,
+                105,
+                lastPageHeight - 5,
+                { align: 'center' }
+              );
+            }
             
             pdf.save('analisis-carpinteria.pdf');
-            URL.revokeObjectURL(svgUrl);
           });
-        };
-        
-        img.src = svgUrl;
+        }
       };
       document.head.appendChild(script2);
     };
