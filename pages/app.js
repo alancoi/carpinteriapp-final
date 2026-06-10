@@ -1465,12 +1465,6 @@ export default function App() {
                 <p className="menu-desc">Asesor disponible siempre</p>
               </div>
 
-              <div className="menu-card" onClick={() => setProjectsModalOpen(true)} style={{cursor: 'pointer'}}>
-                <span className="menu-icon">📊</span>
-                <div className="menu-title">Mis Proyectos</div>
-                <p className="menu-desc">Historial de trabajos</p>
-              </div>
-
               <div className="menu-card" onClick={() => setSettingsModalOpen(true)} style={{cursor: 'pointer'}}>
                 <span className="menu-icon">⚙️</span>
                 <div className="menu-title">Configuración</div>
@@ -1612,12 +1606,6 @@ export default function App() {
                 </div>
               )}
             </>
-          )}
-
-          {analysis && (typeof analysis === 'object' || (typeof analysis === 'string' && !analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐'))) && (
-            <button className="btn-primary save-project-btn" onClick={saveProject} style={{marginBottom: '0.8rem', background: 'linear-gradient(135deg, #4CAF50, #45a049)'}}>
-              💾 Guardar Proyecto
-            </button>
           )}
 
           {analysis && (typeof analysis === 'object' || (typeof analysis === 'string' && !analysis.includes('❌') && !analysis.includes('⚠️') && !analysis.includes('📐'))) && (
@@ -1869,60 +1857,6 @@ export default function App() {
             <h2>📊 Mis Proyectos</h2>
             <button className="close-btn" onClick={() => {setProjectsModalOpen(false); setSelectedProject(null);}}>×</button>
           </div>
-
-          <div className="modal-body">
-            {selectedProject ? (
-              <div className="project-detail">
-                <button className="back-btn" onClick={() => setSelectedProject(null)}>← Volver</button>
-                <h3>{selectedProject.name}</h3>
-                <div className="project-meta">
-                  <span>📅 {selectedProject.date}</span>
-                </div>
-                <div className="project-preview">
-                  {selectedProject.preview && <img src={selectedProject.preview} alt="Vista previa" />}
-                </div>
-                <div className="analysis-result">
-                  {selectedProject.analysis ? (
-                    typeof selectedProject.analysis === 'object' ? (
-                      <AnalysisRenderer data={selectedProject.analysis} />
-                    ) : typeof selectedProject.analysis === 'string' && selectedProject.analysis.startsWith('<div') ? (
-                      <div dangerouslySetInnerHTML={{ __html: selectedProject.analysis }} />
-                    ) : (
-                      <>{selectedProject.analysis}</>
-                    )
-                  ) : null}
-                </div>
-                <button className="btn-delete" onClick={() => deleteProject(selectedProject._id)}>
-                  🗑️ Eliminar Proyecto
-                </button>
-              </div>
-            ) : (
-              <div className="projects-list">
-                {projects.length === 0 ? (
-                  <div className="empty-projects">
-                    <div className="empty-icon">📂</div>
-                    <h3>Sin proyectos aún</h3>
-                    <p>Los proyectos que guardes aparecerán aquí</p>
-                  </div>
-                ) : (
-                  projects.map(project => (
-                    <div key={project.id} className="project-card" onClick={() => setSelectedProject(project)}>
-                      <div className="project-header">
-                        <h4>{project.name}</h4>
-                        <span className="project-date">{project.date}</span>
-                      </div>
-                      <p className="project-desc">{project.description}</p>
-                      <div className="project-action">Ver detalles →</div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
-
-          <button className="btn-primary" onClick={() => {setProjectsModalOpen(false); setSelectedProject(null);}}>
-            Cerrar
-          </button>
         </div>
       </div>
 
@@ -1946,10 +1880,6 @@ export default function App() {
                 <div className="settings-item">
                   <label>Plan</label>
                   <div className="settings-value plan-badge">Plan Básico</div>
-                </div>
-                <div className="settings-item">
-                  <label>Proyectos Guardados</label>
-                  <div className="settings-value">{projects.length} proyectos</div>
                 </div>
               </div>
 
