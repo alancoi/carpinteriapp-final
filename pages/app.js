@@ -1164,7 +1164,7 @@ export default function App() {
 
               <button 
                 type="button" 
-                onClick={() => {setRegisterMode(!registerMode); setAuthError(''); setEmail(''); setPassword('');}}
+                onClick={() => {setRegisterMode(!registerMode); setAuthError(''); setNombre(''); setEmail(''); setPassword('');}}
                 style={{width: '100%', marginTop: '1rem', padding: '0.8rem', background: 'transparent', border: '1px solid #FF8C00', color: '#FF8C00', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', transition: 'all 0.3s'}}
               >
                 {registerMode ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
