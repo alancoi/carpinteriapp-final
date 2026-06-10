@@ -80,10 +80,10 @@ const AnalysisRenderer = ({ data }) => {
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', minWidth: '280px' }}>
             <thead>
               <tr style={{ background: '#1565C0', color: 'white' }}>
-                <th style={{ padding: '8px', textAlign: 'left', fontWeight: 'bold', wordBreak: 'break-word' }}>Comp</th>
-                <th style={{ padding: '8px', textAlign: 'left', fontWeight: 'bold' }}>Med</th>
+                <th style={{ padding: '8px', textAlign: 'left', fontWeight: 'bold', wordBreak: 'break-word', fontSize: '10px' }}>Componente</th>
+                <th style={{ padding: '8px', textAlign: 'left', fontWeight: 'bold' }}>Medidas</th>
                 <th style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>Cant</th>
-                <th style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>Desp</th>
+                <th style={{ padding: '8px', textAlign: 'center', fontWeight: 'bold' }}>Desp%</th>
               </tr>
             </thead>
             <tbody>
@@ -103,7 +103,7 @@ const AnalysisRenderer = ({ data }) => {
       {/* DESPERDICIO */}
       {data.desperdicio_total && (
         <div style={{ marginBottom: '20px', padding: '12px', background: '#FFF3E0', border: '2px solid #FF8C00', borderRadius: '4px' }}>
-          <div style={{ fontSize: '10px', color: '#E65100', fontWeight: 'bold', marginBottom: '6px' }}>DESPERDICIO TOTAL</div>
+          <div style={{ fontSize: '10px', color: '#E65100', fontWeight: 'bold', marginBottom: '6px' }}>DESPERDICIO TOTAL DE PLACA (275×183cm)</div>
           <div style={{ fontSize: '18px', color: '#FF8C00', fontWeight: 'bold' }}>{data.desperdicio_total}</div>
         </div>
       )}
