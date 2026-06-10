@@ -271,6 +271,7 @@ export default function App() {
   const [userId, setUserId] = useState(null);
   const [nombre, setNombre] = useState('');
   const [plan, setPlan] = useState('basico');
+  const [usosHoy, setUsosHoy] = useState(20);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [registerMode, setRegisterMode] = useState(false);
@@ -313,23 +314,16 @@ export default function App() {
     e.preventDefault();
     setAuthError('');
     
-    if (registerMode && !nombre) {
-      setAuthError('Por favor completa tu nombre');
-      return;
-    }
-    
-    if (!email || !password) {
+    if (!nombre || !email || !password) {
       setAuthError('Por favor completa todos los campos');
       return;
     }
 
     try {
-      const endpoint = registerMode ? '/api/auth/register' : '/api/auth/login';
-      
-      const response = await fetch(endpoint, {
+      const response = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(registerMode ? { nombre, email, password } : { email, password }),
+        body: JSON.stringify({ email, password }),
       });
 
       const data = await response.json();
@@ -342,14 +336,9 @@ export default function App() {
       setUserId(data.user.id);
       setNombre(data.user.nombre);
       setPlan(data.user.plan || 'basico');
+      setUsosHoy(20); // Reset a 20 usos al hacer login
       setIsLoggedIn(true);
       setAuthError('');
-      setRegisterMode(false);
-      
-      // Cargar proyectos del usuario
-      if (data.user.id) {
-        loadProjects(data.user.id);
-      }
     } catch (error) {
       setAuthError('Error conectando con el servidor');
       console.error(error);
@@ -445,9 +434,13 @@ export default function App() {
           } else {
             // Guardar como objeto para renderizar con React
             setAnalysis(parsed);
+            // Decrementar usos
+            setUsosHoy(prev => Math.max(0, prev - 1));
           }
         } catch (e) {
           setAnalysis(data.analysis);
+          // Decrementar usos incluso si hay error al parsear
+          setUsosHoy(prev => Math.max(0, prev - 1));
         }
       } catch (error) {
         setAnalysis(`❌ ${error.message}`);
@@ -852,6 +845,9 @@ export default function App() {
     setChatMessages([...chatMessages, userMessage]);
     setChatInput('');
     setChatLoading(true);
+    
+    // Decrementar usos
+    setUsosHoy(prev => Math.max(0, prev - 1));
 
     try {
       const response = await fetch('/api/chat', {
@@ -1115,24 +1111,22 @@ export default function App() {
             
             <form onSubmit={handleLogin}>
               <h2 style={{fontSize: '1.3rem', marginBottom: '1.5rem', color: '#FF8C00'}}>
-                {registerMode ? '📝 Registro' : '🔐 Login'}
+                🔐 Login
               </h2>
               
-              {registerMode && (
-                <div className="form-group">
-                  <label className="label">Nombre Completo</label>
-                  <input 
-                    type="text" 
-                    placeholder="Tu nombre" 
-                    value={nombre} 
-                    onChange={(e) => setNombre(e.target.value)} 
-                    required 
-                  />
-                </div>
-              )}
+              <div className="form-group">
+                <label className="label">Nombre Completo</label>
+                <input 
+                  type="text" 
+                  placeholder="Tu nombre" 
+                  value={nombre} 
+                  onChange={(e) => setNombre(e.target.value)} 
+                  required 
+                />
+              </div>
               
               <div className="form-group">
-                <label className="label">Email (Usuario)</label>
+                <label className="label">Email</label>
                 <input 
                   type="email" 
                   placeholder="tu@email.com" 
@@ -1159,15 +1153,7 @@ export default function App() {
               )}
 
               <button type="submit" className="btn-login">
-                {registerMode ? '📝 Registrarse' : '🔐 Iniciar Sesión'}
-              </button>
-
-              <button 
-                type="button" 
-                onClick={() => {setRegisterMode(!registerMode); setAuthError(''); setNombre(''); setEmail(''); setPassword('');}}
-                style={{width: '100%', marginTop: '1rem', padding: '0.8rem', background: 'transparent', border: '1px solid #FF8C00', color: '#FF8C00', borderRadius: '8px', cursor: 'pointer', fontWeight: '600', transition: 'all 0.3s'}}
-              >
-                {registerMode ? '¿Ya tienes cuenta? Inicia sesión' : '¿No tienes cuenta? Regístrate'}
+                🔐 Iniciar Sesión
               </button>
             </form>
           </div>
@@ -1462,9 +1448,12 @@ export default function App() {
               <div className="user-info">
                 <div className="user-name">{nombre}</div>
                 <div className="user-email">Usuario activo</div>
-                <div className="plan-badge">Plan {plan === 'premium' ? 'Premium' : 'Básico'}</div>
+                <div style={{display: 'flex', gap: '1rem', marginTop: '0.5rem'}}>
+                  <div className="plan-badge">Plan {plan === 'premium' ? 'Premium' : 'Básico'}</div>
+                  <div className="plan-badge" style={{background: 'rgba(76, 175, 80, 0.2)', color: '#4CAF50', border: '1px solid #4CAF50'}}>📊 {usosHoy}/20 usos hoy</div>
+                </div>
               </div>
-              <button className="logout-btn" onClick={() => {setIsLoggedIn(false); setNombre(''); setEmail(''); setPassword(''); setPlan('basico');}}>
+              <button className="logout-btn" onClick={() => {setIsLoggedIn(false); setNombre(''); setEmail(''); setPassword(''); setPlan('basico'); setUsosHoy(20);}}>
                 <i className="fas fa-sign-out-alt"></i> Salir
               </button>
             </div>
