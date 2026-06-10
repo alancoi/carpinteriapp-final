@@ -42,65 +42,14 @@ async function analyzeWithModel(imageBase64, mimeType = 'image/jpeg') {
               },
               {
                 type: 'text',
-                text: `Verifica si esta imagen es un mueble de BUENA CALIDAD.
+                text: `Analiza esta imagen de un mueble y devuelve SOLO UN JSON en UNA SOLA LÍNEA.
 
-SI NO mueble: "❌ No es mueble. Sube foto clara."
-SI borroso/oscuro: "⚠️ Imagen borrosa. Mejor iluminación y resolución."
-SI inclinado: "📐 Foto inclinada. Tómala de frente."
+SI NO es mueble o está borroso/inclinado: {"error":"[mensaje apropiado]"}
 
-SI BUENA CALIDAD, DEVUELVE HTML CON ESTE FORMATO EXACTO (TODO EN ESPAÑOL):
+SI es mueble de buena calidad, DEVUELVE JSON PURO (sin explicaciones, sin saltos de línea):
+{"tipo_mueble":"[tipo exacto]","estilo":"[estilo]","medidas":{"largo":[número],"ancho":[número],"alto":[número]},"materiales":[{"nombre":"[material]","cantidad":"[cantidad con unidad]"}],"componentes":[{"nombre":"[componente]","cantidad":[número],"medidas":"[L×A cm]","espesor":"[espesor cm]"}],"cortes":[{"componente":"[nombre]","medidas":"[L×A cm]","cantidad":[número],"desperdicio":"[%]"}],"desperdicio_total":"[rango%]","notas":["[nota 1 práctica]","[nota 2 práctica]","[nota 3 práctica]"]}
 
-<div style="font-family: Arial, sans-serif; color: #333;">
-
-<h2 style="color: #1565C0; border-bottom: 3px solid #FF8C00; padding-bottom: 10px;">1. COMPONENTES Y MEDIDAS</h2>
-
-<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 15px 0;">
-  <div style="border: 2px solid #1565C0; border-radius: 8px; padding: 12px; background: #F5F5F5;">
-    <strong style="color: #FF8C00;">Tablero superior</strong><br>
-    Cantidad: 1 | Largo: 183cm | Ancho: 64cm<br>
-    Espesor: 1.8cm | Material: Madera sólida
-  </div>
-  <div style="border: 2px solid #1565C0; border-radius: 8px; padding: 12px; background: #F5F5F5;">
-    <strong style="color: #FF8C00;">Pata</strong><br>
-    Cantidad: 4 | Largo: 5cm | Ancho: 5cm<br>
-    Espesor: 81cm | Material: Madera sólida
-  </div>
-  [Continúa con TODOS los componentes en recuadros 2x2]
-</div>
-
-<h2 style="color: #1565C0; border-bottom: 3px solid #FF8C00; padding-bottom: 10px; margin-top: 20px;">2. LISTA DE COMPRA</h2>
-
-<div style="border: 2px solid #1565C0; border-radius: 8px; padding: 15px; background: #F5F5F5; margin: 15px 0;">
-  <p><strong>Madera:</strong> [tipo], [cantidad m²], medidas [principales]</p>
-  <p><strong>Herrajes:</strong> [tipo exacto], [cantidad unidades]</p>
-  <p><strong>Tornillos:</strong> [diámetro × largo mm], [cantidad unidades]</p>
-  <p><strong>Clavos:</strong> [medida exacta mm], [cantidad unidades]</p>
-  <p><strong>Cantos:</strong> [material], [cantidad metros lineales]</p>
-  <p><strong>Adhesivos:</strong> [tipo], [cantidad]</p>
-</div>
-
-<h2 style="color: #1565C0; border-bottom: 3px solid #FF8C00; padding-bottom: 10px; margin-top: 20px;">3. CORTES DE PLACA 275×183cm</h2>
-
-<div style="border: 2px solid #1565C0; border-radius: 8px; padding: 15px; background: #F5F5F5; margin: 15px 0;">
-  <p><strong>Pieza:</strong> [nombre] | <strong>Cantidad:</strong> [n] | <strong>Medidas:</strong> [L]×[A]cm | <strong>Área:</strong> [área]cm²</p>
-  [Continúa con TODAS las piezas]
-  <hr style="border: none; border-top: 1px solid #CCC; margin: 15px 0;">
-  <p><strong>Área total placa:</strong> 50.325cm² | <strong>Área usada:</strong> [XX]cm² | <strong>Desperdicio:</strong> [XX]% / [XX]cm²</p>
-</div>
-
-<h2 style="color: #1565C0; border-bottom: 3px solid #FF8C00; padding-bottom: 10px; margin-top: 20px;">4. NOTAS CRÍTICAS</h2>
-
-<div style="border-left: 4px solid #FF8C00; border-radius: 4px; padding: 15px; background: #FFF3E0; margin: 15px 0;">
-  <p>⚠️ [dato crítico técnico]</p>
-  <p>⚠️ [dato crítico técnico]</p>
-  <p>⚠️ [dato crítico técnico]</p>
-</div>
-
-<p style="color: #666; font-size: 0.9em; margin-top: 20px; border-top: 1px solid #CCC; padding-top: 15px;">
-  <strong>⚠️ NOTA FINAL:</strong> Las medidas son APROXIMADAS en centímetros basadas en la imagen enviada.
-</p>
-
-</div>`,
+IMPORTANTE: Analiza REALMENTE la foto, extrae medidas aproximadas visuales, lista TODOS los componentes visibles, calcula desperdicio realista.`,
               },
             ],
           },

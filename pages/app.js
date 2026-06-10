@@ -1,6 +1,140 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 
+// Función para generar HTML desde datos JSON del mueble
+const generateAnalysisHTML = (data) => {
+  if (!data.tipo_mueble) return '';
+
+  return `
+    <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; color: #333; max-width: 900px; margin: 0 auto;">
+      
+      <!-- ENCABEZADO -->
+      <div style="border-bottom: 3px solid #FF8C00; padding-bottom: 20px; margin-bottom: 30px;">
+        <h2 style="color: #1565C0; font-size: 24px; margin-bottom: 5px;">Análisis Técnico de Mueble</h2>
+        <p style="color: #999; font-size: 13px; margin: 0;">CarpinteriAPP - Análisis profesional para carpinteros</p>
+      </div>
+
+      <!-- TIPO Y ESTILO -->
+      <div style="margin-bottom: 30px;">
+        <div style="color: #1565C0; font-size: 16px; font-weight: 600; border-left: 4px solid #FF8C00; padding-left: 12px; margin-bottom: 15px;">Tipo de Mueble</div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <div style="padding: 12px; background: #f9f9f9; border-radius: 6px; border-left: 3px solid #FF8C00;">
+            <div style="font-size: 12px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 5px;">Clasificación</div>
+            <div style="font-size: 16px; color: #1565C0; font-weight: 600;">${data.tipo_mueble}</div>
+          </div>
+          <div style="padding: 12px; background: #f9f9f9; border-radius: 6px; border-left: 3px solid #FF8C00;">
+            <div style="font-size: 12px; color: #999; text-transform: uppercase; font-weight: 600; margin-bottom: 5px;">Estilo</div>
+            <div style="font-size: 16px; color: #1565C0; font-weight: 600;">${data.estilo}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MEDIDAS PRINCIPALES -->
+      <div style="margin-bottom: 30px;">
+        <div style="color: #1565C0; font-size: 16px; font-weight: 600; border-left: 4px solid #FF8C00; padding-left: 12px; margin-bottom: 15px;">Medidas Principales</div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+          <div style="background: linear-gradient(135deg, #FFF3E0 0%, #FFECB3 100%); border: 2px solid #FF8C00; border-radius: 8px; padding: 15px; text-align: center;">
+            <div style="font-size: 12px; color: #E65100; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;">Largo</div>
+            <div style="font-size: 22px; color: #FF8C00; font-weight: 700;">${data.medidas.largo}cm</div>
+          </div>
+          <div style="background: linear-gradient(135deg, #FFF3E0 0%, #FFECB3 100%); border: 2px solid #FF8C00; border-radius: 8px; padding: 15px; text-align: center;">
+            <div style="font-size: 12px; color: #E65100; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;">Ancho</div>
+            <div style="font-size: 22px; color: #FF8C00; font-weight: 700;">${data.medidas.ancho}cm</div>
+          </div>
+          <div style="background: linear-gradient(135deg, #FFF3E0 0%, #FFECB3 100%); border: 2px solid #FF8C00; border-radius: 8px; padding: 15px; text-align: center;">
+            <div style="font-size: 12px; color: #E65100; font-weight: 600; margin-bottom: 8px; text-transform: uppercase;">Alto</div>
+            <div style="font-size: 22px; color: #FF8C00; font-weight: 700;">${data.medidas.alto}cm</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- MATERIALES -->
+      <div style="margin-bottom: 30px;">
+        <div style="color: #1565C0; font-size: 16px; font-weight: 600; border-left: 4px solid #FF8C00; padding-left: 12px; margin-bottom: 15px;">Materiales</div>
+        <div style="background: #f9f9f9; padding: 15px; border-radius: 6px; border-left: 3px solid #1565C0;">
+          ${data.materiales.map((m, i) => `
+            <div style="display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #eee; ${i === data.materiales.length - 1 ? 'border-bottom: none;' : ''}">
+              <span style="font-weight: 600; color: #333;">${m.nombre}</span>
+              <span style="color: #FF8C00; font-weight: 600;">${m.cantidad}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- COMPONENTES -->
+      <div style="margin-bottom: 30px;">
+        <div style="color: #1565C0; font-size: 16px; font-weight: 600; border-left: 4px solid #FF8C00; padding-left: 12px; margin-bottom: 15px;">Componentes Principales</div>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+          ${data.componentes.map(c => `
+            <div style="background: #f0f7ff; border: 1px solid #1565C0; border-radius: 6px; padding: 15px;">
+              <div style="font-weight: 600; color: #1565C0; margin-bottom: 8px;">${c.nombre}</div>
+              <div style="font-size: 13px; color: #666; line-height: 1.6;">
+                <strong>Cantidad:</strong> ${c.cantidad}<br>
+                <strong>Medidas:</strong> ${c.medidas}<br>
+                ${c.espesor ? `<strong>Espesor:</strong> ${c.espesor}` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- TABLA CORTES -->
+      <div style="margin-bottom: 30px;">
+        <div style="color: #1565C0; font-size: 16px; font-weight: 600; border-left: 4px solid #FF8C00; padding-left: 12px; margin-bottom: 15px;">Especificación de Cortes</div>
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+          <thead>
+            <tr>
+              <th style="background: #1565C0; color: white; padding: 12px; text-align: left; font-weight: 600;">Componente</th>
+              <th style="background: #1565C0; color: white; padding: 12px; text-align: left; font-weight: 600;">Medidas</th>
+              <th style="background: #1565C0; color: white; padding: 12px; text-align: left; font-weight: 600;">Cantidad</th>
+              <th style="background: #1565C0; color: white; padding: 12px; text-align: left; font-weight: 600;">Desperdicio</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${data.cortes.map((c, i) => `
+              <tr style="background: ${i % 2 === 0 ? '#f9f9f9' : 'white'};">
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${c.componente}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${c.medidas}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee;">${c.cantidad}</td>
+                <td style="padding: 12px; border-bottom: 1px solid #eee; color: #FF8C00; font-weight: 600;">${c.desperdicio}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- DESPERDICIO -->
+      <div style="margin-bottom: 30px;">
+        <div style="background: linear-gradient(135deg, #FFF3E0 0%, #FFE0B2 100%); border: 2px solid #FF8C00; border-radius: 8px; padding: 15px;">
+          <div style="font-weight: 600; color: #E65100; margin-bottom: 8px; font-size: 14px;">Resumen de Desperdicio</div>
+          <div style="font-size: 13px; color: #666; line-height: 1.6;">
+            <strong>Desperdicio total estimado:</strong> <span style="color: #FF8C00; font-weight: 700; font-size: 16px;">${data.desperdicio_total}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTAS -->
+      <div style="margin-bottom: 30px;">
+        <div style="color: #1565C0; font-size: 16px; font-weight: 600; border-left: 4px solid #FF8C00; padding-left: 12px; margin-bottom: 15px;">Recomendaciones</div>
+        <div style="background: #f0f7ff; border-left: 4px solid #1565C0; padding: 15px; border-radius: 6px;">
+          ${data.notas.map(nota => `
+            <div style="display: flex; margin-bottom: 10px; font-size: 13px; color: #555; line-height: 1.5;">
+              <span style="color: #FF8C00; font-weight: 700; margin-right: 10px; min-width: 20px;">•</span>
+              <span>${nota}</span>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- PIE -->
+      <div style="border-top: 1px solid #eee; padding-top: 15px; font-size: 12px; color: #999; text-align: center;">
+        <p style="margin: 0;">⚠️ Todas las medidas son aproximadas en centímetros basadas en el análisis de la imagen recibida.</p>
+      </div>
+
+    </div>
+  `;
+};
+
 export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
@@ -163,7 +297,19 @@ export default function App() {
           throw new Error(data.message || data.details || data.error || 'Error desconocido');
         }
 
-        setAnalysis(data.analysis);
+        // Parsear JSON de Claude Vision
+        try {
+          const parsed = JSON.parse(data.analysis);
+          if (parsed.error) {
+            setAnalysis(parsed.error);
+          } else {
+            // Convertir JSON a HTML renderizable
+            const html = generateAnalysisHTML(parsed);
+            setAnalysis(html);
+          }
+        } catch (e) {
+          setAnalysis(data.analysis);
+        }
       } catch (error) {
         setAnalysis(`❌ ${error.message}`);
       } finally {
