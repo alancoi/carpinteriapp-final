@@ -1,4 +1,6 @@
 import crypto from 'crypto';
+import connectDB from '@/lib/mongodb';
+import ImageCache from '@/models/ImageCache';
 
 const analysisCache = {};
 
@@ -129,14 +131,42 @@ export default async function handler(req, res) {
     }
 
     const imageHash = getImageHash(imageBase64);
+    
+    // PRIMERO: Buscar en caché en memoria (rápido)
     if (analysisCache[imageHash]) {
       return res.status(200).json({
         success: true,
         analysis: analysisCache[imageHash].analysis,
         cached: true,
+        cacheType: 'memory',
       });
     }
 
+    // SEGUNDO: Buscar en MongoDB (caché persistente)
+    try {
+      await connectDB();
+      const cachedResult = await ImageCache.findOne({ hash: imageHash });
+      
+      if (cachedResult) {
+        // Guardar también en caché en memoria para próximas veces
+        analysisCache[imageHash] = {
+          analysis: cachedResult.analisis,
+          timestamp: Date.now(),
+        };
+        
+        return res.status(200).json({
+          success: true,
+          analysis: JSON.stringify(cachedResult.analisis),
+          cached: true,
+          cacheType: 'database',
+        });
+      }
+    } catch (dbError) {
+      console.error('Error buscando en DB caché:', dbError);
+      // Continuar sin caché si falla BD
+    }
+
+    // TERCERO: Si no está en caché, analizar con Claude
     const result = await analyzeWithModel(imageBase64, mimeType);
 
     if (!result.analysis || result.analysis.trim().length === 0) {
@@ -146,16 +176,37 @@ export default async function handler(req, res) {
       });
     }
 
+    // Guardar en caché en memoria
     analysisCache[imageHash] = {
       analysis: result.analysis,
       timestamp: Date.now(),
     };
 
+    // Limpiar caché en memoria (máximo 100 items)
     Object.keys(analysisCache).forEach((key) => {
       if (Date.now() - analysisCache[key].timestamp > 3600000) {
         delete analysisCache[key];
       }
     });
+
+    // Guardar en MongoDB (caché persistente)
+    try {
+      await connectDB();
+      const analysisObj = JSON.parse(result.analysis);
+      
+      await ImageCache.updateOne(
+        { hash: imageHash },
+        {
+          hash: imageHash,
+          analisis: analysisObj,
+          createdAt: new Date(),
+        },
+        { upsert: true }
+      );
+    } catch (dbError) {
+      console.error('Error guardando en DB caché:', dbError);
+      // Continuar sin guardar si falla
+    }
 
     return res.status(200).json({
       success: true,
