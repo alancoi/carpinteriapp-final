@@ -482,8 +482,13 @@ export default function App() {
         const grisClaro = [220, 220, 220];
         
         // FUNCIONES HELPER
-        const addSection = (title) => {
-          if (y > h - 40) pdf.addPage();
+        const addSection = (title, minSpaceNeeded = 25) => {
+          // Si no hay espacio para título + contenido, pasar a página nueva
+          if (y + minSpaceNeeded > h - margin) {
+            pdf.addPage();
+            y = margin;
+          }
+          
           pdf.setFontSize(13);
           pdf.setTextColor(...azul);
           pdf.setFont(undefined, 'bold');
@@ -519,7 +524,7 @@ export default function App() {
         y += 25;
         
         // MEDIDAS PRINCIPALES
-        addSection('MEDIDAS PRINCIPALES');
+        addSection('MEDIDAS PRINCIPALES', 30);
         
         const medWidth = (contentW - 8) / 3;
         const measures = [
@@ -555,14 +560,14 @@ export default function App() {
         
         // MATERIALES
         if (analysis.materiales && analysis.materiales.length > 0) {
-          addSection('MATERIALES');
+          addSection('MATERIALES', 20);
           
           pdf.setFontSize(9);
           pdf.setTextColor(...gris);
           pdf.setFont(undefined, 'normal');
           
           analysis.materiales.forEach((m, idx) => {
-            if (y > h - 25) {
+            if (y > h - 20) {
               pdf.addPage();
               y = margin;
             }
@@ -587,14 +592,14 @@ export default function App() {
         
         // COMPONENTES
         if (analysis.componentes && analysis.componentes.length > 0) {
-          addSection('COMPONENTES PRINCIPALES');
+          addSection('COMPONENTES PRINCIPALES', 25);
           
           pdf.setFontSize(8);
           pdf.setTextColor(...gris);
           pdf.setFont(undefined, 'normal');
           
           analysis.componentes.forEach((c, idx) => {
-            if (y > h - 30) {
+            if (y > h - 25) {
               pdf.addPage();
               y = margin;
             }
@@ -622,7 +627,7 @@ export default function App() {
         
         // TABLA DE CORTES
         if (analysis.cortes && analysis.cortes.length > 0) {
-          addSection('CORTES DE PLACA');
+          addSection('CORTES DE PLACA', 40);
           
           const colW = [55, 40, 20, 25];
           const headers = ['Componente', 'Medidas', 'Cant.', 'Desp.'];
@@ -646,14 +651,44 @@ export default function App() {
           pdf.setTextColor(...gris);
           pdf.setFontSize(7);
           
+          let rowCount = 0;
           analysis.cortes.forEach((c, idx) => {
-            if (y > h - 20) {
+            // Si quedan menos de 10mm, pasar a nueva página con título
+            if (y + 5 > h - 15) {
               pdf.addPage();
               y = margin;
-              addSection('CORTES DE PLACA (continuación)');
+              
+              // Repetir el título en la nueva página
+              pdf.setFontSize(13);
+              pdf.setTextColor(...azul);
+              pdf.setFont(undefined, 'bold');
+              pdf.text('CORTES DE PLACA (continuación)', margin, y);
+              y += 8;
+              pdf.setDrawColor(...naranja);
+              pdf.line(margin, y - 2, w - margin, y - 2);
+              y += 6;
+              
+              // Repetir headers
+              pdf.setFillColor(...azul);
+              pdf.setTextColor(255, 255, 255);
+              pdf.setFont(undefined, 'bold');
+              pdf.setFontSize(8);
+              
+              xCol = margin;
+              headers.forEach((h, i) => {
+                pdf.rect(xCol, y, colW[i], 6, 'F');
+                pdf.text(h, xCol + 1, y + 4);
+                xCol += colW[i];
+              });
+              y += 7;
+              
+              pdf.setFont(undefined, 'normal');
+              pdf.setTextColor(...gris);
+              pdf.setFontSize(7);
+              rowCount = 0;
             }
             
-            if (idx % 2 === 0) {
+            if (rowCount % 2 === 0) {
               pdf.setFillColor(250, 250, 250);
               pdf.rect(margin, y, contentW, 5, 'F');
             }
@@ -676,13 +711,13 @@ export default function App() {
             pdf.text(c.desperdicio, xCol + 1, y + 3);
             
             y += 5;
+            rowCount++;
           });
           addSpacing(3);
         }
         
         // DESPERDICIO TOTAL
-        if (y > h - 30) pdf.addPage();
-        addSection('DESPERDICIO TOTAL DE PLACA');
+        addSection('DESPERDICIO TOTAL DE PLACA', 25);
         
         pdf.setFillColor(255, 243, 224);
         pdf.setDrawColor(...naranja);
@@ -703,8 +738,7 @@ export default function App() {
         
         // RECOMENDACIONES
         if (analysis.notas && analysis.notas.length > 0) {
-          if (y > h - 35) pdf.addPage();
-          addSection('RECOMENDACIONES TÉCNICAS');
+          addSection('RECOMENDACIONES TÉCNICAS', 30);
           
           pdf.setFontSize(8);
           pdf.setTextColor(...gris);
@@ -714,7 +748,20 @@ export default function App() {
             if (y > h - 20) {
               pdf.addPage();
               y = margin;
-              addSection('RECOMENDACIONES (continuación)');
+              
+              // Repetir el título
+              pdf.setFontSize(13);
+              pdf.setTextColor(...azul);
+              pdf.setFont(undefined, 'bold');
+              pdf.text('RECOMENDACIONES TÉCNICAS (continuación)', margin, y);
+              y += 8;
+              pdf.setDrawColor(...naranja);
+              pdf.line(margin, y - 2, w - margin, y - 2);
+              y += 6;
+              
+              pdf.setFontSize(8);
+              pdf.setTextColor(...gris);
+              pdf.setFont(undefined, 'normal');
             }
             
             const lines = pdf.splitTextToSize(`${idx + 1}. ${n}`, contentW - 5);
