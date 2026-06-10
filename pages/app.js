@@ -186,218 +186,187 @@ export default function App() {
       return;
     }
     
-    console.log('Iniciando descarga PDF...');
+    // Cargar solo jsPDF
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
     
-    // Cargar librerías
-    Promise.all([
-      new Promise((resolve) => {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
-        script.onload = resolve;
-        document.head.appendChild(script);
-      }),
-      new Promise((resolve) => {
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-        script.onload = resolve;
-        document.head.appendChild(script);
-      })
-    ]).then(() => {
-      console.log('Librerías cargadas');
-      
-      const { jsPDF } = window.jspdf;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      
-      let yPos = 15;
-      
-      // ENCABEZADO
-      pdf.setFontSize(18);
-      pdf.setTextColor(21, 101, 192);
-      pdf.text('ANÁLISIS TÉCNICO DE MUEBLE', 15, yPos);
-      yPos += 8;
-      
-      pdf.setFontSize(10);
-      pdf.setTextColor(100, 100, 100);
-      pdf.text('CarpinteriAPP - El futuro de la carpintería', 15, yPos);
-      yPos += 7;
-      
-      pdf.setDrawColor(255, 140, 0);
-      pdf.line(15, yPos, 195, yPos);
-      yPos += 8;
-      
-      // TÍTULO PLANO TÉCNICO
-      pdf.setFontSize(11);
-      pdf.setTextColor(21, 101, 192);
-      pdf.text('PLANO TÉCNICO - MEDIDAS PRINCIPALES', 15, yPos);
-      yPos += 8;
-      
-      // Buscar la foto
-      const previewImg = document.querySelector('img[src*="data:image"]') ||
-                        document.querySelector('.preview-image') || 
-                        document.querySelector('img[alt*="preview"]') ||
-                        document.querySelector('.upload-preview img');
-      
-      console.log('Foto encontrada:', previewImg);
-      
-      if (previewImg && previewImg.src) {
-        try {
-          window.html2canvas(previewImg, {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-            backgroundColor: '#ffffff'
-          }).then((canvas) => {
-            console.log('Canvas generado');
-            
-            const imgData = canvas.toDataURL('image/png');
-            const imgWidth = 80;
-            const imgHeight = (canvas.height * imgWidth) / canvas.width;
-            
-            // Foto centrada
-            const imgX = (210 - imgWidth) / 2;
-            pdf.addImage(imgData, 'PNG', imgX, yPos, imgWidth, imgHeight);
-            yPos += imgHeight + 5;
-            
-            // MEDIDAS PRINCIPALES EN RECUADROS
-            const medidas = [
-              { label: 'LARGO', valor: '180cm' },
-              { label: 'ANCHO', valor: '60cm' },
-              { label: 'ALTO', valor: '180cm' }
-            ];
-            
-            pdf.setFontSize(8);
-            medidas.forEach((medida, idx) => {
-              const xOffset = 25 + (idx * 55);
-              pdf.setDrawColor(21, 101, 192);
-              pdf.rect(xOffset - 8, yPos - 5, 45, 20);
-              
-              pdf.setTextColor(100, 100, 100);
-              pdf.text(medida.label, xOffset + 14, yPos, { align: 'center' });
-              
-              pdf.setFontSize(12);
-              pdf.setTextColor(255, 140, 0);
-              pdf.text(medida.valor, xOffset + 14, yPos + 10, { align: 'center' });
-              
-              pdf.setFontSize(8);
-            });
-            
-            yPos += 25;
-            
-            // CORTES DE PLACA
-            pdf.setFontSize(11);
-            pdf.setTextColor(21, 101, 192);
-            pdf.text('CORTES DE PLACA - MEDIDAS ESPECÍFICAS', 15, yPos);
-            yPos += 6;
-            
-            const tableData = [
-              ['Componente', 'Medidas (L × A)', 'Cant.'],
-              ['Laterales/Costados', '180 × 60cm', '2'],
-              ['Tablero Superior', '180 × 85cm', '1'],
-              ['Estantes', '80 × 60cm', '2'],
-              ['Refuerzos', '80 × 10cm', '4']
-            ];
-            
-            pdf.setFontSize(8);
-            tableData.forEach((row, idx) => {
-              if (idx === 0) {
-                pdf.setFillColor(21, 101, 192);
-                pdf.setTextColor(255, 255, 255);
-              } else {
-                pdf.setFillColor(245, 245, 245);
-                pdf.setTextColor(85, 85, 85);
-              }
-              
-              pdf.rect(15, yPos, 55, 6, idx === 0 ? 'F' : '');
-              pdf.rect(70, yPos, 80, 6, idx === 0 ? 'F' : '');
-              pdf.rect(150, yPos, 45, 6, idx === 0 ? 'F' : '');
-              
-              pdf.text(row[0], 18, yPos + 4);
-              pdf.text(row[1], 73, yPos + 4);
-              pdf.text(row[2], 168, yPos + 4);
-              
-              yPos += 6;
-            });
-            
-            yPos += 3;
-            
-            // LISTA DE COMPRA
-            pdf.setFontSize(11);
-            pdf.setTextColor(21, 101, 192);
-            pdf.text('LISTA DE COMPRA', 15, yPos);
-            yPos += 5;
-            
-            const compraData = [
-              ['Material', 'Cantidad'],
-              ['MDF/Madera', '~6 m²'],
-              ['Tornillos 5×40', '24 unidades'],
-              ['Canto PVC', '~8 metros'],
-              ['Adhesivo PVA', '250 ml']
-            ];
-            
-            pdf.setFontSize(7);
-            compraData.forEach((row, idx) => {
-              if (idx === 0) {
-                pdf.setFillColor(21, 101, 192);
-                pdf.setTextColor(255, 255, 255);
-              } else {
-                pdf.setFillColor(250, 250, 250);
-                pdf.setTextColor(85, 85, 85);
-              }
-              
-              pdf.rect(15, yPos, 90, 5, idx === 0 ? 'F' : '');
-              pdf.rect(105, yPos, 90, 5, idx === 0 ? 'F' : '');
-              
-              pdf.text(row[0], 18, yPos + 3);
-              pdf.text(row[1], 108, yPos + 3);
-              
-              yPos += 5;
-            });
-            
-            yPos += 3;
-            
-            // NOTAS TÉCNICAS
-            pdf.setFontSize(9);
-            pdf.setTextColor(21, 101, 192);
-            pdf.text('NOTAS TÉCNICAS', 15, yPos);
-            yPos += 4;
-            
-            pdf.setFontSize(7);
+    script.onload = () => {
+      try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        
+        let yPos = 15;
+        
+        // ENCABEZADO
+        pdf.setFontSize(18);
+        pdf.setTextColor(21, 101, 192);
+        pdf.text('ANÁLISIS TÉCNICO DE MUEBLE', 15, yPos);
+        yPos += 8;
+        
+        pdf.setFontSize(10);
+        pdf.setTextColor(100, 100, 100);
+        pdf.text('CarpinteriAPP - El futuro de la carpintería', 15, yPos);
+        yPos += 7;
+        
+        pdf.setDrawColor(255, 140, 0);
+        pdf.line(15, yPos, 195, yPos);
+        yPos += 10;
+        
+        // MEDIDAS PRINCIPALES
+        pdf.setFontSize(12);
+        pdf.setTextColor(21, 101, 192);
+        pdf.text('MEDIDAS PRINCIPALES DEL MUEBLE', 15, yPos);
+        yPos += 8;
+        
+        // Recuadros de medidas
+        const medidas = [
+          { label: 'LARGO', valor: '180cm' },
+          { label: 'ANCHO', valor: '60cm' },
+          { label: 'ALTO', valor: '180cm' }
+        ];
+        
+        medidas.forEach((medida, idx) => {
+          const xOffset = 20 + (idx * 55);
+          
+          // Recuadro
+          pdf.setDrawColor(21, 101, 192);
+          pdf.setLineWidth(1);
+          pdf.rect(xOffset, yPos - 8, 45, 20);
+          
+          // Label
+          pdf.setFontSize(9);
+          pdf.setTextColor(100, 100, 100);
+          pdf.text(medida.label, xOffset + 22.5, yPos - 2, { align: 'center' });
+          
+          // Valor
+          pdf.setFontSize(14);
+          pdf.setTextColor(255, 140, 0);
+          pdf.setFont(undefined, 'bold');
+          pdf.text(medida.valor, xOffset + 22.5, yPos + 8, { align: 'center' });
+          pdf.setFont(undefined, 'normal');
+        });
+        
+        yPos += 25;
+        
+        // CORTES DE PLACA
+        pdf.setFontSize(12);
+        pdf.setTextColor(21, 101, 192);
+        pdf.text('CORTES DE PLACA - MEDIDAS ESPECÍFICAS', 15, yPos);
+        yPos += 8;
+        
+        // Tabla de cortes
+        const tableData = [
+          ['Componente', 'Medidas (L × A)', 'Cant.'],
+          ['Laterales/Costados', '180 × 60cm', '2'],
+          ['Tablero Superior', '180 × 85cm', '1'],
+          ['Estantes', '80 × 60cm', '2'],
+          ['Refuerzos', '80 × 10cm', '4']
+        ];
+        
+        pdf.setFontSize(9);
+        tableData.forEach((row, idx) => {
+          const rowHeight = 6;
+          
+          if (idx === 0) {
+            pdf.setFillColor(21, 101, 192);
+            pdf.setTextColor(255, 255, 255);
+            pdf.rect(15, yPos, 55, rowHeight, 'F');
+            pdf.rect(70, yPos, 80, rowHeight, 'F');
+            pdf.rect(150, yPos, 45, rowHeight, 'F');
+          } else {
+            pdf.setFillColor(245, 245, 245);
             pdf.setTextColor(85, 85, 85);
-            pdf.text('⚠️ Todas las medidas son aproximadas en centímetros', 18, yPos);
-            yPos += 3;
-            pdf.text('⚠️ Verificar escuadra y nivelación durante el armado', 18, yPos);
-            yPos += 3;
-            pdf.text('⚠️ Respetar tolerancias ±2mm en cortes', 18, yPos);
-            
-            // PIE DE PÁGINA
-            pdf.setFontSize(7);
-            pdf.setTextColor(150, 150, 150);
-            pdf.line(15, 280, 195, 280);
-            pdf.text(
-              `Generado: ${new Date().toLocaleDateString('es-AR')} | CarpinteriAPP © 2026`,
-              105,
-              285,
-              { align: 'center' }
-            );
-            
-            console.log('PDF listo, descargando...');
-            pdf.save('analisis-carpinteria.pdf');
-            alert('PDF descargado exitosamente');
-          }).catch(err => {
-            console.error('Error al convertir canvas:', err);
-            alert('Error al generar PDF');
-          });
-        } catch(e) {
-          console.error('Error:', e);
-          alert('Error: ' + e.message);
-        }
-      } else {
-        alert('Por favor sube una foto del mueble primero');
+            pdf.rect(15, yPos, 55, rowHeight);
+            pdf.rect(70, yPos, 80, rowHeight);
+            pdf.rect(150, yPos, 45, rowHeight);
+          }
+          
+          pdf.text(row[0], 18, yPos + 4.5);
+          pdf.text(row[1], 73, yPos + 4.5);
+          pdf.text(row[2], 168, yPos + 4.5, { align: 'center' });
+          
+          yPos += rowHeight;
+        });
+        
+        yPos += 5;
+        
+        // LISTA DE COMPRA
+        pdf.setFontSize(12);
+        pdf.setTextColor(21, 101, 192);
+        pdf.text('LISTA DE COMPRA', 15, yPos);
+        yPos += 7;
+        
+        const compraData = [
+          ['Material', 'Cantidad'],
+          ['MDF/Madera', '~6 m²'],
+          ['Tornillos 5×40mm', '24 unidades'],
+          ['Canto PVC', '~8 metros'],
+          ['Adhesivo PVA', '250 ml']
+        ];
+        
+        pdf.setFontSize(9);
+        compraData.forEach((row, idx) => {
+          const rowHeight = 5;
+          
+          if (idx === 0) {
+            pdf.setFillColor(21, 101, 192);
+            pdf.setTextColor(255, 255, 255);
+            pdf.rect(15, yPos, 90, rowHeight, 'F');
+            pdf.rect(105, yPos, 90, rowHeight, 'F');
+          } else {
+            pdf.setFillColor(250, 250, 250);
+            pdf.setTextColor(85, 85, 85);
+            pdf.rect(15, yPos, 90, rowHeight);
+            pdf.rect(105, yPos, 90, rowHeight);
+          }
+          
+          pdf.text(row[0], 18, yPos + 3.5);
+          pdf.text(row[1], 108, yPos + 3.5);
+          
+          yPos += rowHeight;
+        });
+        
+        yPos += 5;
+        
+        // NOTAS TÉCNICAS
+        pdf.setFontSize(11);
+        pdf.setTextColor(21, 101, 192);
+        pdf.text('NOTAS TÉCNICAS IMPORTANTES', 15, yPos);
+        yPos += 5;
+        
+        pdf.setFontSize(9);
+        pdf.setTextColor(85, 85, 85);
+        pdf.text('⚠️ Todas las medidas son aproximadas en centímetros', 18, yPos);
+        yPos += 4;
+        pdf.text('⚠️ Verificar escuadra y nivelación durante el armado', 18, yPos);
+        yPos += 4;
+        pdf.text('⚠️ Respetar tolerancias ±2mm en cortes precisos', 18, yPos);
+        
+        // PIE DE PÁGINA
+        pdf.setFontSize(8);
+        pdf.setTextColor(150, 150, 150);
+        pdf.line(15, 285, 195, 285);
+        pdf.text(
+          `Generado: ${new Date().toLocaleDateString('es-AR')} | CarpinteriAPP © 2026 | Medidas aproximadas`,
+          105,
+          290,
+          { align: 'center' }
+        );
+        
+        pdf.save('analisis-carpinteria.pdf');
+        alert('✅ PDF descargado exitosamente');
+        
+      } catch(error) {
+        console.error('Error al generar PDF:', error);
+        alert('Error: ' + error.message);
       }
-    }).catch(err => {
-      console.error('Error al cargar librerías:', err);
-      alert('Error al cargar librerías de PDF');
-    });
+    };
+    
+    script.onerror = () => {
+      alert('Error: No se pudo cargar la librería de PDF');
+    };
+    
+    document.head.appendChild(script);
   };
 
   // Auto-scroll a los botones cuando aparece el análisis
