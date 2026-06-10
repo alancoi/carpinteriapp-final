@@ -879,7 +879,7 @@ export default function App() {
           date: new Date().toLocaleString('es-AR'),
           analysis,
           preview,
-          description: analysis.substring(0, 100) + '...',
+          description: analysis.tipo_mueble ? `${analysis.tipo_mueble} - ${analysis.estilo}` : 'Análisis de mueble',
         }),
       });
 
