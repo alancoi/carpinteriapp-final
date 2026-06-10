@@ -5,8 +5,8 @@ export default function Document() {
     <Html lang="es">
       <Head>
         {/* Favicon */}
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/favicon.svg" />
+        <link rel="icon" href="/favicon.png" type="image/png" />
+        <link rel="apple-touch-icon" href="/favicon.png" />
         
         {/* Web App Meta Tags */}
         <meta name="theme-color" content="#1565C0" />
