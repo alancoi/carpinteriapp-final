@@ -37,7 +37,10 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
         max_tokens: 1000,
-        system: `Eres un asesor experto en carpintería y diseño de muebles. Ayudas a carpinteros con:
+        system: [
+          {
+            type: 'text',
+            text: `Eres un asesor experto en carpintería y diseño de muebles. Ayudas a carpinteros con:
 - Consultas sobre técnicas de carpintería
 - Diseño y planeación de muebles
 - Materiales y herramientas
@@ -45,6 +48,9 @@ export default async function handler(req, res) {
 - Consejos profesionales
 
 Responde de forma clara, concisa y práctica. Usa español. Si la pregunta no es sobre carpintería, amablemente redirige a temas de carpintería.`,
+            cache_control: { type: 'ephemeral' },
+          }
+        ],
         messages: messages,
       }),
     });

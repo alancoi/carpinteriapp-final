@@ -17,32 +17,8 @@ async function analyzeWithModel(imageBase64, mimeType = 'image/jpeg') {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 60000);
 
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2500,
-        messages: [
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image',
-                source: {
-                  type: 'base64',
-                  media_type: mimeType,
-                  data: imageBase64,
-                },
-              },
-              {
-                type: 'text',
-                text: `ANALIZA ESTA IMAGEN DE MUEBLE CON MÁXIMA PRECISIÓN.
+  // Prompt que será cacheado
+  const analysisPrompt = `ANALIZA ESTA IMAGEN DE MUEBLE CON MÁXIMA PRECISIÓN.
 
 INSTRUCCIONES CRÍTICAS:
 - Identifica QUÉ mueble es REALMENTE (mesa, armario, estante, silla, escritorio, etc)
@@ -60,7 +36,35 @@ IMPORTANTE:
 - El tipo_mueble debe coincidir CON LO QUE VES en la foto
 - Las medidas deben ser realistas para ese tipo de mueble
 - Los componentes deben ser los VISIBLES en la imagen
-- RESPONDE SOLO CON EL JSON, NADA MÁS`,
+- RESPONDE SOLO CON EL JSON, NADA MÁS`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 2500,
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'text',
+                text: analysisPrompt,
+                cache_control: { type: 'ephemeral' },
+              },
+              {
+                type: 'image',
+                source: {
+                  type: 'base64',
+                  media_type: mimeType,
+                  data: imageBase64,
+                },
               },
             ],
           },
