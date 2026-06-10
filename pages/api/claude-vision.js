@@ -42,14 +42,24 @@ async function analyzeWithModel(imageBase64, mimeType = 'image/jpeg') {
               },
               {
                 type: 'text',
-                text: `Analiza esta imagen de un mueble y devuelve SOLO UN JSON en UNA SOLA LÍNEA.
+                text: `ANALIZA ESTA IMAGEN DE MUEBLE CON MÁXIMA PRECISIÓN.
 
-SI NO es mueble o está borroso/inclinado: {"error":"[mensaje apropiado]"}
+INSTRUCCIONES CRÍTICAS:
+- Identifica QUÉ mueble es REALMENTE (mesa, armario, estante, silla, escritorio, etc)
+- Analiza la forma, estructura, componentes visibles
+- Extrae medidas visuales aproximadas pero REALISTAS
+- Devuelve SOLO JSON en UNA LÍNEA, sin explicaciones
 
-SI es mueble de buena calidad, DEVUELVE JSON PURO (sin explicaciones, sin saltos de línea):
-{"tipo_mueble":"[tipo exacto]","estilo":"[estilo]","medidas":{"largo":[número],"ancho":[número],"alto":[número]},"materiales":[{"nombre":"[material]","cantidad":"[cantidad con unidad]"}],"componentes":[{"nombre":"[componente]","cantidad":[número],"medidas":"[L×A cm]","espesor":"[espesor cm]"}],"cortes":[{"componente":"[nombre]","medidas":"[L×A cm]","cantidad":[número],"desperdicio":"[%]"}],"desperdicio_total":"[rango%]","notas":["[nota 1 práctica]","[nota 2 práctica]","[nota 3 práctica]"]}
+SI NO es mueble: {"error":"No es mueble o imagen inapropiada"}
 
-IMPORTANTE: Analiza REALMENTE la foto, extrae medidas aproximadas visuales, lista TODOS los componentes visibles, calcula desperdicio realista.`,
+SI ES MUEBLE, devuelve JSON EXACTO en este formato (UNA LÍNEA):
+{"tipo_mueble":"[TIPO REAL que VES]","estilo":"[estilo visual]","medidas":{"largo":[número],"ancho":[número],"alto":[número]},"materiales":[{"nombre":"[material]","cantidad":"[cantidad]"}],"componentes":[{"nombre":"[nombre componente]","cantidad":[num],"medidas":"[medidas]","espesor":"[espesor o N/A]"}],"cortes":[{"componente":"[nombre]","medidas":"[L×A]","cantidad":[num],"desperdicio":"[%]"}],"desperdicio_total":"[%]","notas":["[nota técnica 1]","[nota técnica 2]","[nota técnica 3]"]}
+
+IMPORTANTE:
+- ANALIZA LA IMAGEN REALMENTE, no uses plantillas
+- El tipo_mueble debe coincidir CON LO QUE VES en la foto
+- Las medidas deben ser realistas para ese tipo de mueble
+- Los componentes deben ser los VISIBLES en la imagen`,
               },
             ],
           },
