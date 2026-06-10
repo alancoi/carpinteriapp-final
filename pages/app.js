@@ -181,54 +181,74 @@ export default function App() {
   };
 
   const downloadPDF = () => {
-    if (!analysis) return;
+    if (!analysis) {
+      alert('Por favor completa un análisis primero');
+      return;
+    }
     
-    const script1 = document.createElement('script');
-    script1.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+    console.log('Iniciando descarga PDF...');
     
-    const script2 = document.createElement('script');
-    script2.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
-    
-    script1.onload = () => {
-      script2.onload = () => {
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        
-        let yPos = 15;
-        
-        // ENCABEZADO
-        pdf.setFontSize(18);
-        pdf.setTextColor(21, 101, 192);
-        pdf.text('ANÁLISIS TÉCNICO DE MUEBLE', 15, yPos);
-        yPos += 8;
-        
-        pdf.setFontSize(10);
-        pdf.setTextColor(100, 100, 100);
-        pdf.text('CarpinteriAPP - El futuro de la carpintería', 15, yPos);
-        yPos += 7;
-        
-        pdf.setDrawColor(255, 140, 0);
-        pdf.line(15, yPos, 195, yPos);
-        yPos += 8;
-        
-        // TÍTULO PLANO TÉCNICO
-        pdf.setFontSize(11);
-        pdf.setTextColor(21, 101, 192);
-        pdf.text('PLANO TÉCNICO - MEDIDAS PRINCIPALES', 15, yPos);
-        yPos += 8;
-        
-        // FOTO DEL MUEBLE
-        const previewImg = document.querySelector('.preview-image') || 
-                          document.querySelector('img[alt*="preview"]') ||
-                          document.querySelector('.upload-preview img');
-        
-        if (previewImg && previewImg.src) {
+    // Cargar librerías
+    Promise.all([
+      new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+        script.onload = resolve;
+        document.head.appendChild(script);
+      }),
+      new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js';
+        script.onload = resolve;
+        document.head.appendChild(script);
+      })
+    ]).then(() => {
+      console.log('Librerías cargadas');
+      
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      
+      let yPos = 15;
+      
+      // ENCABEZADO
+      pdf.setFontSize(18);
+      pdf.setTextColor(21, 101, 192);
+      pdf.text('ANÁLISIS TÉCNICO DE MUEBLE', 15, yPos);
+      yPos += 8;
+      
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text('CarpinteriAPP - El futuro de la carpintería', 15, yPos);
+      yPos += 7;
+      
+      pdf.setDrawColor(255, 140, 0);
+      pdf.line(15, yPos, 195, yPos);
+      yPos += 8;
+      
+      // TÍTULO PLANO TÉCNICO
+      pdf.setFontSize(11);
+      pdf.setTextColor(21, 101, 192);
+      pdf.text('PLANO TÉCNICO - MEDIDAS PRINCIPALES', 15, yPos);
+      yPos += 8;
+      
+      // Buscar la foto
+      const previewImg = document.querySelector('img[src*="data:image"]') ||
+                        document.querySelector('.preview-image') || 
+                        document.querySelector('img[alt*="preview"]') ||
+                        document.querySelector('.upload-preview img');
+      
+      console.log('Foto encontrada:', previewImg);
+      
+      if (previewImg && previewImg.src) {
+        try {
           window.html2canvas(previewImg, {
-            scale: 1.5,
+            scale: 2,
             useCORS: true,
             logging: false,
             backgroundColor: '#ffffff'
           }).then((canvas) => {
+            console.log('Canvas generado');
+            
             const imgData = canvas.toDataURL('image/png');
             const imgWidth = 80;
             const imgHeight = (canvas.height * imgWidth) / canvas.width;
@@ -354,21 +374,30 @@ export default function App() {
             pdf.setTextColor(150, 150, 150);
             pdf.line(15, 280, 195, 280);
             pdf.text(
-              `Generado: ${new Date().toLocaleDateString('es-AR')} | CarpinteriAPP © 2026 | Medidas aproximadas`,
+              `Generado: ${new Date().toLocaleDateString('es-AR')} | CarpinteriAPP © 2026`,
               105,
               285,
               { align: 'center' }
             );
             
+            console.log('PDF listo, descargando...');
             pdf.save('analisis-carpinteria.pdf');
+            alert('PDF descargado exitosamente');
+          }).catch(err => {
+            console.error('Error al convertir canvas:', err);
+            alert('Error al generar PDF');
           });
-        } else {
-          alert('Por favor sube una foto del mueble para generar el PDF');
+        } catch(e) {
+          console.error('Error:', e);
+          alert('Error: ' + e.message);
         }
-      };
-      document.head.appendChild(script2);
-    };
-    document.head.appendChild(script1);
+      } else {
+        alert('Por favor sube una foto del mueble primero');
+      }
+    }).catch(err => {
+      console.error('Error al cargar librerías:', err);
+      alert('Error al cargar librerías de PDF');
+    });
   };
 
   // Auto-scroll a los botones cuando aparece el análisis
