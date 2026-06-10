@@ -1302,32 +1302,33 @@ export default function App() {
         /* CHAT STYLES */
         .chat-modal { display: flex; flex-direction: column; height: 80vh; padding: 0; }
         .chat-container { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-        .chat-messages { flex: 1; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; }
-        .chat-welcome { text-align: center; padding: 2rem 1rem; }
-        .chat-welcome-icon { font-size: 3rem; margin-bottom: 1rem; }
-        .chat-welcome h3 { color: #FF8C00; margin-bottom: 0.5rem; font-size: 1.2rem; }
-        .chat-welcome p { color: #A0AEC0; margin-bottom: 0.8rem; font-size: 0.9rem; }
-        .chat-welcome ul { list-style: none; text-align: left; display: inline-block; color: #A0AEC0; font-size: 0.85rem; }
-        .chat-welcome li { margin: 0.5rem 0; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 1.5rem; background: linear-gradient(135deg, rgba(15, 45, 90, 0.3) 0%, rgba(21, 101, 192, 0.1) 100%); }
+        .chat-welcome { text-align: center; padding: 3rem 1.5rem 2rem; }
+        .chat-welcome-icon { font-size: 3.5rem; margin-bottom: 1.5rem; }
+        .chat-welcome h3 { color: #FF8C00; margin-bottom: 0.8rem; font-size: 1.3rem; font-weight: 700; }
+        .chat-welcome p { color: #A0AEC0; margin-bottom: 1.2rem; font-size: 0.95rem; line-height: 1.6; }
+        .chat-welcome ul { list-style: none; text-align: left; display: inline-block; color: #A0AEC0; font-size: 0.9rem; }
+        .chat-welcome li { margin: 0.7rem 0; padding-left: 1.5rem; position: relative; }
+        .chat-welcome li:before { content: '✓'; position: absolute; left: 0; color: #FF8C00; font-weight: bold; }
         
-        .chat-message { display: flex; margin-bottom: 0.5rem; }
+        .chat-message { display: flex; margin-bottom: 0.5rem; align-items: flex-end; }
         .chat-message.user { justify-content: flex-end; }
         .chat-message.assistant { justify-content: flex-start; }
-        .chat-text { max-width: 80%; padding: 0.8rem 1rem; border-radius: 12px; word-wrap: break-word; line-height: 1.5; }
-        .chat-message.user .chat-text { background: linear-gradient(135deg, #0D47A1, #FF8C00); color: #FFFFFF; border-radius: 12px 2px 12px 12px; }
-        .chat-message.assistant .chat-text { background: rgba(13, 71, 161, 0.2); color: #A0AEC0; border: 1px solid #0D47A1; border-radius: 2px 12px 12px 12px; }
+        .chat-text { max-width: 75%; padding: 1rem 1.2rem; border-radius: 14px; word-wrap: break-word; line-height: 1.6; font-size: 0.95rem; }
+        .chat-message.user .chat-text { background: linear-gradient(135deg, #0D47A1, #FF8C00); color: #FFFFFF; border-radius: 14px 4px 14px 14px; box-shadow: 0 4px 12px rgba(255, 140, 0, 0.25); }
+        .chat-message.assistant .chat-text { background: rgba(13, 71, 161, 0.25); color: #E0E8FF; border: 1.5px solid rgba(21, 101, 192, 0.5); border-radius: 4px 14px 14px 14px; box-shadow: 0 2px 8px rgba(21, 101, 192, 0.15); }
         
-        .chat-typing { display: flex; gap: 4px; padding: 0.8rem 1rem; }
+        .chat-typing { display: flex; gap: 5px; padding: 1rem 1.2rem; background: rgba(13, 71, 161, 0.2); border-radius: 14px; width: fit-content; }
         .chat-typing span { width: 8px; height: 8px; border-radius: 50%; background: #FF8C00; animation: typing 1.4s infinite; }
         .chat-typing span:nth-child(2) { animation-delay: 0.2s; }
         .chat-typing span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typing { 0%, 60%, 100% { opacity: 0.3; } 30% { opacity: 1; } }
+        @keyframes typing { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-8px); } }
         
-        .chat-input-container { display: flex; gap: 0.8rem; padding: 1rem; background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%); border-top: 1px solid #2D3A52; }
-        .chat-input { flex: 1; padding: 0.8rem; background: #0A0E27; border: 1px solid #2D3A52; color: #FFFFFF; border-radius: 8px; font-size: 0.9rem; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-        .chat-input:focus { outline: none; border-color: #FF8C00; box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2); }
+        .chat-input-container { display: flex; gap: 0.8rem; padding: 1.2rem; background: linear-gradient(135deg, #1F2A47 0%, #141B33 100%); border-top: 2px solid rgba(255, 140, 0, 0.2); }
+        .chat-input { flex: 1; padding: 0.9rem 1rem; background: #0A0E27; border: 1.5px solid #2D3A52; color: #FFFFFF; border-radius: 8px; font-size: 0.95rem; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
+        .chat-input:focus { outline: none; border-color: #FF8C00; box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.15); }
         .chat-input:disabled { opacity: 0.5; cursor: not-allowed; }
-        .chat-send-btn { padding: 0.8rem 1.2rem; background: linear-gradient(135deg, #0D47A1, #FF8C00); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1rem; font-weight: 600; transition: all 0.3s; }
+        .chat-send-btn { padding: 0.9rem 1.4rem; background: linear-gradient(135deg, #0D47A1, #FF8C00); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 1.1rem; font-weight: 700; transition: all 0.3s; box-shadow: 0 4px 12px rgba(255, 140, 0, 0.3); }
         .chat-send-btn:hover:not(:disabled) { transform: scale(1.05); }
         .chat-send-btn:disabled { opacity: 0.5; cursor: not-allowed; }
         
@@ -1498,7 +1499,7 @@ export default function App() {
 
           <div className="coming-soon-container">
             <div className="coming-soon-icon">💎</div>
-            <h3>Plan Premium - $9.000/mes</h3>
+            <h3>Plan Premium - Proximamente</h3>
             <p>Acceso ilimitado a todas las funciones premium</p>
             
             <div className="coming-soon-features">
@@ -1535,7 +1536,7 @@ export default function App() {
                 pointerEvents: 'auto'
               }}
             >
-              💳 Comprar Premium - $9.000
+              🔜 Proximamente
             </button>
           </div>
         </div>
@@ -1843,7 +1844,7 @@ export default function App() {
                 onClick={handleChatSend}
                 disabled={chatLoading || !chatInput.trim()}
               >
-                ✈️
+                🔨
               </button>
             </div>
           </div>
