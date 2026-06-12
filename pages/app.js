@@ -501,6 +501,7 @@ export default function App() {
             setAnalysis(parsed);
             
             // Decrementar usos en BD
+            console.log('DEBUG: userId en handleFileUpload:', userId);
             if (userId) {
               try {
                 const usosResponse = await fetch('/api/users/decrementar-usos', {
@@ -509,12 +510,15 @@ export default function App() {
                   body: JSON.stringify({ userId }),
                 });
                 const usosData = await usosResponse.json();
+                console.log('DEBUG: Respuesta decrementar-usos:', usosData);
                 if (usosData.usosHoyRestantes !== undefined) {
                   updateUsosHoy(usosData.usosHoyRestantes);
                 }
               } catch (err) {
                 console.error('Error decrementando usos:', err);
               }
+            } else {
+              console.warn('DEBUG: userId es null/undefined, no se decrementó');
             }
           }
         } catch (e) {

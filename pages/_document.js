@@ -19,6 +19,26 @@ export default function Document() {
         
         {/* PWA */}
         <link rel="manifest" href="/manifest.json" />
+        
+        {/* Global CSS */}
+        <style>{`
+          * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+          }
+          html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+          }
+          #__next {
+            width: 100%;
+            height: 100%;
+          }
+        `}</style>
       </Head>
       <body>
         <Main />
