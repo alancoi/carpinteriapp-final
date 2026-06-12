@@ -156,7 +156,7 @@ export default async function handler(req, res) {
         
         return res.status(200).json({
           success: true,
-          analysis: JSON.stringify(cachedResult.analisis),
+          analysis: typeof cachedResult.analisis === 'string' ? cachedResult.analisis : JSON.stringify(cachedResult.analisis),
           cached: true,
           cacheType: 'database',
         });
