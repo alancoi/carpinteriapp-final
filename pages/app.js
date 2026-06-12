@@ -518,7 +518,7 @@ export default function App() {
             }
           }
         } catch (e) {
-          console.error('Error parseando JSON:', e, 'Raw:', data.analysis.substring(0, 100));
+          console.error('Error parseando JSON:', e, 'Raw:', typeof data.analysis === 'string' ? data.analysis.substring(0, 100) : JSON.stringify(data).substring(0, 100));
           setAnalysis('❌ Error al procesar la imagen. Intenta con una foto más clara.');
           // Decrementar usos incluso si hay error al parsear
           if (userId) {
