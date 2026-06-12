@@ -22,6 +22,17 @@ export default async function handler(req, res) {
       return res.status(404).json({ error: 'Usuario no encontrado' });
     }
 
+    // Verificar si debe resetear usos (cada 24 horas)
+    const ahora = new Date();
+    const ultimoReset = new Date(user.ultimoResetUsos || user.createdAt);
+    const diff = ahora - ultimoReset;
+    const hours = diff / (1000 * 60 * 60);
+    
+    if (hours >= 24) {
+      user.usosHoyRestantes = 20;
+      user.ultimoResetUsos = ahora;
+    }
+
     // Decrementar solo si hay usos disponibles
     if (user.usosHoyRestantes > 0) {
       user.usosHoyRestantes -= 1;

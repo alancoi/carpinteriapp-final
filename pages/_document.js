@@ -4,6 +4,9 @@ export default function Document() {
   return (
     <Html lang="es">
       <Head>
+        {/* Viewport */}
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no" />
+        
         {/* Favicon */}
         <link rel="icon" href="/favicon.png" type="image/png" />
         <link rel="apple-touch-icon" href="/favicon.png" />
