@@ -310,6 +310,53 @@ export default function App() {
   const [costOperative, setCostOperative] = useState('');
   const [desiredMargin, setDesiredMargin] = useState(50);
 
+  // Cargar sesión del localStorage al iniciar
+  useEffect(() => {
+    const savedSession = localStorage.getItem('carpinteriapp_session');
+    if (savedSession) {
+      try {
+        const session = JSON.parse(savedSession);
+        setUserId(session.id);
+        setNombre(session.nombre);
+        setEmail(session.email);
+        setPlan(session.plan || 'basico');
+        setUsosHoy(session.usosHoyRestantes || 20);
+        setIsLoggedIn(true);
+      } catch (error) {
+        console.error('Error cargando sesión:', error);
+        localStorage.removeItem('carpinteriapp_session');
+      }
+    }
+  }, []);
+
+  // Función helper para actualizar usos y localStorage
+  const updateUsosHoy = (nuevoUsos) => {
+    setUsosHoy(nuevoUsos);
+    // Actualizar localStorage
+    const savedSession = localStorage.getItem('carpinteriapp_session');
+    if (savedSession) {
+      try {
+        const session = JSON.parse(savedSession);
+        session.usosHoyRestantes = nuevoUsos;
+        localStorage.setItem('carpinteriapp_session', JSON.stringify(session));
+      } catch (error) {
+        console.error('Error actualizando localStorage:', error);
+      }
+    }
+  };
+
+  // Función para logout
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    setNombre('');
+    setEmail('');
+    setPassword('');
+    setUserId(null);
+    setPlan('basico');
+    setUsosHoy(20);
+    localStorage.removeItem('carpinteriapp_session');
+  };
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setAuthError('');
@@ -333,12 +380,23 @@ export default function App() {
         return;
       }
 
+      const sessionData = {
+        id: data.user.id,
+        nombre: data.user.nombre,
+        email: email,
+        plan: data.user.plan || 'basico',
+        usosHoyRestantes: data.user.usosHoyRestantes || 20
+      };
+
       setUserId(data.user.id);
-      setNombre(data.user.nombre); // NOMBRE DE LA BD
+      setNombre(data.user.nombre);
       setPlan(data.user.plan || 'basico');
-      setUsosHoy(data.user.usosHoyRestantes || 20); // USOS DE LA BD, NO RESETEAR
+      updateUsosHoy(data.user.usosHoyRestantes || 20);
       setIsLoggedIn(true);
       setAuthError('');
+      
+      // Guardar sesión en localStorage
+      localStorage.setItem('carpinteriapp_session', JSON.stringify(sessionData));
     } catch (error) {
       setAuthError('Error conectando con el servidor');
       console.error(error);
@@ -452,7 +510,7 @@ export default function App() {
                 });
                 const usosData = await usosResponse.json();
                 if (usosData.usosHoyRestantes !== undefined) {
-                  setUsosHoy(usosData.usosHoyRestantes);
+                  updateUsosHoy(usosData.usosHoyRestantes);
                 }
               } catch (err) {
                 console.error('Error decrementando usos:', err);
@@ -472,7 +530,7 @@ export default function App() {
               });
               const usosData = await usosResponse.json();
               if (usosData.usosHoyRestantes !== undefined) {
-                setUsosHoy(usosData.usosHoyRestantes);
+                updateUsosHoy(usosData.usosHoyRestantes);
               }
             } catch (err) {
               console.error('Error decrementando usos:', err);
@@ -906,7 +964,7 @@ export default function App() {
           });
           const usosData = await usosResponse.json();
           if (usosData.usosHoyRestantes !== undefined) {
-            setUsosHoy(usosData.usosHoyRestantes);
+            updateUsosHoy(usosData.usosHoyRestantes);
           }
         } catch (err) {
           console.error('Error decrementando usos:', err);
@@ -1504,7 +1562,7 @@ export default function App() {
                   <div className="plan-badge" style={{background: 'rgba(76, 175, 80, 0.2)', color: '#4CAF50', border: '1px solid #4CAF50'}}>📊 {usosHoy}/20 usos hoy</div>
                 </div>
               </div>
-              <button className="logout-btn" onClick={() => {setIsLoggedIn(false); setNombre(''); setEmail(''); setPassword(''); setPlan('basico'); setUsosHoy(20);}}>
+              <button className="logout-btn" onClick={handleLogout}>
                 <i className="fas fa-sign-out-alt"></i> Salir
               </button>
             </div>
