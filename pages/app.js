@@ -501,13 +501,14 @@ export default function App() {
             setAnalysis(parsed);
             
             // Decrementar usos en BD
-            console.log('DEBUG: userId en handleFileUpload:', userId);
-            if (userId) {
+            const userIdToUse = userId || (JSON.parse(localStorage.getItem('carpinteriapp_session') || '{}').id);
+            console.log('DEBUG: userId en handleFileUpload:', userIdToUse);
+            if (userIdToUse) {
               try {
                 const usosResponse = await fetch('/api/users/decrementar-usos', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ userId }),
+                  body: JSON.stringify({ userId: userIdToUse }),
                 });
                 const usosData = await usosResponse.json();
                 console.log('DEBUG: Respuesta decrementar-usos:', usosData);
@@ -518,19 +519,20 @@ export default function App() {
                 console.error('Error decrementando usos:', err);
               }
             } else {
-              console.warn('DEBUG: userId es null/undefined, no se decrementó');
+              console.warn('DEBUG: No hay userId ni en state ni en localStorage');
             }
           }
         } catch (e) {
           console.error('Error parseando JSON:', e, 'Raw:', typeof data.analysis === 'string' ? data.analysis.substring(0, 100) : JSON.stringify(data).substring(0, 100));
           setAnalysis('❌ Error al procesar la imagen. Intenta con una foto más clara.');
           // Decrementar usos incluso si hay error al parsear
-          if (userId) {
+          const userIdToUse = userId || (JSON.parse(localStorage.getItem('carpinteriapp_session') || '{}').id);
+          if (userIdToUse) {
             try {
               const usosResponse = await fetch('/api/users/decrementar-usos', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId }),
+                body: JSON.stringify({ userId: userIdToUse }),
               });
               const usosData = await usosResponse.json();
               if (usosData.usosHoyRestantes !== undefined) {
@@ -959,12 +961,13 @@ export default function App() {
       setChatMessages(prev => [...prev, { role: 'assistant', text: data.response }]);
       
       // Decrementar usos en BD
-      if (userId) {
+      const userIdToUse = userId || (JSON.parse(localStorage.getItem('carpinteriapp_session') || '{}').id);
+      if (userIdToUse) {
         try {
           const usosResponse = await fetch('/api/users/decrementar-usos', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ userId }),
+            body: JSON.stringify({ userId: userIdToUse }),
           });
           const usosData = await usosResponse.json();
           if (usosData.usosHoyRestantes !== undefined) {
@@ -1344,9 +1347,15 @@ export default function App() {
         .loading-text { font-size: 0.9rem; font-weight: 600; color: #A0AEC0; }
         .analysis-result { background: #0A0E27; border: 1px solid #0D47A1; border-left: 4px solid #FF8C00; color: #A0AEC0; padding: 1.5rem; border-radius: 8px; font-size: 0.85rem; max-height: 500px; overflow-y: auto; overflow-x: auto; white-space: pre-wrap; font-family: 'Courier New', monospace; margin-top: 1rem; line-height: 1.6; letter-spacing: 0.2px; word-break: break-word; }
         @media (max-width: 768px) {
+          .phone-frame { width: 100vw !important; height: 100vh !important; margin: 0 !important; padding: 0 !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; }
+          .phone-content { padding: 40px 0 0 0 !important; border-radius: 0 !important; }
+          .notch { display: none; }
           .analysis-result { font-size: 0.8rem; padding: 1rem; max-height: 600px; line-height: 1.5; }
         }
         @media (max-width: 480px) {
+          .phone-frame { width: 100vw !important; height: 100vh !important; margin: 0 !important; padding: 0 !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; }
+          .phone-content { padding: 40px 0 0 0 !important; border-radius: 0 !important; }
+          .notch { display: none; }
           .analysis-result { font-size: 0.75rem; padding: 0.8rem; max-height: 70vh; overflow-x: auto; }
         }
         .analysis-result strong { color: #FF8C00; font-weight: 700; }
