@@ -504,24 +504,35 @@ export default function App() {
             
             // Decrementar usos en BD
             const userIdToUse = userId || (JSON.parse(localStorage.getItem('carpinteriapp_session') || '{}').id);
-            console.log('DEBUG: userId en handleFileUpload:', userIdToUse);
+            console.log('=== DECREMENT USES DEBUG ===');
+            console.log('userId state:', userId);
+            console.log('userIdToUse:', userIdToUse);
+            console.log('localStorage session:', localStorage.getItem('carpinteriapp_session'));
+            
             if (userIdToUse) {
               try {
+                console.log('Calling decrementar-usos with userId:', userIdToUse);
                 const usosResponse = await fetch('/api/users/decrementar-usos', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ userId: userIdToUse }),
                 });
+                console.log('Response status:', usosResponse.status);
                 const usosData = await usosResponse.json();
-                console.log('DEBUG: Respuesta decrementar-usos:', usosData);
+                console.log('Response data:', usosData);
+                
                 if (usosData.usosHoyRestantes !== undefined) {
+                  console.log('Updating usos to:', usosData.usosHoyRestantes);
                   updateUsosHoy(usosData.usosHoyRestantes);
+                  console.log('✅ Usos actualizado exitosamente');
+                } else {
+                  console.warn('⚠️ Response sin usosHoyRestantes:', usosData);
                 }
               } catch (err) {
-                console.error('Error decrementando usos:', err);
+                console.error('❌ Error decrementando usos:', err);
               }
             } else {
-              console.warn('DEBUG: No hay userId ni en state ni en localStorage');
+              console.error('❌ NO HAY USERID - no se puede decrementar');
             }
           }
         } catch (e) {
