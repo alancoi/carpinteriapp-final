@@ -1278,11 +1278,36 @@ export default function App() {
 
       <style>{`
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f0f0f0; padding: 10px; }
-        .phone-frame { width: 390px; height: 844px; background: linear-gradient(180deg, #0A0E27 0%, #141B33 100%); border-radius: 50px; padding: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); margin: 20px auto; overflow: hidden; border: 10px solid #000; position: relative; }
-        .notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 150px; height: 28px; background: #000; border-radius: 0 0 40px 40px; z-index: 100; }
-        .phone-content { width: 100%; height: 100%; overflow-y: auto; background: linear-gradient(180deg, #0A0E27 0%, #141B33 100%); color: #FFFFFF; padding: 60px 15px 15px 15px; border-radius: 45px; }
-        .container { width: 100%; }
+        body { 
+          font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; 
+          background: #0A0E27;
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+        }
+        #__next {
+          width: 100%;
+          height: 100%;
+          display: flex;
+        }
+        .phone-frame { 
+          width: 100%;
+          height: 100%;
+          background: linear-gradient(180deg, #0A0E27 0%, #141B33 100%); 
+          margin: 0;
+          padding: 0;
+          border-radius: 0;
+          box-shadow: none;
+          border: none;
+          overflow: hidden; 
+          position: relative;
+          flex: 1;
+        }
+        .notch { display: none; }
+        .phone-content { width: 100%; height: 100%; overflow-y: auto; background: linear-gradient(180deg, #0A0E27 0%, #141B33 100%); color: #FFFFFF; padding: 0; border-radius: 0; }
+        .container { width: 100%; padding: 15px; }
         .header { padding: 1.5rem; border-radius: 15px; margin-bottom: 1.2rem; text-align: center; }
         .header-logo { width: 70px; height: 70px; border-radius: 15px; display: flex; align-items: center; justify-content: center; margin: 0 auto 0.8rem; border: 2px solid rgba(255, 255, 255, 0.3); overflow: hidden; }
         .header-logo img { width: 100%; height: 100%; object-fit: cover; }
@@ -1338,15 +1363,9 @@ export default function App() {
         .loading-text { font-size: 0.9rem; font-weight: 600; color: #A0AEC0; }
         .analysis-result { background: #0A0E27; border: 1px solid #0D47A1; border-left: 4px solid #FF8C00; color: #A0AEC0; padding: 1.5rem; border-radius: 8px; font-size: 0.85rem; max-height: 500px; overflow-y: auto; overflow-x: auto; white-space: pre-wrap; font-family: 'Courier New', monospace; margin-top: 1rem; line-height: 1.6; letter-spacing: 0.2px; word-break: break-word; }
         @media (max-width: 768px) {
-          .phone-frame { width: 100vw !important; height: 100vh !important; margin: 0 !important; padding: 0 !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; }
-          .phone-content { padding: 40px 0 0 0 !important; border-radius: 0 !important; }
-          .notch { display: none; }
           .analysis-result { font-size: 0.8rem; padding: 1rem; max-height: 600px; line-height: 1.5; }
         }
         @media (max-width: 480px) {
-          .phone-frame { width: 100vw !important; height: 100vh !important; margin: 0 !important; padding: 0 !important; border-radius: 0 !important; border: none !important; box-shadow: none !important; }
-          .phone-content { padding: 40px 0 0 0 !important; border-radius: 0 !important; }
-          .notch { display: none; }
           .analysis-result { font-size: 0.75rem; padding: 0.8rem; max-height: 70vh; overflow-x: auto; }
         }
         .analysis-result strong { color: #FF8C00; font-weight: 700; }
