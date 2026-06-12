@@ -361,8 +361,8 @@ export default function App() {
     e.preventDefault();
     setAuthError('');
     
-    if (!nombre || !email || !password) {
-      setAuthError('Por favor completa todos los campos');
+    if (!email || !password) {
+      setAuthError('Por favor completa email y contraseña');
       return;
     }
 
@@ -483,6 +483,8 @@ export default function App() {
         if (!response.ok) {
           throw new Error(data.message || data.details || data.error || 'Error desconocido');
         }
+
+        console.log('DEBUG Vision API response:', { success: data.success, analysisType: typeof data.analysis, analysisLength: data.analysis?.length });
 
         // Parsear JSON de Claude Vision
         try {
@@ -1229,17 +1231,6 @@ export default function App() {
               <h2 style={{fontSize: '1.3rem', marginBottom: '1.5rem', color: '#FF8C00'}}>
                 🔐 Login
               </h2>
-              
-              <div className="form-group">
-                <label className="label">Nombre Completo</label>
-                <input 
-                  type="text" 
-                  placeholder="Tu nombre" 
-                  value={nombre} 
-                  onChange={(e) => setNombre(e.target.value)} 
-                  required 
-                />
-              </div>
               
               <div className="form-group">
                 <label className="label">Email</label>
