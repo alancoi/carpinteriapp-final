@@ -1,7 +1,2 @@
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
-}
-
-module.exports = nextConfig
-
+// Minimal Next.js config
+module.exports = {}
