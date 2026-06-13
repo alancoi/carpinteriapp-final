@@ -121,7 +121,12 @@ export default async function handler(req, res) {
       orderData = JSON.parse(orderData);
     }
 
-    const email = orderData.email;
+    console.log('📦 ORDEN COMPLETA:', JSON.stringify(orderData, null, 2));
+    console.log('📧 Email field:', orderData.email);
+    console.log('📧 Customer email:', orderData.customer?.email);
+    console.log('📧 Contact email:', orderData.contact_email);
+
+    const email = orderData.email || orderData.customer?.email || orderData.contact_email;
     const orderNumber = orderData.name?.replace('#', '') || 'unknown';
     
     if (!email) {
