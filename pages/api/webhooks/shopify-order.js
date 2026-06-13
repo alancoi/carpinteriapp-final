@@ -1,0 +1,186 @@
+import connectDB from '@/lib/mongodb';
+import User from '@/models/User';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+
+// Configurar transporte de email (usar variables de entorno)
+const transporter = nodemailer.createTransport({
+  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
+  port: parseInt(process.env.EMAIL_PORT || '587'),
+  secure: process.env.EMAIL_SECURE === 'true',
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Método no permitido' });
+  }
+
+  try {
+    // Verificar webhook signature de Shopify
+    const hmacHeader = req.headers['x-shopify-hmac-sha256'];
+    if (!verifyShopifyWebhook(req.body, hmacHeader)) {
+      console.warn('⚠️ Webhook signature inválida');
+      return res.status(401).json({ error: 'Webhook signature inválida' });
+    }
+
+    const orderData = JSON.parse(req.body);
+    console.log('📦 Webhook Shopify recibido:', orderData.name);
+
+    // Obtener email y plan de la compra
+    const email = orderData.email;
+    const orderId = orderData.name.replace('#', '');
+    
+    // Determinar plan según producto comprado
+    let plan = 'basico';
+    if (orderData.line_items && orderData.line_items.length > 0) {
+      const productTitle = orderData.line_items[0].title.toLowerCase();
+      if (productTitle.includes('premium') || productTitle.includes('unlimited')) {
+        plan = 'premium';
+      }
+    }
+
+    // Generar contraseña: últimos 6 dígitos del orden ID
+    const tempPassword = orderId.slice(-6);
+
+    await connectDB();
+
+    // Verificar si el usuario ya existe
+    let user = await User.findOne({ email });
+    if (!user) {
+      // Crear nuevo usuario
+      user = new User({
+        nombre: null,
+        email,
+        password: tempPassword, // En producción, hash la contraseña
+        plan,
+        usosHoyRestantes: 20,
+        ultimoResetUsos: new Date(),
+      });
+      await user.save();
+      console.log('✅ Usuario creado:', email);
+    } else {
+      // Actualizar plan si es necesario
+      user.plan = plan;
+      await user.save();
+      console.log('✅ Usuario actualizado:', email);
+    }
+
+    // Enviar email de bienvenida
+    await sendWelcomeEmail(email, tempPassword, plan, orderId);
+
+    return res.status(200).json({ success: true, message: 'Usuario creado y email enviado' });
+  } catch (error) {
+    console.error('❌ Error en webhook:', error);
+    return res.status(500).json({ error: 'Error procesando webhook', details: error.message });
+  }
+}
+
+function verifyShopifyWebhook(body, hmacHeader) {
+  const secret = process.env.SHOPIFY_WEBHOOK_SECRET;
+  if (!secret) {
+    console.warn('⚠️ SHOPIFY_WEBHOOK_SECRET no configurado');
+    return true; // En desarrollo, permitir sin verificación
+  }
+
+  const hash = crypto
+    .createHmac('sha256', secret)
+    .update(body, 'utf8')
+    .digest('base64');
+
+  return hash === hmacHeader;
+}
+
+async function sendWelcomeEmail(email, password, plan, orderId) {
+  const appUrl = 'https://carpinteriapp-final.vercel.app/app';
+  
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bienvenido a CarpinteríApp</title>
+  <style>
+    body { font-family: 'Arial', sans-serif; background: linear-gradient(135deg, #0D47A1 0%, #0A1B3F 100%); margin: 0; padding: 20px; }
+    .container { max-width: 600px; margin: 0 auto; background: white; border-radius: 10px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.2); }
+    .header { background: linear-gradient(135deg, #FF8C00 0%, #0D47A1 100%); padding: 40px 20px; text-align: center; color: white; }
+    .header h1 { margin: 0; font-size: 28px; }
+    .logo { height: 60px; margin-bottom: 15px; }
+    .content { padding: 40px; }
+    .greeting { font-size: 20px; color: #0A1B3F; margin-bottom: 20px; font-weight: bold; }
+    .info-box { background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #FF8C00; }
+    .info-label { color: #6b7280; font-size: 12px; text-transform: uppercase; font-weight: 600; }
+    .info-value { color: #0D47A1; font-size: 18px; font-weight: bold; font-family: 'Courier New', monospace; }
+    .plan-badge { display: inline-block; padding: 8px 16px; background: ${plan === 'premium' ? '#FFE082' : '#90CAF9'}; color: ${plan === 'premium' ? '#F57F17' : '#0D47A1'}; border-radius: 20px; font-weight: bold; margin: 10px 0; }
+    .button { display: inline-block; background: #FF8C00; color: white; padding: 15px 40px; text-decoration: none; border-radius: 5px; font-weight: bold; margin: 20px 0; font-size: 16px; }
+    .button:hover { background: #E67E00; }
+    .footer { background: #f3f4f6; padding: 20px; text-align: center; color: #6b7280; font-size: 12px; border-top: 1px solid #e5e7eb; }
+    .note { color: #6b7280; font-size: 13px; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://i.postimg.cc/XpQvP00b/image.png" alt="CarpinteríApp" class="logo">
+      <h1>¡Bienvenido a CarpinteríApp!</h1>
+      <p>Tu herramienta profesional para carpintería</p>
+    </div>
+    
+    <div class="content">
+      <div class="greeting">¡Gracias por tu compra! 🎉</div>
+      
+      <p>Hemos activado tu cuenta y ya estás listo para comenzar a usar CarpinteríApp. Tu acceso incluye:</p>
+      
+      <div class="plan-badge">${plan === 'premium' ? '⭐ Plan Premium - Acceso Ilimitado' : '📱 Plan Básico - 20 Usos/día'}</div>
+      
+      <p>Aquí están tus datos de acceso:</p>
+      
+      <div class="info-box">
+        <div class="info-label">📧 Email</div>
+        <div class="info-value">${email}</div>
+      </div>
+      
+      <div class="info-box">
+        <div class="info-label">🔐 Contraseña</div>
+        <div class="info-value">${password}</div>
+      </div>
+      
+      <p style="text-align: center;">
+        <a href="${appUrl}" class="button">➜ Acceder a CarpinteríApp</a>
+      </p>
+      
+      <div class="note">
+        <strong>💡 Tip:</strong> Puedes cambiar tu contraseña dentro de la app en cualquier momento. Te recomendamos hacerlo por seguridad.
+      </div>
+      
+      <div class="note" style="border-top: 1px solid #e5e7eb; padding-top: 15px; margin-top: 20px;">
+        <strong>¿Necesitas ayuda?</strong><br>
+        Si tienes preguntas o problemas, contáctanos en <strong>mundooficioweb@gmail.com</strong>
+      </div>
+    </div>
+    
+    <div class="footer">
+      <p>CarpinteríApp - El futuro de la carpintería</p>
+      <p>© 2026 Mundo Oficio. Todos los derechos reservados.</p>
+    </div>
+  </div>
+</body>
+</html>
+  `;
+
+  try {
+    await transporter.sendMail({
+      from: process.env.EMAIL_FROM || 'mundooficioweb@gmail.com',
+      to: email,
+      subject: '¡Bienvenido a CarpinteríApp! Tu acceso está listo',
+      html: htmlContent,
+    });
+    console.log('✅ Email enviado a:', email);
+  } catch (error) {
+    console.error('❌ Error enviando email:', error);
+  }
+}
