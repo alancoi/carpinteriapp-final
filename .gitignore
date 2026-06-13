@@ -1,5 +1,1 @@
-node_modules/
-.next/
-.env.local
-.env
-*.log
+google-creds.json

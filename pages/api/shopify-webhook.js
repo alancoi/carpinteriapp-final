@@ -1,23 +1,26 @@
 import connectDB from '@/lib/mongodb';
 import mongoose from 'mongoose';
 import { google } from 'googleapis';
+import path from 'path';
+import fs from 'fs';
 
 async function sendWelcomeEmail(email, orderNumber) {
   try {
-    console.log('📧 Enviando email de bienvenida a:', email);
+    console.log('📧 Enviando email a:', email);
+
+    // Cargar credenciales
+    let credentials;
+    try {
+      const credPath = path.join(process.cwd(), 'google-creds.json');
+      const credFile = fs.readFileSync(credPath, 'utf8');
+      credentials = JSON.parse(credFile);
+    } catch (err) {
+      console.error('❌ No se encontró google-creds.json:', err.message);
+      throw err;
+    }
 
     const auth = new google.auth.GoogleAuth({
-      credentials: {
-        type: 'service_account',
-        project_id: 'carpinteriapp-499314',
-        private_key_id: '9f8c28d694414e3dcfe164c539879b8a4f377fa7',
-        private_key: process.env.GOOGLE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        client_email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-        client_id: '114227546688806555565',
-        auth_uri: 'https://accounts.google.com/o/oauth2/auth',
-        token_uri: 'https://oauth2.googleapis.com/token',
-        auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
-      },
+      credentials,
       scopes: ['https://www.googleapis.com/auth/gmail.send'],
     });
 
@@ -114,7 +117,7 @@ async function sendWelcomeEmail(email, orderNumber) {
       requestBody: message,
     });
 
-    console.log('✅ Email enviado a:', email);
+    console.log('✅ Email enviado');
     return true;
   } catch (error) {
     console.error('❌ Error email:', error.message);
@@ -123,7 +126,7 @@ async function sendWelcomeEmail(email, orderNumber) {
 }
 
 export default async function handler(req, res) {
-  console.log('📡 Webhook Shopify:', req.method);
+  console.log('📡 Webhook:', req.method);
   
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
@@ -134,8 +137,6 @@ export default async function handler(req, res) {
     if (typeof orderData === 'string') {
       orderData = JSON.parse(orderData);
     }
-
-    console.log('📦 Orden:', orderData.name);
 
     const email = orderData.email;
     const orderNumber = orderData.name?.replace('#', '') || 'unknown';
@@ -150,7 +151,7 @@ export default async function handler(req, res) {
       plan = 'premium';
     }
 
-    console.log('✅ Creando usuario:', { email, plan });
+    console.log('✅ Usuario:', email, 'Plan:', plan);
 
     await connectDB();
     const db = mongoose.connection.db;
