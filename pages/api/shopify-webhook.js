@@ -1,23 +1,12 @@
 import connectDB from '@/lib/mongodb';
 import mongoose from 'mongoose';
 import { google } from 'googleapis';
-import path from 'path';
-import fs from 'fs';
 
 async function sendWelcomeEmail(email, orderNumber) {
   try {
     console.log('📧 Enviando email a:', email);
 
-    // Cargar credenciales
-    let credentials;
-    try {
-      const credPath = path.join(process.cwd(), 'google-creds.json');
-      const credFile = fs.readFileSync(credPath, 'utf8');
-      credentials = JSON.parse(credFile);
-    } catch (err) {
-      console.error('❌ No se encontró google-creds.json:', err.message);
-      throw err;
-    }
+    const credentials = JSON.parse(process.env.GOOGLE_CREDS);
 
     const auth = new google.auth.GoogleAuth({
       credentials,
@@ -118,7 +107,6 @@ async function sendWelcomeEmail(email, orderNumber) {
     });
 
     console.log('✅ Email enviado');
-    return true;
   } catch (error) {
     console.error('❌ Error email:', error.message);
     throw error;
@@ -170,7 +158,6 @@ export default async function handler(req, res) {
       { upsert: true }
     );
 
-    // Enviar email
     try {
       await sendWelcomeEmail(email, orderNumber);
     } catch (emailError) {
