@@ -1,18 +1,12 @@
 import connectDB from '@/lib/mongodb';
 import mongoose from 'mongoose';
-import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
+
+const resend = new Resend('re_2vKg7efY_C8PbbUvtbH8eAty5SNyMfB21');
 
 async function sendWelcomeEmail(email, orderNumber) {
   try {
     console.log('📧 Enviando email a:', email);
-
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: 'carpinteriapp.ok@gmail.com',
-        pass: 'wqymzmmxzoxdkpd',
-      },
-    });
 
     const htmlContent = `<!DOCTYPE html>
 <html lang="es">
@@ -94,14 +88,14 @@ async function sendWelcomeEmail(email, orderNumber) {
 </body>
 </html>`;
 
-    await transporter.sendMail({
-      from: 'carpinteriapp.ok@gmail.com',
+    const response = await resend.emails.send({
+      from: 'carpinteriapp <onboarding@resend.dev>',
       to: email,
       subject: '¡Bienvenido a CarpinteríApp! Tu acceso está listo',
       html: htmlContent,
     });
 
-    console.log('✅ Email enviado a:', email);
+    console.log('✅ Email enviado:', response);
   } catch (error) {
     console.error('❌ Error email:', error.message);
     throw error;
