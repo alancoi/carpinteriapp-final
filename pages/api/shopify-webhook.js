@@ -9,8 +9,8 @@ async function sendWelcomeEmail(email, orderNumber) {
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: 'alancoimieres@gmail.com',
-        pass: 'jskuvyvyzhbegizb',
+        user: 'carpinteriapp.ok@gmail.com',
+        pass: 'wqymzmmxzoxdkpd',
       },
     });
 
@@ -95,7 +95,7 @@ async function sendWelcomeEmail(email, orderNumber) {
 </html>`;
 
     await transporter.sendMail({
-      from: 'alancoimieres@gmail.com',
+      from: 'carpinteriapp.ok@gmail.com',
       to: email,
       subject: '¡Bienvenido a CarpinteríApp! Tu acceso está listo',
       html: htmlContent,
