@@ -1,9 +1,5 @@
 import connectDB from '@/lib/mongodb';
 import mongoose from 'mongoose';
-import * as SibApiV3Sdk from '@getbrevo/brevo';
-
-const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
-apiInstance.setApiKey(SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
 async function sendWelcomeEmail(email, orderNumber) {
   try {
@@ -89,16 +85,30 @@ async function sendWelcomeEmail(email, orderNumber) {
 </body>
 </html>`;
 
-    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-    sendSmtpEmail.subject = '¡Bienvenido a CarpinteríApp! Tu acceso está listo';
-    sendSmtpEmail.htmlContent = htmlContent;
-    sendSmtpEmail.sender = { name: 'CarpinteríApp', email: 'noreply@carpinteriapp.site' };
-    sendSmtpEmail.to = [{ email: email }];
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'accept': 'application/json',
+        'api-key': process.env.BREVO_API_KEY,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: { name: 'CarpinteríApp', email: 'noreply@carpinteriapp.site' },
+        to: [{ email: email }],
+        subject: '¡Bienvenido a CarpinteríApp! Tu acceso está listo',
+        htmlContent: htmlContent,
+      }),
+    });
 
-    await apiInstance.sendTransacEmail(sendSmtpEmail);
-    console.log('✅ Email enviado correctamente');
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(`Brevo error: ${JSON.stringify(error)}`);
+    }
+
+    const result = await response.json();
+    console.log('✅ Email enviado:', result);
   } catch (error) {
-    console.error('❌ Error email:', error.message || error);
+    console.error('❌ Error email:', error.message);
     throw error;
   }
 }
