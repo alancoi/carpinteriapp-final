@@ -93,7 +93,7 @@ async function sendWelcomeEmail(email, orderNumber) {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'CarpinteríApp', email: 'noreply@carpinteriapp.site' },
+        sender: { name: 'CarpinteríApp', email: 'contact@example.com' },
         to: [{ email: email }],
         subject: '¡Bienvenido a CarpinteríApp! Tu acceso está listo',
         htmlContent: htmlContent,
