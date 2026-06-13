@@ -4,7 +4,7 @@ const userSchema = new mongoose.Schema(
   {
     nombre: {
       type: String,
-      required: [true, 'Por favor proporciona tu nombre'],
+      default: null,
     },
     email: {
       type: String,
