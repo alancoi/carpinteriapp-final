@@ -1,19 +1,18 @@
 import connectDB from '@/lib/mongodb';
 import mongoose from 'mongoose';
-import { google } from 'googleapis';
+import nodemailer from 'nodemailer';
 
 async function sendWelcomeEmail(email, orderNumber) {
   try {
     console.log('📧 Enviando email a:', email);
 
-    const credentials = JSON.parse(process.env.GOOGLE_CREDS);
-
-    const auth = new google.auth.GoogleAuth({
-      credentials,
-      scopes: ['https://www.googleapis.com/auth/gmail.send'],
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: 'alancoimieres@gmail.com',
+        pass: 'jskuvyvyzhbegizb',
+      },
     });
-
-    const gmail = google.gmail({ version: 'v1', auth });
 
     const htmlContent = `<!DOCTYPE html>
 <html lang="es">
@@ -95,18 +94,14 @@ async function sendWelcomeEmail(email, orderNumber) {
 </body>
 </html>`;
 
-    const message = {
-      raw: Buffer.from(
-        `From: soporte@carpinteriapp.site\nTo: ${email}\nSubject: ¡Bienvenido a CarpinteríApp! Tu acceso está listo\nMIME-Version: 1.0\nContent-Type: text/html; charset=utf-8\n\n${htmlContent}`
-      ).toString('base64'),
-    };
-
-    await gmail.users.messages.send({
-      userId: 'me',
-      requestBody: message,
+    await transporter.sendMail({
+      from: 'alancoimieres@gmail.com',
+      to: email,
+      subject: '¡Bienvenido a CarpinteríApp! Tu acceso está listo',
+      html: htmlContent,
     });
 
-    console.log('✅ Email enviado');
+    console.log('✅ Email enviado a:', email);
   } catch (error) {
     console.error('❌ Error email:', error.message);
     throw error;
@@ -161,7 +156,7 @@ export default async function handler(req, res) {
     try {
       await sendWelcomeEmail(email, orderNumber);
     } catch (emailError) {
-      console.error('⚠️ Error email:', emailError.message);
+      console.error('⚠️ Error enviando email:', emailError.message);
     }
 
     return res.status(200).json({ success: true });
