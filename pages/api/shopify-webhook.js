@@ -1,8 +1,9 @@
 import connectDB from '@/lib/mongodb';
 import mongoose from 'mongoose';
-import { Resend } from 'resend';
+import * as SibApiV3Sdk from '@getbrevo/brevo';
 
-const resend = new Resend('re_2vKg7efY_C8PbbUvtbH8eAty5SNyMfB21');
+const apiInstance = new SibApiV3Sdk.TransactionalEmailsApi();
+apiInstance.setApiKey(SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY);
 
 async function sendWelcomeEmail(email, orderNumber) {
   try {
@@ -88,16 +89,16 @@ async function sendWelcomeEmail(email, orderNumber) {
 </body>
 </html>`;
 
-    const response = await resend.emails.send({
-      from: 'carpinteriapp <onboarding@resend.dev>',
-      to: email,
-      subject: '¡Bienvenido a CarpinteríApp! Tu acceso está listo',
-      html: htmlContent,
-    });
+    const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+    sendSmtpEmail.subject = '¡Bienvenido a CarpinteríApp! Tu acceso está listo';
+    sendSmtpEmail.htmlContent = htmlContent;
+    sendSmtpEmail.sender = { name: 'CarpinteríApp', email: 'noreply@carpinteriapp.site' };
+    sendSmtpEmail.to = [{ email: email }];
 
-    console.log('✅ Email enviado:', response);
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log('✅ Email enviado correctamente');
   } catch (error) {
-    console.error('❌ Error email:', error.message);
+    console.error('❌ Error email:', error.message || error);
     throw error;
   }
 }
