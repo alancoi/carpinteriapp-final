@@ -2,6 +2,8 @@ import connectDB from '@/lib/mongodb';
 import mongoose from 'mongoose';
 
 export default async function handler(req, res) {
+  console.log('📡 Webhook recibido:', req.method);
+  
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
   }
@@ -12,21 +14,23 @@ export default async function handler(req, res) {
       orderData = JSON.parse(orderData);
     }
 
+    console.log('📦 Datos orden:', { email: orderData.email, name: orderData.name });
+
     const email = orderData.email;
     const orderId = orderData.name?.replace('#', '') || 'unknown';
     
     if (!email) {
-      console.log('⚠️ Sin email en la orden');
+      console.log('❌ Sin email');
       return res.status(400).json({ error: 'Sin email' });
     }
 
-    // Determinar plan
     let plan = 'basico';
     if (orderData.line_items?.[0]?.title?.toLowerCase().includes('premium')) {
       plan = 'premium';
     }
 
     const tempPassword = orderId.slice(-6) || '123456';
+    console.log('✅ Datos preparados:', { email, plan, password: tempPassword });
 
     await connectDB();
     const db = mongoose.connection.db;
@@ -45,10 +49,15 @@ export default async function handler(req, res) {
       { upsert: true }
     );
 
-    console.log('✅ Usuario creado:', email, 'Plan:', plan);
+    console.log('✅ Usuario guardado:', email);
 
-    // Enviar email
+    // ENVIAR EMAIL
     try {
+      console.log('📧 Intentando enviar email...');
+      console.log('📧 HOST:', process.env.EMAIL_HOST);
+      console.log('📧 PORT:', process.env.EMAIL_PORT);
+      console.log('📧 USER:', process.env.EMAIL_USER);
+
       const nodemailer = require('nodemailer');
       const transporter = nodemailer.createTransport({
         host: process.env.EMAIL_HOST,
@@ -124,22 +133,21 @@ export default async function handler(req, res) {
 </html>
       `;
 
-      await transporter.sendMail({
+      const result = await transporter.sendMail({
         from: process.env.EMAIL_FROM,
         to: email,
         subject: '¡Bienvenido a CarpinteríApp! Tu acceso está listo',
         html: htmlContent,
       });
 
-      console.log('✅ Email enviado a:', email);
+      console.log('✅ EMAIL ENVIADO:', result.messageId);
     } catch (emailError) {
-      console.error('⚠️ Error email:', emailError.message);
-      // No fallar si el email no se envía
+      console.error('❌ ERROR EMAIL:', emailError.message);
     }
 
     return res.status(200).json({ success: true });
   } catch (error) {
-    console.error('❌ Error webhook:', error.message);
+    console.error('❌ ERROR WEBHOOK:', error.message);
     return res.status(500).json({ error: error.message });
   }
 }
