@@ -1,18 +1,6 @@
 import connectDB from '@/lib/mongodb';
 import mongoose from 'mongoose';
 import nodemailer from 'nodemailer';
-import crypto from 'crypto';
-
-// Configurar transporte de email
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.EMAIL_PORT || '587'),
-  secure: process.env.EMAIL_SECURE === 'true',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
-  },
-});
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -85,6 +73,17 @@ export default async function handler(req, res) {
 async function sendWelcomeEmail(email, password, plan, orderId) {
   const appUrl = 'https://carpinteriapp-final.vercel.app/app';
   
+  // Crear transporter DENTRO de la función
+  const transporter = nodemailer.createTransport({
+    host: process.env.EMAIL_HOST,
+    port: parseInt(process.env.EMAIL_PORT || '587'),
+    secure: process.env.EMAIL_SECURE === 'true',
+    auth: {
+      user: process.env.EMAIL_USER,
+      pass: process.env.EMAIL_PASSWORD,
+    },
+  });
+  
   const htmlContent = `
 <!DOCTYPE html>
 <html lang="es">
@@ -147,7 +146,7 @@ async function sendWelcomeEmail(email, password, plan, orderId) {
       
       <div class="note" style="border-top: 1px solid #e5e7eb; padding-top: 15px; margin-top: 20px;">
         <strong>¿Necesitas ayuda?</strong><br>
-        Si tienes preguntas o problemas, contáctanos en <strong>mundooficioweb@gmail.com</strong>
+        Si tienes preguntas o problemas, contáctanos en <strong>soporte@carpinteriapp.site</strong>
       </div>
     </div>
     
@@ -162,7 +161,7 @@ async function sendWelcomeEmail(email, password, plan, orderId) {
 
   try {
     await transporter.sendMail({
-      from: process.env.EMAIL_FROM || 'mundooficioweb@gmail.com',
+      from: process.env.EMAIL_FROM,
       to: email,
       subject: '¡Bienvenido a CarpinteríApp! Tu acceso está listo',
       html: htmlContent,
