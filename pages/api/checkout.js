@@ -1,5 +1,3 @@
-import axios from 'axios';
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Método no permitido' });
@@ -51,18 +49,26 @@ export default async function handler(req, res) {
       }
     };
 
-    const shopifyApi = `${process.env.NEXT_PUBLIC_SHOPIFY_API_URL || 'https://carpinteriapp.myshopify.com/admin/api/2024-01'}/orders.json`;
+    const shopifyApi = 'https://carpinteriapp.myshopify.com/admin/api/2024-01/orders.json';
     
     console.log('🛒 Creando orden en Shopify...');
-    const shopifyResponse = await axios.post(shopifyApi, shopifyOrder, {
+    const shopifyResponse = await fetch(shopifyApi, {
+      method: 'POST',
       headers: {
         'X-Shopify-Access-Token': process.env.SHOPIFY_API_TOKEN,
         'Content-Type': 'application/json'
-      }
+      },
+      body: JSON.stringify(shopifyOrder)
     });
 
-    const orderId = shopifyResponse.data.order.id;
-    const orderNumber = shopifyResponse.data.order.order_number;
+    if (!shopifyResponse.ok) {
+      const error = await shopifyResponse.json();
+      throw new Error(`Shopify error: ${JSON.stringify(error)}`);
+    }
+
+    const shopifyData = await shopifyResponse.json();
+    const orderId = shopifyData.order.id;
+    const orderNumber = shopifyData.order.order_number;
 
     console.log('✅ Orden Shopify creada:', orderNumber);
 
@@ -85,9 +91,9 @@ export default async function handler(req, res) {
         }
       },
       back_urls: {
-        success: `${process.env.NEXT_PUBLIC_APP_URL || 'https://carpinteriapp.site'}/success?order=${orderNumber}`,
-        failure: `${process.env.NEXT_PUBLIC_APP_URL || 'https://carpinteriapp.site'}/failure`,
-        pending: `${process.env.NEXT_PUBLIC_APP_URL || 'https://carpinteriapp.site'}/pending`
+        success: `https://carpinteriapp.site/success?order=${orderNumber}`,
+        failure: `https://carpinteriapp.site/failure`,
+        pending: `https://carpinteriapp.site/pending`
       },
       auto_return: 'approved',
       external_reference: `order-${orderNumber}`,
@@ -98,18 +104,25 @@ export default async function handler(req, res) {
     };
 
     console.log('💳 Creando preferencia Mercado Pago...');
-    const mercadoPagoResponse = await axios.post(
+    const mercadoPagoResponse = await fetch(
       'https://api.mercadopago.com/checkout/preferences',
-      mercadoPagoPreference,
       {
+        method: 'POST',
         headers: {
           'Authorization': `Bearer ${process.env.MERCADOPAGO_ACCESS_TOKEN}`,
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify(mercadoPagoPreference)
       }
     );
 
-    const preferenceId = mercadoPagoResponse.data.id;
+    if (!mercadoPagoResponse.ok) {
+      const error = await mercadoPagoResponse.json();
+      throw new Error(`Mercado Pago error: ${JSON.stringify(error)}`);
+    }
+
+    const mercadoPagoData = await mercadoPagoResponse.json();
+    const preferenceId = mercadoPagoData.id;
     const paymentUrl = `https://www.mercadopago.com.ar/checkout/v1/redirect?pref_id=${preferenceId}`;
 
     console.log('✅ Preferencia Mercado Pago creada:', preferenceId);
@@ -123,11 +136,11 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error('❌ Error en checkout:', error.response?.data || error.message);
+    console.error('❌ Error en checkout:', error.message);
     
     return res.status(500).json({
       error: 'Error al procesar el pago',
-      details: error.response?.data?.message || error.message
+      details: error.message
     });
   }
 }
