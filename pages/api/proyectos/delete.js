@@ -1,5 +1,9 @@
-import connectDB from '@/lib/mongodb';
-import Proyecto from '@/models/Proyecto';
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== 'DELETE') {
@@ -13,11 +17,15 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'projectId requerido' });
     }
 
-    await connectDB();
+    const { data: deletedProject, error: deleteError } = await supabase
+      .from('proyectos')
+      .delete()
+      .eq('id', projectId)
+      .select()
+      .single();
 
-    const deletedProject = await Proyecto.findByIdAndDelete(projectId);
-
-    if (!deletedProject) {
+    if (deleteError || !deletedProject) {
+      console.error('Proyecto no encontrado o error:', deleteError);
       return res.status(404).json({ error: 'Proyecto no encontrado' });
     }
 

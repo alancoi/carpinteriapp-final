@@ -1,5 +1,9 @@
-import connectDB from '@/lib/mongodb';
-import Contacto from '@/models/Contacto';
+import { createClient } from '@supabase/supabase-js';
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -13,14 +17,26 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'El mensaje es requerido' });
     }
 
-    await connectDB();
+    const { data: newContact, error: createError } = await supabase
+      .from('contactos')
+      .insert({
+        user_id: userId || null,
+        email: email || null,
+        mensaje,
+        tipo: 'error',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .select()
+      .single();
 
-    const newContact = await Contacto.create({
-      userId: userId || null,
-      email: email || null,
-      mensaje,
-      tipo: 'error',
-    });
+    if (createError) {
+      console.error('Error guardando contacto:', createError);
+      return res.status(500).json({
+        error: 'Error guardando reporte',
+        details: createError.message,
+      });
+    }
 
     return res.status(201).json({
       success: true,
