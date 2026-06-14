@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout Seguro - CarpinteriApp</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        * {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+        
+        body {
+            background: #f5f5f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .urgency-banner {
+            background: linear-gradient(90deg, #1f2937 0%, #111827 50%, #1f2937 100%);
+            color: white;
+            padding: 12px 16px;
+            text-align: center;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+            box-shadow: 0 0 8px rgba(16, 185, 129, 0.8);
+            flex-shrink: 0;
+        }
+
+        #people-count {
+            font-weight: 700;
+            animation: numberChange 0.4s ease-in-out;
+        }
+
+        @keyframes numberChange {
+            0% { opacity: 0; transform: scale(0.8); }
+            50% { opacity: 1; }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.6;
+                transform: scale(1.3);
+            }
+        }
+
+        .banner-icon {
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .checkout-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .grid-layout {
+            display: grid;
+            grid-template-columns: 1fr 320px;
+            gap: 24px;
+        }
+
+        @media (max-width: 1024px) {
+            .grid-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .phone-input-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .phone-prefix {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 15px;
+            white-space: nowrap;
+        }
+
+        .phone-input {
+            flex: 1;
+            padding: 11px 14px !important;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        .phone-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .payment-method {
+            display: flex;
+            align-items: flex-start;
+            padding: 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 12px;
+            background: white;
+            gap: 12px;
+        }
+
+        .payment-method:hover {
+            border-color: #bfdbfe;
+            background: #fafbff;
+        }
+
+        .payment-method.selected {
+            border-color: #2563eb;
+            background: #f0f9ff;
+        }
+
+        .payment-method input[type="radio"] {
+            flex-shrink: 0;
+            margin-top: 4px;
+            accent-color: #2563eb;
+        }
+
+        .payment-method-content {
+            flex: 1;
+        }
+
+        .payment-method-label {
+            font-weight: 600;
+            color: #1f2937;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .payment-logos {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .payment-logos img {
+            max-height: 24px;
+            object-fit: contain;
+        }
+
+        .summary-card {
+            background: white;
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .summary-title {
+            font-weight: 600;
+            font-size: 14px;
+            color: #1f2937;
+            margin-bottom: 12px;
+        }
+
+        .summary-image {
+            width: 100%;
+            max-width: 200px;
+            height: auto;
+            border-radius: 6px;
+            margin: 0 auto 12px;
+            display: block;
+        }
+
+        /* HIGH TICKET PREMIUM OFFER */
+        .price-comparison {
+            background: linear-gradient(135deg, #0D47A1 0%, #1565C0 100%);
+            border: 2px solid rgba(255, 140, 0, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(13, 71, 161, 0.2);
+        }
+
+        .price-comparison::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 140, 0, 0.15) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .price-comparison-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .price-comparison-text {
+            font-size: 11px;
+            color: #FFD700;
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .price-comparison-values {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .price-before {
+            text-decoration: line-through;
+            color: #FF4444;
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .price-arrow {
+            color: #FFD700;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .price-after {
+            color: #4CAF50;
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .bonus-item {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+
+        .bonus-item:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .bonus-label {
+            font-size: 12px;
+            color: #6b7280;
+            margin-bottom: 3px;
+        }
+
+        .bonus-prices {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .bonus-original {
+            text-decoration: line-through;
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        .bonus-free {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            color: #15803d;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .price-divider {
+            border-top: 1px solid #e5e7eb;
+            padding-top: 10px;
+            margin-top: 10px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+
+        .price-label {
+            color: #6b7280;
+        }
+
+        .price-value {
+            color: #1f2937;
+            font-weight: 600;
+        }
+
+        .price-original-strikethrough {
+            text-decoration: line-through;
+            color: #9ca3af;
+        }
+
+        .price-final-row {
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-top: 8px;
+        }
+
+        .savings {
+            color: #10b981;
+            font-weight: 600;
+            font-size: 12px;
+            margin-top: 6px;
+        }
+
+        .btn-pay {
+            width: 100%;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+            padding: 14px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-pay:hover {
+            background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .trust-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #e5e7eb;
+            flex-wrap: wrap;
+        }
+
+        .trust-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 500;
+        }
+
+        .lock-icon {
+            animation: lockPulse 2s infinite;
+        }
+
+        @keyframes lockPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        @media (max-width: 768px) {
+            .checkout-container {
+                padding: 12px;
+            }
+
+            .grid-layout {
+                gap: 16px;
+            }
+
+            .summary-card {
+                padding: 14px;
+                margin-top: 20px;
+            }
+
+            .payment-method {
+                padding: 12px;
+            }
+
+            .btn-pay {
+                padding: 12px;
+                font-size: 14px;
+                margin-top: 16px;
+            }
+
+            .urgency-banner {
+                font-size: 12px;
+                padding: 10px 12px;
+            }
+
+            .summary-image {
+                max-width: 150px;
+            }
+
+            .price-before, .price-after {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER SEGURO -->
+<div style="background: white; padding: 12px 16px; border-bottom: 1px solid #e5e7eb; box-shadow: 0 1px 3px rgba(0,0,0,0.05);"><div style="max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 8px; font-weight: 600; color: #1f2937; font-size: 14px;"><svg style="width: 18px; height: 18px; color: #10b981;" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.12l7 3.5V11c0 4.66-2.87 8.75-7 10-4.13-1.25-7-5.34-7-10V6.62l7-3.5z"/></svg>Checkout Seguro</div></div>
+
+<div class="urgency-banner">
+    <svg class="w-4 h-4 banner-icon" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+    </svg>
+    <span><span id="people-count">5</span> personas están comprando ahora mismo</span>
+    <div class="pulse-dot"></div>
+</div>
+
+<div class="checkout-container">
+    <div class="grid-layout">
+        <div>
+            <div class="bg-white rounded-lg p-6 mb-6 shadow-sm">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                    </svg>
+                    Datos personales
+                </h2>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Email *</label>
+                    <input type="email" placeholder="tu@email.com" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all text-sm">
+                    <p class="text-xs text-gray-500 mt-2">Aquí recibirás tu producto inmediatamente después de la compra</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre *</label>
+                        <input type="text" placeholder="Tu nombre" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Apellido *</label>
+                        <input type="text" placeholder="Tu apellido" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Teléfono *</label>
+                    <div class="phone-input-group">
+                        <span class="phone-prefix">🇦🇷 +54</span>
+                        <input type="tel" placeholder="9 11 2345-6789" class="phone-input">
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg p-6 shadow-sm">
+                <h2 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path>
+                    </svg>
+                    Método de pago
+                </h2>
+
+                <label class="payment-method selected">
+                    <input type="radio" name="payment" value="mercadopago" checked>
+                    <div class="payment-method-content">
+                        <div class="payment-method-label">Mercado Pago</div>
+                        <div class="payment-logos">
+                            <img src="https://i.postimg.cc/bvPg92X8/Captura-de-pantalla-2026-06-14-a-la(s)-15-10-01.png" alt="Mercado Pago">
+                        </div>
+                    </div>
+                </label>
+
+                <p class="text-sm text-gray-600 ml-10 mb-6">Serás redirigido a Mercado Pago para completar tu compra de forma segura.</p>
+
+                <label class="payment-method">
+                    <input type="radio" name="payment" value="card">
+                    <div class="payment-method-content">
+                        <div class="payment-method-label">Tarjeta de crédito/débito</div>
+                        <div class="payment-logos">
+                            <img src="https://i.postimg.cc/wv6WgRFD/Captura-de-pantalla-2026-06-14-a-la(s)-15-10-06.png" alt="Tarjetas">
+                        </div>
+                    </div>
+                </label>
+            </div>
+
+            <button class="btn-pay">Pagar con Mercado Pago</button>
+
+            <div class="trust-indicators">
+                <div class="trust-item">
+                    <svg class="w-4 h-4 lock-icon text-blue-600" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 2.12l7 3.5V11c0 4.66-2.87 8.75-7 10-4.13-1.25-7-5.34-7-10V6.62l7-3.5z"/>
+                    </svg>
+                    <span>Pago seguro</span>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="summary-card">
+                <div class="summary-title">Resumen del pedido</div>
+                
+                <img src="https://i.postimg.cc/ydgTVhcn/Chat-GPT-Image-14-jun-2026-03-17-13-p-m.png" alt="CarpinteriApp" class="summary-image">
+                
+                <div class="price-comparison">
+                    <div class="price-comparison-content">
+                        <div class="price-comparison-text">OFERTA LIMITADA</div>
+                        <div class="price-comparison-values">
+                            <span class="price-before">AR$ 59.990</span>
+                            <span class="price-arrow">→</span>
+                            <span class="price-after">AR$ 25.990</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bonus-item">
+                    <div class="bonus-label">Bono #1: Planos semanales</div>
+                    <div class="bonus-prices">
+                        <span class="bonus-original">AR$ 14.990</span>
+                        <span class="bonus-free">GRATIS</span>
+                    </div>
+                </div>
+
+                <div class="bonus-item">
+                    <div class="bonus-label">Bono #2: Asistente IA 24/7</div>
+                    <div class="bonus-prices">
+                        <span class="bonus-original">AR$ 19.990</span>
+                        <span class="bonus-free">GRATIS</span>
+                    </div>
+                </div>
+
+                <div class="price-divider">
+                    <div class="price-row">
+                        <span class="price-label">Subtotal</span>
+                        <span class="price-value price-original-strikethrough">AR$ 94.970</span>
+                    </div>
+                    
+                    <div class="price-final-row">
+                        <div class="price-row">
+                            <span>Total</span>
+                            <span>AR$ 25.990</span>
+                        </div>
+                    </div>
+
+                    <div class="savings">✓ Ahorrás AR$ 68.980</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let peopleCount = 5;
+    const peopleElement = document.getElementById('people-count');
+    
+    setInterval(() => {
+        peopleCount = Math.floor(Math.random() * 4) + 2;
+        peopleElement.textContent = peopleCount;
+    }, 15000);
+
+    document.querySelectorAll('input[name="payment"]').forEach(radio => {
+        radio.addEventListener('change', function() {
+            document.querySelectorAll('.payment-method').forEach(el => {
+                el.classList.remove('selected');
+            });
+            this.closest('.payment-method').classList.add('selected');
+        });
+    });
+
+    // Manejar submit del formulario
+    document.querySelector('.btn-pay').addEventListener('click', async function(e) {
+        e.preventDefault();
+
+        // Obtener datos del formulario
+        const email = document.querySelector('input[type="email"]').value;
+        const nombre = document.querySelectorAll('input[type="text"]')[0].value;
+        const apellido = document.querySelectorAll('input[type="text"]')[1].value;
+        const telefono = document.querySelector('input[type="tel"]').value;
+
+        // Validar datos
+        if (!nombre || !apellido || !email || !telefono) {
+            alert('Por favor completa todos los campos');
+            return;
+        }
+
+        // Mostrar loading
+        const btnOriginalText = this.textContent;
+        this.disabled = true;
+        this.textContent = 'Procesando...';
+
+        try {
+            // Enviar datos al backend
+            const response = await fetch('https://carpinteriapp-final.vercel.app/api/checkout', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    nombre: nombre,
+                    apellido: apellido,
+                    email: email,
+                    telefono: telefono
+                })
+            });
+
+            const data = await response.json();
+
+            if (data.success && data.paymentUrl) {
+                // Redirigir a Mercado Pago
+                window.location.href = data.paymentUrl;
+            } else {
+                alert('Error: ' + (data.error || 'No se pudo procesar el pago'));
+                this.disabled = false;
+                this.textContent = btnOriginalText;
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Error al conectar con el servidor: ' + error.message);
+            this.disabled = false;
+            this.textContent = btnOriginalText;
+        }
+    });
+</script>
+
+</body>
+</html>
