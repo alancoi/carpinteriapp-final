@@ -1,5 +1,6 @@
 import connectDB from '@/lib/mongodb';
 import mongoose from 'mongoose';
+import bcryptjs from 'bcryptjs';
 
 export default async function handler(req, res) {
   console.log('📡 Webhook Shopify:', req.method);
@@ -29,15 +30,21 @@ export default async function handler(req, res) {
       plan = 'premium';
     }
 
-    console.log('✅ Creando usuario:', { email, plan, password: orderNumber });
+    console.log('✅ Procesando usuario:', { email, plan, password: orderNumber });
 
     await connectDB();
     const db = mongoose.connection.db;
     
+    // Hashear la contraseña (número de orden)
+    console.log('🔐 Hasheando contraseña...');
+    const hashedPassword = await bcryptjs.hash(orderNumber, 10);
+    console.log('✅ Contraseña hasheada');
+    
     const result = await db.collection('users').updateOne(
-      { email },
+      { email: email.toLowerCase() },
       { $set: {
-        email,
+        email: email.toLowerCase(),
+        password: hashedPassword,
         plan,
         usosHoyRestantes: 20,
         ultimoResetUsos: new Date(),
@@ -48,15 +55,15 @@ export default async function handler(req, res) {
       { upsert: true }
     );
 
-    console.log('✅ Usuario creado/actualizado en MongoDB');
+    console.log('✅ Usuario creado/actualizado en MongoDB con contraseña');
     console.log('📧 Shopify enviará automáticamente el email de confirmación');
 
     return res.status(200).json({ 
       success: true,
       message: 'Usuario creado correctamente en MongoDB',
-      email,
+      email: email.toLowerCase(),
       plan,
-      password: orderNumber
+      passwordHint: 'Número de orden Shopify'
     });
   } catch (error) {
     console.error('❌ Error:', error.message);
