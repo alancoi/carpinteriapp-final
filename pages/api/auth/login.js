@@ -10,25 +10,37 @@ export default async function handler(req, res) {
   try {
     const { email, password } = req.body;
 
+    console.log('🔐 Intento de login:', email);
+
     if (!email || !password) {
       return res.status(400).json({ error: 'Email y contraseña requeridos' });
     }
 
+    console.log('📦 Conectando a DB...');
     await connectDB();
+    console.log('✅ Conectado a DB');
 
     // Buscar usuario
-    const user = await User.findOne({ email }).select('+password');
+    console.log('🔍 Buscando usuario:', email);
+    const user = await User.findOne({ email: email.toLowerCase() }).select('+password');
     
     if (!user) {
+      console.log('❌ Usuario no encontrado:', email);
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
+
+    console.log('✅ Usuario encontrado');
+    console.log('🔐 Comparando contraseñas...');
 
     // Verificar contraseña
     const passwordMatch = await bcryptjs.compare(password, user.password);
     
     if (!passwordMatch) {
+      console.log('❌ Contraseña incorrecta para:', email);
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
+
+    console.log('✅ Contraseña correcta');
 
     // Verificar si debe resetear usos (cada 24 horas)
     const ahora = new Date();
@@ -40,7 +52,10 @@ export default async function handler(req, res) {
       user.usosHoyRestantes = 20;
       user.ultimoResetUsos = ahora;
       await user.save();
+      console.log('🔄 Usos resetados para nuevo día');
     }
+
+    console.log('✅ Login exitoso para:', email);
 
     return res.status(200).json({
       success: true,
@@ -55,11 +70,13 @@ export default async function handler(req, res) {
       },
     });
   } catch (error) {
-    console.error('Error en login:', error);
+    console.error('❌ ERROR EN LOGIN:', error);
+    console.error('Stack:', error.stack);
+    
     return res.status(500).json({
       error: 'Error en login',
       details: error.message,
+      type: error.name,
     });
   }
 }
-
