@@ -1,6 +1,10 @@
-import connectDB from '@/lib/mongodb';
-import mongoose from 'mongoose';
+import { createClient } from '@supabase/supabase-js';
 import bcryptjs from 'bcryptjs';
+
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -16,18 +20,15 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Email y contraseña requeridos' });
     }
 
-    await connectDB();
-    console.log('✅ MongoDB conectado');
-
-    const db = mongoose.connection.db;
-    
-    // Buscar usuario directamente en MongoDB
+    // Buscar usuario en Supabase
     console.log('🔍 Buscando usuario:', email);
-    const user = await db.collection('users').findOne({ 
-      email: email.toLowerCase() 
-    });
-    
-    if (!user) {
+    const { data: user, error: searchError } = await supabase
+      .from('users')
+      .select('*')
+      .eq('email', email.toLowerCase())
+      .single();
+
+    if (searchError || !user) {
       console.log('❌ Usuario no encontrado');
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
@@ -36,13 +37,13 @@ export default async function handler(req, res) {
     console.log('🔐 Verificando contraseña...');
 
     // Verificar contraseña
-    if (!user.password) {
+    if (!user.password_hash) {
       console.log('❌ Usuario sin contraseña');
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
     }
 
-    const passwordMatch = await bcryptjs.compare(password, user.password);
-    
+    const passwordMatch = await bcryptjs.compare(password, user.password_hash);
+
     if (!passwordMatch) {
       console.log('❌ Contraseña incorrecta');
       return res.status(401).json({ error: 'Email o contraseña incorrectos' });
@@ -52,19 +53,22 @@ export default async function handler(req, res) {
 
     // Verificar si debe resetear usos (cada 24 horas)
     const ahora = new Date();
-    const ultimoReset = new Date(user.ultimoResetUsos || user.createdAt);
+    const ultimoReset = new Date(user.ultimo_reset_usos || user.created_at);
     const diff = ahora - ultimoReset;
     const hours = diff / (1000 * 60 * 60);
-    
+
     if (hours >= 24) {
-      await db.collection('users').updateOne(
-        { _id: user._id },
-        { $set: {
-          usosHoyRestantes: 20,
-          ultimoResetUsos: ahora
-        }}
-      );
-      console.log('🔄 Usos resetados');
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          usos_hoy_restantes: 20,
+          ultimo_reset_usos: ahora.toISOString(),
+        })
+        .eq('id', user.id);
+
+      if (!updateError) {
+        console.log('🔄 Usos resetados');
+      }
     }
 
     console.log('✅ Login exitoso');
@@ -73,16 +77,16 @@ export default async function handler(req, res) {
       success: true,
       message: 'Login exitoso',
       user: {
-        id: user._id,
+        id: user.id,
         email: user.email,
         plan: user.plan || 'basico',
-        usosHoyRestantes: user.usosHoyRestantes || 20,
+        usosHoyRestantes: user.usos_hoy_restantes || 20,
       },
     });
   } catch (error) {
     console.error('❌ ERROR LOGIN:', error.message);
     console.error('Stack:', error.stack);
-    
+
     return res.status(500).json({
       error: 'Error en login',
       details: error.message,
