@@ -8,16 +8,23 @@ const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-function verifyShopifyWebhook(req) {
-  const hmacHeader = req.headers['x-shopify-hmac-sha256'];
-  const body = req.rawBody || '';
+function verifyShopifyWebhook(rawBody, hmacHeader) {
+  if (!SHOPIFY_WEBHOOK_SECRET || !hmacHeader) {
+    console.log('❌ Falta SECRET o HMAC header');
+    return false;
+  }
 
   const hash = crypto
     .createHmac('sha256', SHOPIFY_WEBHOOK_SECRET)
-    .update(body, 'utf8')
+    .update(rawBody, 'utf8')
     .digest('base64');
 
-  return hash === hmacHeader;
+  const isValid = hash === hmacHeader;
+  console.log('🔐 Hash calculado:', hash);
+  console.log('🔐 HMAC header:', hmacHeader);
+  console.log('🔐 ¿Válido?', isValid);
+  
+  return isValid;
 }
 
 export default async function handler(req, res) {
@@ -28,13 +35,20 @@ export default async function handler(req, res) {
   try {
     console.log('📦 Webhook Shopify recibido');
 
+    // Obtener el body crudo
+    const rawBody = await getRawBody(req);
+    const hmacHeader = req.headers['x-shopify-hmac-sha256'];
+
+    console.log('📨 Body recibido:', rawBody.substring(0, 100), '...');
+    console.log('🔐 HMAC header recibido:', hmacHeader);
+
     // Verificar firma
-    if (!verifyShopifyWebhook(req)) {
+    if (!verifyShopifyWebhook(rawBody, hmacHeader)) {
       console.log('❌ Firma Shopify inválida');
       return res.status(401).json({ error: 'Firma inválida' });
     }
 
-    const order = req.body;
+    const order = JSON.parse(rawBody);
     console.log('✅ Firma verificada');
     console.log('📋 Order ID:', order.id);
 
@@ -130,8 +144,21 @@ export default async function handler(req, res) {
 
 export const config = {
   api: {
-    bodyParser: {
-      raw: true,
-    },
+    bodyParser: false,
   },
 };
+
+// Middleware para capturar el body crudo
+function getRawBody(req) {
+  return new Promise((resolve, reject) => {
+    let data = '';
+    req.setEncoding('utf8');
+    req.on('data', chunk => {
+      data += chunk;
+    });
+    req.on('end', () => {
+      resolve(data);
+    });
+    req.on('error', reject);
+  });
+}
