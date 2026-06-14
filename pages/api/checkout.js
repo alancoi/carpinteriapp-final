@@ -49,7 +49,7 @@ export default async function handler(req, res) {
       }
     };
 
-    const shopifyApi = 'https://carpinteriapp.myshopify.com/admin/api/2024-01/orders.json';
+    const shopifyApi = 'https://estampadosanime.myshopify.com/admin/api/2024-01/orders.json';
     
     console.log('🛒 Creando orden en Shopify...');
     const shopifyResponse = await fetch(shopifyApi, {
