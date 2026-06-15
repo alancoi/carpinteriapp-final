@@ -1,7 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import bcryptjs from 'bcryptjs';
-import * as brevo from '@getbrevo/brevo';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
@@ -10,31 +9,43 @@ const BREVO_API_KEY = process.env.BREVO_API_KEY;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Configurar Brevo
-const apiInstance = new brevo.TransactionalEmailsApi();
-apiInstance.setApiKey(brevo.ApiClient.instance.authentications['api-key'], BREVO_API_KEY);
-
 async function sendWelcomeEmail(email, orderNumber, plan) {
   try {
     console.log('📧 Enviando email de bienvenida a:', email);
     
-    const sendSmtpEmail = new brevo.SendSmtpEmail();
-    sendSmtpEmail.subject = '¡Bienvenido a CarpinteriAPP! Tus credenciales de acceso';
-    sendSmtpEmail.sender = { email: 'noreply@carpinteriapp.com', name: 'CarpinteriAPP' };
-    sendSmtpEmail.to = [{ email: email }];
-    sendSmtpEmail.htmlContent = `
-      <h2>¡Bienvenido a CarpinteriAPP! 🎉</h2>
-      <p>Tu cuenta ha sido creada exitosamente.</p>
-      <h3>Tus credenciales de acceso:</h3>
-      <p><strong>Email:</strong> ${email}</p>
-      <p><strong>Contraseña:</strong> ${orderNumber}</p>
-      <h3>Tu Plan: ${plan === 'premium' ? 'Premium Ilimitado' : 'Básico (20 usos/día)'}</h3>
-      <p><a href="https://carpinteriapp-final.vercel.app/app" style="background-color: #FF8C00; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Inicia Sesión</a></p>
-      <p>Si tienes problemas, responde este email.</p>
-      <p>¡El futuro de la carpintería! ⚒️</p>
-    `;
+    const emailBody = {
+      sender: { email: 'noreply@carpinteriapp.com', name: 'CarpinteriAPP' },
+      to: [{ email: email }],
+      subject: '¡Bienvenido a CarpinteriAPP! Tus credenciales de acceso',
+      htmlContent: `
+        <h2>¡Bienvenido a CarpinteriAPP! 🎉</h2>
+        <p>Tu cuenta ha sido creada exitosamente.</p>
+        <h3>Tus credenciales de acceso:</h3>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Contraseña:</strong> ${orderNumber}</p>
+        <h3>Tu Plan: ${plan === 'premium' ? 'Premium Ilimitado' : 'Básico (20 usos/día)'}</h3>
+        <p><a href="https://carpinteriapp-final.vercel.app/app" style="background-color: #FF8C00; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Inicia Sesión</a></p>
+        <p>Si tienes problemas, responde este email.</p>
+        <p>¡El futuro de la carpintería! ⚒️</p>
+      `,
+    };
 
-    await apiInstance.sendTransacEmail(sendSmtpEmail);
+    const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'api-key': BREVO_API_KEY,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(emailBody),
+    });
+
+    if (!response.ok) {
+      const error = await response.json();
+      console.error('❌ Error Brevo:', error);
+      return false;
+    }
+
     console.log('✅ Email enviado exitosamente');
     return true;
   } catch (error) {
