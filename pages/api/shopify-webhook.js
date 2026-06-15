@@ -152,8 +152,8 @@ export default async function handler(req, res) {
 
       console.log('✅ Usuario actualizado');
       
-      // Enviar email
-      await sendWelcomeEmail(email, orderNumber, plan);
+      // Email desactivado por ahora - configurar Brevo después
+      // await sendWelcomeEmail(email, orderNumber, plan);
     } else {
       console.log('🆕 Creando nuevo usuario...');
       const { error: insertError } = await supabase
@@ -175,8 +175,8 @@ export default async function handler(req, res) {
 
       console.log('✅ Usuario creado');
       
-      // Enviar email
-      await sendWelcomeEmail(email, orderNumber, plan);
+      // Email desactivado por ahora - configurar Brevo después
+      // await sendWelcomeEmail(email, orderNumber, plan);
     }
 
     return res.status(200).json({
