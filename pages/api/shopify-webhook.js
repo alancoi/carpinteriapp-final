@@ -1,12 +1,47 @@
 import { createClient } from '@supabase/supabase-js';
 import crypto from 'crypto';
 import bcryptjs from 'bcryptjs';
+import * as brevo from '@getbrevo/brevo';
 
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY;
 const SHOPIFY_WEBHOOK_SECRET = process.env.SHOPIFY_WEBHOOK_SECRET;
+const BREVO_API_KEY = process.env.BREVO_API_KEY;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Configurar Brevo
+const apiInstance = new brevo.TransactionalEmailsApi();
+apiInstance.setApiKey(brevo.ApiClient.instance.authentications['api-key'], BREVO_API_KEY);
+
+async function sendWelcomeEmail(email, orderNumber, plan) {
+  try {
+    console.log('📧 Enviando email de bienvenida a:', email);
+    
+    const sendSmtpEmail = new brevo.SendSmtpEmail();
+    sendSmtpEmail.subject = '¡Bienvenido a CarpinteriAPP! Tus credenciales de acceso';
+    sendSmtpEmail.sender = { email: 'noreply@carpinteriapp.com', name: 'CarpinteriAPP' };
+    sendSmtpEmail.to = [{ email: email }];
+    sendSmtpEmail.htmlContent = `
+      <h2>¡Bienvenido a CarpinteriAPP! 🎉</h2>
+      <p>Tu cuenta ha sido creada exitosamente.</p>
+      <h3>Tus credenciales de acceso:</h3>
+      <p><strong>Email:</strong> ${email}</p>
+      <p><strong>Contraseña:</strong> ${orderNumber}</p>
+      <h3>Tu Plan: ${plan === 'premium' ? 'Premium Ilimitado' : 'Básico (20 usos/día)'}</h3>
+      <p><a href="https://carpinteriapp-final.vercel.app/app" style="background-color: #FF8C00; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">Inicia Sesión</a></p>
+      <p>Si tienes problemas, responde este email.</p>
+      <p>¡El futuro de la carpintería! ⚒️</p>
+    `;
+
+    await apiInstance.sendTransacEmail(sendSmtpEmail);
+    console.log('✅ Email enviado exitosamente');
+    return true;
+  } catch (error) {
+    console.error('❌ Error enviando email:', error.message);
+    return false;
+  }
+}
 
 function verifyShopifyWebhook(rawBody, hmacHeader) {
   if (!SHOPIFY_WEBHOOK_SECRET || !hmacHeader) {
@@ -105,6 +140,9 @@ export default async function handler(req, res) {
       }
 
       console.log('✅ Usuario actualizado');
+      
+      // Enviar email
+      await sendWelcomeEmail(email, orderNumber, plan);
     } else {
       console.log('🆕 Creando nuevo usuario...');
       const { error: insertError } = await supabase
@@ -125,6 +163,9 @@ export default async function handler(req, res) {
       }
 
       console.log('✅ Usuario creado');
+      
+      // Enviar email
+      await sendWelcomeEmail(email, orderNumber, plan);
     }
 
     return res.status(200).json({
